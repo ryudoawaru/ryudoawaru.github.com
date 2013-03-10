@@ -1,0 +1,8 @@
+---
+layout: post
+title: "first_po"
+date: 2013-03-09 21:44
+comments: true
+categories: [blog,test]
+---
+把部落格蓋著先~~
