@@ -1,0 +1,21 @@
+---
+layout: post
+title: "sinatra-course-20130329"
+date: 2013-04-05 20:41
+comments: true
+categories: sinatra course
+---
+
+這次和[龍哥](http://blog.eddie.com.tw)一起合辦[有心人的課程](http://blog.eddie.com.tw/2013/02/08/new-rubyist-wanted/) 其中的第二天是小弟主講Sinatra & Rack, 以下是講義分享
+
+<script async class="speakerdeck-embed" data-id="e833e210801b01309fec12313933796a" data-ratio="1.2994923857868" src="//speakerdeck.com/assets/embed.js"></script>
+
+已將課程所用之原始碼放到[Github](https://github.com/ryudoawaru/sinatra-course-20130329)
+
+心得：
+
+*   這次準備過程還是很抖, 一開始因為發現了神奇的課程[Understanding Rack](http://tekpub.com/productions/rack)因此想把這篇的大意放到教材中, 不過果然還是太難把這麼硬的東西表達出來啊....
+
+*   刺激的是除了前一天做講義到五點之外, 十點一起來還接到了公司的message得在緊急狀態之下10分鐘修了production code, 一下課又得繼續修 & Deploy…
+
+*   4/5發現竟然有四位學員[fork](https://github.com/ryudoawaru/sinatra-course-20130329/network)了, 真是令人感動, 其中還有人抓到我的[bug](https://github.com/ryudoawaru/sinatra-course-20130329/issues/1)..xd
