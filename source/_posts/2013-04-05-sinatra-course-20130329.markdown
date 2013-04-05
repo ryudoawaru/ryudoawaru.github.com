@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "sinatra-course-20130329"
+title: "Sinatra課程紀錄"
 date: 2013-04-05 20:41
 comments: true
 categories: sinatra course
