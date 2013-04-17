@@ -4,7 +4,7 @@
   <title><![CDATA[慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudoawaru.github.com/atom.xml" rel="self"/>
   <link href="http://ryudoawaru.github.com/"/>
-  <updated>2013-04-06T14:02:12+08:00</updated>
+  <updated>2013-04-17T17:48:48+08:00</updated>
   <id>http://ryudoawaru.github.com/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -12,6 +12,28 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby Tuesday#22]]></title>
+    <link href="http://ryudoawaru.github.com/blog/2013/04/17/rubytuesday-22/"/>
+    <updated>2013-04-17T16:12:00+08:00</updated>
+    <id>http://ryudoawaru.github.com/blog/2013/04/17/rubytuesday-22</id>
+    <content type="html"><![CDATA[<p>由於之前已經比較久沒辦的關係, 相信大家都悶了, 剛好這次找到了相當不錯的場地<a href="https://www.facebook.com/hdxcafe">HDX Cafe</a>, 加上兩位新人講者<a href="http://blog.taian.su/">泰安</a>和<a href="http://tonytonyjan.net/">大兜</a>, 所以就決定要開辦Tuesday啦; 這個場地好的點在於：</p>
+
+<ul>
+<li>地點好, 在程式人的聖地天瓏書局的隔壁, 也就是以前儒林書局的位置; 會前會後都可以下去<del>敗家</del></li>
+<li>場地大, 2F的場地兩邊加起來可以擠上100人都沒問題</li>
+<li>投影設備, 投影幕是移動式的所以到處都可以用</li>
+<li>餐點便宜, 包場的低消是120元, 飲料餐點的水準也比以前去過的不少場地要優, 除了正餐還有麵包/蛋糕, 整體來說很超值.</li>
+<li>可以待到10點, 其實他們是9:30收, 但包場可以到10點沒問題</li>
+</ul>
+
+
+<p><img src="http://i.imgur.com/CLY6rOWl.jpg"/></p>
+
+<p>講者的部份, 兩位新人的演出也非常精彩(和我第一次比真的是強很多), 會場氣氛也非常熱絡; 大家也都呆到快收攤才離開; 報到率近乎100%, 整個都很讓人感動, 希望能繼續辦下去, 謝謝大家！</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby,Sinatra and Websocket]]></title>

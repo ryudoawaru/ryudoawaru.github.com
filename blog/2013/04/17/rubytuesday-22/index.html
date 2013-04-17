@@ -5,12 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Ruby,Sinatra and Websocket - 慕凡(@ryudoawaru)'s blog</title>
+  <title>Ruby Tuesday#22 - 慕凡(@ryudoawaru)'s blog</title>
   <meta name="author" content="Mu-Fan Teng">
 
   
-  <meta name="description" content="近半年來花了很多時間在研究Ruby上實作Websocket的方式, 現介紹簡單心得如下 Base Solution: EventMachine-Websocket
-Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然在Ruby界不流行而且基本上沒在更新了, &hellip;">
+  <meta name="description" content="由於之前已經比較久沒辦的關係, 相信大家都悶了, 剛好這次找到了相當不錯的場地HDX Cafe, 加上兩位新人講者泰安和大兜, 所以就決定要開辦Tuesday啦; 這個場地好的點在於： 地點好, 在程式人的聖地天瓏書局的隔壁, 也就是以前儒林書局的位置; 會前會後都可以下去敗家
+場地大, &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +19,7 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://ryudoawaru.github.com/blog/2013/04/05/ruby-and-websocket/">
+  <link rel="canonical" href="http://ryudoawaru.github.com/blog/2013/04/17/rubytuesday-22/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="慕凡(@ryudoawaru)'s blog" type="application/atom+xml">
@@ -70,7 +70,7 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
   
   <header>
     
-      <h1 class="entry-title">Ruby,Sinatra and Websocket</h1>
+      <h1 class="entry-title">Ruby Tuesday#22</h1>
     
     
       <p class="meta">
@@ -86,7 +86,7 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
   
 
 
-<time datetime="2013-04-05T21:48:00+08:00" pubdate data-updated="true">Apr 5<span>th</span>, 2013</time>
+<time datetime="2013-04-17T16:12:00+08:00" pubdate data-updated="true">Apr 17<span>th</span>, 2013</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -95,37 +95,20 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
   </header>
 
 
-<div class="entry-content"><h3>近半年來花了很多時間在研究Ruby上實作Websocket的方式, 現介紹簡單心得如下</h3>
-
-<p>Base Solution:</p>
+<div class="entry-content"><p>由於之前已經比較久沒辦的關係, 相信大家都悶了, 剛好這次找到了相當不錯的場地<a href="https://www.facebook.com/hdxcafe">HDX Cafe</a>, 加上兩位新人講者<a href="http://blog.taian.su/">泰安</a>和<a href="http://tonytonyjan.net/">大兜</a>, 所以就決定要開辦Tuesday啦; 這個場地好的點在於：</p>
 
 <ul>
-<li><a href="https://github.com/igrigorik/em-websocket">EventMachine-Websocket</a></li>
-<li><a href="http://cramp.in/">Cramp</a></li>
+<li>地點好, 在程式人的聖地天瓏書局的隔壁, 也就是以前儒林書局的位置; 會前會後都可以下去<del>敗家</del></li>
+<li>場地大, 2F的場地兩邊加起來可以擠上100人都沒問題</li>
+<li>投影設備, 投影幕是移動式的所以到處都可以用</li>
+<li>餐點便宜, 包場的低消是120元, 飲料餐點的水準也比以前去過的不少場地要優, 除了正餐還有麵包/蛋糕, 整體來說很超值.</li>
+<li>可以待到10點, 其實他們是9:30收, 但包場可以到10點沒問題</li>
 </ul>
 
 
-<p>Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然在Ruby界不流行而且基本上沒在更新了, 然後想當然我也只會用EM</p>
+<p><img src="http://i.imgur.com/CLY6rOWl.jpg"/></p>
 
-<h2>使用過的EM類Solution：</h2>
-
-<h3><a href="https://github.com/simulacre/sinatra-websocket">Sinatra-Websocket</a></h3>
-
-<p>最初的嘗試, 好處是整合性極高, 可以直接登記在Sinatra的route上以及共享一切Sinatra的設定, Application Server原則上只能用thin, 不過有致命性的memory leak問題, 簡單來說就是Thin會以為已經斷線的WS連線未斷線因此長久下去會在Thin的process上留著無數的連線進而吃掉大量記憶體, 而且作者沒有配合EM-Websocket改版, 因此被判定為不可用</p>
-
-<h3>直接用EM-Websocket當server</h3>
-
-<p>現在的解法, 優點是完全自訂, 同時也是缺點; 等於從0開始設定一個socket server, DB/model…等等的設定都要自己寫; 另外我還比較搞缸的寫了init script變成系統服務, 前端使用haproxy</p>
-
-<h3>負載能力</h3>
-
-<p>非常強, 只要處理掉系統的nofile<a href="https://github.com/shokai/sinatra-websocketio/wiki/C10K">設定</a>的話, 單一行程可以吃到破萬連線不是問題, 不過以現在的EM架構要開多行程處理數萬連線的話, 如果沒有再上一層的pub/sub機制就得要用fork出多行程的方式, 這時就得考慮類似mutex lock的問題了</p>
-
-<h3>IE相容問題</h3>
-
-<p><a href="https://github.com/gimite/web-socket-js">web-socket-js</a>可以解決你的問題, 不過如果你要用haproxy開前端的話就必需要自己設定flash socket policy file, 使用<a href="http://rubygems.org/gems/flash_policy_server">flash_policy_server </a>可手動開這個服務</p>
-
-<p>實際的代碼與架構會在以後說明</p>
+<p>講者的部份, 兩位新人的演出也非常精彩(和我第一次比真的是強很多), 會場氣氛也非常熱絡; 大家也都呆到快收攤才離開; 報到率近乎100%, 整個都很讓人感動, 希望能繼續辦下去, 謝謝大家！</p>
 </div>
 
 
@@ -148,12 +131,12 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
   
 
 
-<time datetime="2013-04-05T21:48:00+08:00" pubdate data-updated="true">Apr 5<span>th</span>, 2013</time>
+<time datetime="2013-04-17T16:12:00+08:00" pubdate data-updated="true">Apr 17<span>th</span>, 2013</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/ruby/'>ruby</a>, <a class='category' href='/blog/categories/sinatra/'>sinatra</a>, <a class='category' href='/blog/categories/websocket/'>websocket</a>
+    <a class='category' href='/blog/categories/rubytw/'>rubytw</a>
   
 </span>
 
@@ -162,7 +145,7 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ryudoawaru.github.com/blog/2013/04/05/ruby-and-websocket/" data-via="ryudoawaru" data-counturl="http://ryudoawaru.github.com/blog/2013/04/05/ruby-and-websocket/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ryudoawaru.github.com/blog/2013/04/17/rubytuesday-22/" data-via="ryudoawaru" data-counturl="http://ryudoawaru.github.com/blog/2013/04/17/rubytuesday-22/" >Tweet</a>
   
   
   
@@ -173,10 +156,8 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2013/04/05/sinatra-course-20130329/" title="Previous Post: Sinatra課程紀錄">&laquo; Sinatra課程紀錄</a>
+        <a class="basic-alignment left" href="/blog/2013/04/05/ruby-and-websocket/" title="Previous Post: Ruby,Sinatra and Websocket">&laquo; Ruby,Sinatra and Websocket</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2013/04/17/rubytuesday-22/" title="Next Post: Ruby Tuesday#22">Ruby Tuesday#22 &raquo;</a>
       
     </p>
   </footer>
@@ -284,8 +265,8 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://ryudoawaru.github.com/blog/2013/04/05/ruby-and-websocket/';
-        var disqus_url = 'http://ryudoawaru.github.com/blog/2013/04/05/ruby-and-websocket/';
+        var disqus_identifier = 'http://ryudoawaru.github.com/blog/2013/04/17/rubytuesday-22/';
+        var disqus_url = 'http://ryudoawaru.github.com/blog/2013/04/17/rubytuesday-22/';
         var disqus_script = 'embed.js';
       
     (function () {
