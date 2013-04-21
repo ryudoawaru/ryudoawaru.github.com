@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[慕凡(@ryudoawaru)'s blog]]></title>
-  <link href="http://ryudoawaru.github.com/atom.xml" rel="self"/>
-  <link href="http://ryudoawaru.github.com/"/>
-  <updated>2013-04-17T17:48:48+08:00</updated>
-  <id>http://ryudoawaru.github.com/</id>
+  <link href="http://ryudo.tw/atom.xml" rel="self"/>
+  <link href="http://ryudo.tw/"/>
+  <updated>2013-04-21T22:34:12+08:00</updated>
+  <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby Tuesday#22]]></title>
-    <link href="http://ryudoawaru.github.com/blog/2013/04/17/rubytuesday-22/"/>
+    <link href="http://ryudo.tw/blog/2013/04/17/rubytuesday-22/"/>
     <updated>2013-04-17T16:12:00+08:00</updated>
-    <id>http://ryudoawaru.github.com/blog/2013/04/17/rubytuesday-22</id>
+    <id>http://ryudo.tw/blog/2013/04/17/rubytuesday-22</id>
     <content type="html"><![CDATA[<p>由於之前已經比較久沒辦的關係, 相信大家都悶了, 剛好這次找到了相當不錯的場地<a href="https://www.facebook.com/hdxcafe">HDX Cafe</a>, 加上兩位新人講者<a href="http://blog.taian.su/">泰安</a>和<a href="http://tonytonyjan.net/">大兜</a>, 所以就決定要開辦Tuesday啦; 這個場地好的點在於：</p>
 
 <ul>
@@ -37,9 +37,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby,Sinatra and Websocket]]></title>
-    <link href="http://ryudoawaru.github.com/blog/2013/04/05/ruby-and-websocket/"/>
+    <link href="http://ryudo.tw/blog/2013/04/05/ruby-and-websocket/"/>
     <updated>2013-04-05T21:48:00+08:00</updated>
-    <id>http://ryudoawaru.github.com/blog/2013/04/05/ruby-and-websocket</id>
+    <id>http://ryudo.tw/blog/2013/04/05/ruby-and-websocket</id>
     <content type="html"><![CDATA[<h3>近半年來花了很多時間在研究Ruby上實作Websocket的方式, 現介紹簡單心得如下</h3>
 
 <p>Base Solution:</p>
@@ -76,12 +76,12 @@
   
   <entry>
     <title type="html"><![CDATA[Sinatra課程紀錄]]></title>
-    <link href="http://ryudoawaru.github.com/blog/2013/04/05/sinatra-course-20130329/"/>
+    <link href="http://ryudo.tw/blog/2013/04/05/sinatra-course-20130329/"/>
     <updated>2013-04-05T20:41:00+08:00</updated>
-    <id>http://ryudoawaru.github.com/blog/2013/04/05/sinatra-course-20130329</id>
+    <id>http://ryudo.tw/blog/2013/04/05/sinatra-course-20130329</id>
     <content type="html"><![CDATA[<p>這次和<a href="http://blog.eddie.com.tw">龍哥</a>一起合辦<a href="http://blog.eddie.com.tw/2013/02/08/new-rubyist-wanted/">有心人的課程</a> 其中的第二天是小弟主講Sinatra &amp; Rack, 以下是講義分享</p>
 
-<script async class="speakerdeck-embed" data-id="e833e210801b01309fec12313933796a" data-ratio="1.2994923857868" src="http://ryudoawaru.github.com//speakerdeck.com/assets/embed.js"></script>
+<script async class="speakerdeck-embed" data-id="e833e210801b01309fec12313933796a" data-ratio="1.2994923857868" src="http://ryudo.tw//speakerdeck.com/assets/embed.js"></script>
 
 
 <p>已將課程所用之原始碼放到<a href="https://github.com/ryudoawaru/sinatra-course-20130329">Github</a></p>
@@ -99,9 +99,9 @@
   
   <entry>
     <title type="html"><![CDATA[first_po]]></title>
-    <link href="http://ryudoawaru.github.com/blog/2013/03/09/first-po/"/>
+    <link href="http://ryudo.tw/blog/2013/03/09/first-po/"/>
     <updated>2013-03-09T21:44:00+08:00</updated>
-    <id>http://ryudoawaru.github.com/blog/2013/03/09/first-po</id>
+    <id>http://ryudo.tw/blog/2013/03/09/first-po</id>
     <content type="html"><![CDATA[<p>把部落格蓋著先~~</p>
 ]]></content>
   </entry>

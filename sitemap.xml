@@ -1,39 +1,39 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
-        <loc>http://ryudoawaru.github.com/blog/2013/03/09/first-po/</loc>
+        <loc>http://ryudo.tw/blog/2013/03/09/first-po/</loc>
         <lastmod>2013-03-10T13:53:16+08:00</lastmod>
     </url>
     <url>
-        <loc>http://ryudoawaru.github.com/blog/2013/04/05/sinatra-course-20130329/</loc>
+        <loc>http://ryudo.tw/blog/2013/04/05/sinatra-course-20130329/</loc>
         <lastmod>2013-04-05T22:30:12+08:00</lastmod>
     </url>
     <url>
-        <loc>http://ryudoawaru.github.com/blog/2013/04/05/ruby-and-websocket/</loc>
+        <loc>http://ryudo.tw/blog/2013/04/05/ruby-and-websocket/</loc>
         <lastmod>2013-04-05T22:29:08+08:00</lastmod>
     </url>
     <url>
-        <loc>http://ryudoawaru.github.com/blog/2013/04/17/rubytuesday-22/</loc>
+        <loc>http://ryudo.tw/blog/2013/04/17/rubytuesday-22/</loc>
         <lastmod>2013-04-17T17:14:24+08:00</lastmod>
     </url>
     <url>
-        <loc>http://ryudoawaru.github.com/about/</loc>
+        <loc>http://ryudo.tw/about/</loc>
         <lastmod>2013-03-10T12:42:46+08:00</lastmod>
     </url>
     <url>
-        <loc>http://ryudoawaru.github.com/blog/archives/</loc>
+        <loc>http://ryudo.tw/blog/archives/</loc>
         <lastmod>2013-04-17T17:14:24+08:00</lastmod>
     </url>
     <url>
-        <loc>http://ryudoawaru.github.com/</loc>
+        <loc>http://ryudo.tw/</loc>
         <lastmod>2013-04-17T17:14:24+08:00</lastmod>
     </url>
     <url>
-        <loc>http://ryudoawaru.github.com/my-presentations/</loc>
+        <loc>http://ryudo.tw/my-presentations/</loc>
         <lastmod>2013-03-10T13:50:53+08:00</lastmod>
     </url>
     <url>
-        <loc>http://ryudoawaru.github.com/robots.txt</loc>
+        <loc>http://ryudo.tw/robots.txt</loc>
         <lastmod>2013-03-09T11:45:29+08:00</lastmod>
     </url>
 </urlset>
