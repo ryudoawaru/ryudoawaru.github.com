@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: ruby, | 慕凡(@ryudoawaru)'s blog]]></title>
-  <link href="http://ryudo.tw/blog/categories/ruby/atom.xml" rel="self"/>
+  <title><![CDATA[Category: rubykaigi | 慕凡(@ryudoawaru)'s blog]]></title>
+  <link href="http://ryudo.tw/blog/categories/rubykaigi/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
   <updated>2013-06-08T12:56:20+08:00</updated>
   <id>http://ryudo.tw/</id>
