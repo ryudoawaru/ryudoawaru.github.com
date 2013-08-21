@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: ruby, | 慕凡(@ryudoawaru)'s blog]]></title>
-  <link href="http://ryudo.tw/blog/categories/ruby/atom.xml" rel="self"/>
+  <title><![CDATA[Category: rails,migration,postgresql | 慕凡(@ryudoawaru)'s blog]]></title>
+  <link href="http://ryudo.tw/blog/categories/rails-migration-postgresql/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
   <updated>2013-08-21T15:13:32+08:00</updated>
   <id>http://ryudo.tw/</id>
@@ -272,99 +272,6 @@
 <p>簡單來說就是在migrate前先切換schema, 然後用Rake的指令呼叫原本的db:migrate/rollback出來, 當然你也可以寫一個task是去掃現存的服務端列表然後再各自migrate, 如果要寫在controller或model的話, 則必需先require rake然後再load Rakefile才行。</p>
 
 <p>以上</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Introduce Ruby Taiwan Community@RubyKaigi 2013[EN,CH]]]></title>
-    <link href="http://ryudo.tw/blog/2013/06/07/rubykaigi2013-lt/"/>
-    <updated>2013-06-07T20:57:00+08:00</updated>
-    <id>http://ryudo.tw/blog/2013/06/07/rubykaigi2013-lt</id>
-    <content type="html"><![CDATA[<p>非常榮幸本次有機會可以和台灣Ruby社群的朋友一起參加世界級的Ruby研討會<a href="http://rubykaigi.org/2013">RubyKaigi2013</a>, 做為台灣Ruby社群的主持人之一, 既然參加了就想要讓世界的Ruby朋友們知道Ruby Taiwan社群的存在, 因此在LT徵稿前就打算要投稿這個主題了.</p>
-
-<hr />
-
-<p>It's my pleasure to join the world-class Ruby seminar <a href="http://rubykaigi.org/2013">RubyKaigi2013</a>, as one of the organizers of Ruby Taiwan community, I wish to let the world know the exist of our community, so I plan to submit this LT.</p>
-
-<p>由於是第一次在海外以英文發表, 又是只有五分鐘的LT, 如果用一般的形式會很難控制時間, 因此就想到了高橋流的方式, 在準備的過程中不斷反覆觀看高橋征義在台灣的LT影片以及簡報來練習; 對於鋪梗也是費盡心思, 感謝<a href="https://twitter.com/ihower">@ihower</a>在去年RubyConf Taiwan 2012的<a href="http://www.slideshare.net/ihower/rubyconf-taiwan-2012-opening-closing">十六字箴言</a>, 以及在<a href="http://magazine.rubyist.net/?0041-RubyTaiwan2012">Rubyist Magazine</a>將其日語漢字化的柴田先生<a href="https://twitter.com/hsbt">@hsbt</a>; 另外由於會眾日本人佔多數, 在講稿上採取英日文並行的方式, 這點要特別再特別的感謝旅居日本的台灣人Rubyist侯大偉<a href="https://twitter.com/davidhou_tw">@davidhou_tw</a>的全力支持, 大偉不但幫我翻譯, 甚至還請了日本朋友幫忙review, 我跟他致謝時他說：「還是慎重點好 畢竟你代表台灣宣傳阿」這句話時, 真的整個超感動又熱血的.</p>
-
-<hr />
-
-<p>Since this is my first time to speak outside of Taiwan and it's a 5 mins LT session, I decided to use the Takahashi-method on my talk. I watch Takahashi-san's slide and screencasts again and again to meditate and practice my speech. Special thanks to @ihower's <a href="http://www.slideshare.net/ihower/rubyconf-taiwan-2012-opening-closing">opening slide at RubyConf Taiwan 2012</a> and <a href="(https://twitter.com/hsbt">@hsbt</a>'s <a href="http://magazine.rubyist.net/?0041-RubyTaiwan2012">Japanese translation on Rubyist Magazine</a> gave me some content on the slide. I write both Japanese and English on my slide because the biggtest part of audience are Japanese. I have to appreciate <a href="https://twitter.com/davidhou_tw">David Hou</a> who is a Taiwanese Rubyist working and living in Japan for translating my slide to Japanese. He even asked help from a Japanese friend. He said to me: "We should be more careful, you represent the Ruby Taiwan community after all" when I expressed my thank to him. He really moved me!</p>
-
-<p>另外一個最後引起日本朋友們關注的就是桐島梗了, 其實會有這個梗是因為自從去年Rubyconf Taiwan 2012後就有在關注日本Ruby大神們的推特, 適逢今年3月時日本舉辦的<a href="http://magazine.rubyist.net/?0042-OoedoRubyKaigi03Report">大江戶RubyKaigi03</a>其中一場由CRuby GC的作者中村成洋<a href="https://twitter.com/nari3">@nari3</a>的演講<a href="http://www.slideshare.net/authorNari/ruby-17269278">桐島、Rubyやめるってよ</a>持續引起大神們的討論, 看了簡報之後雖然不是很懂但是對其中引用的電影<a href="http://www.ghfff.org.tw/program/content.aspx?id=521">聽說桐島退社了</a>感到興趣, 看過之後再回頭看中村的簡報就能夠理解那些梗了, 個人以為那句「<a href="http://imgur.com/Z8m9zkn">戰鬥吧！這裡是我們的世界</a>」是整個電影, 同時也是我自己參與社群經營活動的精神之體現, 作為結尾是非常適合的.</p>
-
-<hr />
-
-<p>I found the most eye-catching point of my presentation for Japanese is the 「Kirishima」's ネタ. In fact I started to follow many Japanese Rubyist's twitter after the RubyConf Taiwan 2012 last year. I noticed <a href="https://twitter.com/nari3">Narihiro Nakamura</a>'s presentation named 「<a href="http://www.slideshare.net/authorNari/ruby-17269278">Kirishima, stop using Ruby</a>」 which is retwteed many times after the 「Oedo RubyKaigi 03」 on March this year. I am extremely interested by the slide's subject which is a movie named 「The Kirishima Thing」, so I can  understanded what Nakamura expressed in his slide after watched the movie and deeply impressed by it. I decided to use the most important line of the movie "Fighting, this is our world!" as the last page of my slide because I think it is the spirit of both the movie and the reason of why I join the operation of our community.</p>
-
-<p>上台前一直很擔心這些梗會沒有用, 前一天晚上由於和龍哥隔天都要上台的關係緊張到幾乎沒睡; 不過現場的反應真是超乎想像意外的好, 結束後也陸續接到幾位日本朋友們的鼓勵, 真的非常窩心, 感謝你們!</p>
-
-<hr />
-
-<p>I almost can't sleep on the eve of LT and worried about if my slide can't attract the audience. Fortunately I finished the speech and it seemed the audience's reaction was good. I must show my gratitude for beging metioned by many Japanese Ruby friends on Twitter as below:</p>
-
-<blockquote class="twitter-tweet" data-conversation="none" lang="zh-tw"><p>@<a href="https://twitter.com/ryudoawaru">ryudoawaru</a> ありがとうございました！lightning talk最高でした！</p>&mdash; Akira Matsuda (@a_matsuda) <a href="https://twitter.com/a_matsuda/status/340776485826740225">2013年6月1日</a></blockquote>
-
-
-<blockquote class="twitter-tweet" lang="zh-tw"><p>練度たかい <a href="https://twitter.com/search/%23rubykaigi">#rubykaigi</a> <a href="https://twitter.com/search/%23rubykaigia">#rubykaigia</a></p>&mdash; Kakutani Shintaro (@kakutani) <a href="https://twitter.com/kakutani/status/340393348638601216">2013年5月31日</a></blockquote>
-
-
-<blockquote class="twitter-tweet" lang="zh-tw"><p>I would like to go to RubyConf Taiwan 2014〜</p>&mdash; SHIBATA Hiroshi (@hsbt) <a href="https://twitter.com/hsbt/status/341113796158439424">2013年6月2日</a></blockquote>
-
-
-<blockquote class="twitter-tweet" lang="zh-tw"><p>Awesome taiwan ruby community! @<a href="https://twitter.com/ryudoawaru">ryudoawaru</a></p>&mdash; Tatsuya Sato (@sato_ryu) <a href="https://twitter.com/sato_ryu/status/340393351146778624">2013年5月31日</a></blockquote>
-
-
-<blockquote class="twitter-tweet" data-conversation="none" lang="zh-tw"><p>@<a href="https://twitter.com/ryudoawaru">ryudoawaru</a> わたしも小学生の時からのファンです！ 素敵なLTでした、TwのRubyカンファレンスに行ってみたくなりました :)</p>&mdash; やきとりい (@yotii23) <a href="https://twitter.com/yotii23/status/340406791693279233">2013年5月31日</a></blockquote>
-
-
-<blockquote class="twitter-tweet" lang="zh-tw"><p>@<a href="https://twitter.com/ryudoawaru">ryudoawaru</a> 良いLTでした(бвб)！</p>&mdash; すずきみほ SUZUKI Miho (@adzuki34) <a href="https://twitter.com/adzuki34/status/340393460668432384">2013年5月31日</a></blockquote>
-
-
-<blockquote class="twitter-tweet" lang="zh-tw"><p>@<a href="https://twitter.com/ryudoawaru">ryudoawaru</a> LT素晴らしかったです！ありがとうございました！</p>&mdash; Yuki Nishijima (@yuki24) <a href="https://twitter.com/yuki24/status/340784167895838720">2013年6月1日</a></blockquote>
-
-
-<blockquote class="twitter-tweet" lang="zh-tw"><p>.@<a href="https://twitter.com/ryudoawaru">ryudoawaru</a> さんが <a href="https://twitter.com/search/%23rubykaigi">#rubykaigi</a> 2日目のLTでスライドに桐島を使っていたのは、@<a href="https://twitter.com/nari3">nari3</a> の大江戸03のスライドを見て興味を持ち、映画を探して観て大好きになったからだとか(台湾語字幕あるそうです)。台湾rubyistに桐島届いてた！</p>&mdash; O-Show (@oshow) <a href="https://twitter.com/oshow/status/341110877375840256">2013年6月2日</a></blockquote>
-
-
-<script async src="http://ryudo.tw//platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-
-<p>神奇的是, 在LT投影片上傳slideshare後的隔天竟然登上了slideshare的「Hot on Facebook」首頁排行榜, 真的是又驚又喜</p>
-
-<hr />
-
-<p>It was a miracle that on the third day of RubyKaigi2013, my slide was in the 「Hot in Facebook」 area of Slideshare's homepage.</p>
-
-<center><img src="http://i.imgur.com/rN7xNwl.png" style="max-width:720px;" /></center>
-
-
-<p>感謝<a href="https://twitter.com/takai">高井先生</a>的照片, 拍的非常好.</p>
-
-<hr />
-
-<p>Thanks to the high quality photo taken by <a href="https://twitter.com/takai">Naoto Takai</a>.</p>
-
-<center><img src="http://farm6.staticflickr.com/5469/8905326085_5f217d6665_c.jpg"/></center>
-
-
-<p>這趟日本行真的是收獲多多, 接下來還會有幾篇文章介紹; 整個從準備到上台的過程中, 心裡一直想就大偉的話, 要讓世界知道Ruby Taiwan社群的存在, 今後一樣會持續努力</p>
-
-<hr />
-
-<p>I learn so much on Japan this time, and I will write many blog posts to represent my journey. On the process of preparing the presentation, I always remember what David said and try my best to let the attendee know what we(Ruby Taiwan community) do and I will continue my work in the future.</p>
-
-<h3>Thanks to all awesome staffs of Rubykaigi and community friends in Japan, また台湾で会お！</h3>
-
-<p>附上簡報檔以及當天Live如下：</p>
-
-<center>
-<iframe src="http://www.slideshare.net/slideshow/embed_code/22236968?rel=0" width="597" height="486" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC;border-width:1px 1px 0;margin-bottom:5px" allowfullscreen webkitallowfullscreen mozallowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="http://www.slideshare.net/ryudoawaru/introduce-ruby-taiwanrubykaigi2013" title="Introduce Ruby Taiwan@Rubykaigi2013" target="_blank">Introduce Ruby Taiwan@Rubykaigi2013</a> </strong> from <strong><a href="http://www.slideshare.net/ryudoawaru" target="_blank">Mu-Fan Teng</a></strong> </div>
-<iframe width="480" height="302" src="http://www.ustream.tv/embed/recorded/33573701/highlight/367455?v=3&amp;wmode=direct" scrolling="no" frameborder="0" style="border: 0px none transparent;">    </iframe>
-<br /><a href="http://www.ustream.tv/" style="padding: 2px 0px 4px; width: 400px; background: #ffffff; display: block; color: #000000; font-weight: normal; font-size: 10px; text-decoration: underline; text-align: center;" target="_blank">Video streaming by Ustream</a>
-</center>
-
 ]]></content>
   </entry>
   
