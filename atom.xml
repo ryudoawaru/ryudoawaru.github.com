@@ -4,7 +4,7 @@
   <title><![CDATA[慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2013-11-12T10:54:04+08:00</updated>
+  <updated>2014-01-01T02:43:17+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -12,6 +12,41 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[2013回顧[CH]]]></title>
+    <link href="http://ryudo.tw/blog/2014/01/01/my2013/"/>
+    <updated>2014-01-01T00:18:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2014/01/01/my2013</id>
+    <content type="html"><![CDATA[<h2>2013大事紀</h2>
+
+<ul>
+<li> 一月, 在WebConf Taiwan 2013 發表「<a href="http://www.youtube.com/watch?v=WEgoBZkS9Uw">非典型貧窮網站維運經驗分享</a>」</li>
+<li>二月, 舉辦[Ruby 20週年慶祝趴] (https://kktix.com/events/ruby20)</li>
+<li>四月, 接棒ihower主辦Ruby Tuesday以及<a href="http://ruby.tw">Ruby Taiwan社群</a>, 開始<a href="https://kktix.com/events/ruby-tuesday-22/">Ruby Tuesday 22</a></li>
+<li>五月底, 和社群朋友一同參加<a href="http://rubykaigi.org/2013/">Ruby Kaigi 2013</a>, 並發表<a href="http://ryudo.tw/blog/2013/06/07/rubykaigi2013-lt/">Lightning Talk</a>向世界的Rubyist們介紹了Ruby Taiwan社群</li>
+<li>七月, 在<a href="https://kktix.com/events/ruby-tuesday-24">Ruby Tuesday 24</a>發表<a href="http://rubytaiwan.tumblr.com/post/55311043584/ruby-tuesday-24">日本行心得</a>, 該場Ruby Tuesday也創下了史上最多與會者的紀錄(報名115, 實到100)</li>
+<li>九月, 和<a href="http://blog.eddie.com.tw/">龍哥</a>與<a href="http://blog.taian.su/">泰安</a>共同<a href="http://ryudo.tw/blog/2013/09/14/railsgirls-taipei-01/">舉辦</a>了<a href="http://railsgirls.tw/2013/10/08/rg-taipei1st-record/">第一屆Rails Girls Taipei</a>;  九月底離開Resume Companion</li>
+<li>十一月, 舉辦<a href="http://railsgirls.tw/2013/11/29/rg-taipei2nd-record/">第二屆Rails Girls Taipei</a>, 接任<a href="http://rubyconf.tw/">RubyConf Taiwan</a>總召</li>
+</ul>
+
+
+<p>回顧2013, 最多事件發生在經營Ruby社群方面, 雖然從小以來對辦活動或是搞社團都不太熱衷, 參與社群最初的目的也只是想要精進自己的技術和交朋友, 不知不覺Ruby社群就變成生活重心之一了, 參加RubyKaigi 2013期間的所見所聞也對我產生了很大的衝擊, 明年的目標有：</p>
+
+<ul>
+<li>成功舉辦RubyConf Taiwan 2014</li>
+<li>讓某個該上線的網站上線(秘)</li>
+<li>讓上述的網站正常營運</li>
+<li>持續經營Rails Girls 社群</li>
+<li>在國外的conf發表talk或session</li>
+<li>學好日文</li>
+<li>學好英文</li>
+</ul>
+
+
+<h1>加油！</h1>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Rails Girls Taipei-01 活動主辦心得]]></title>
