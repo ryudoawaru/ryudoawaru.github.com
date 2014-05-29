@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: course | 慕凡(@ryudoawaru)'s blog]]></title>
+  <link href="http://ryudo.tw/blog/categories/course/atom.xml" rel="self"/>
+  <link href="http://ryudo.tw/"/>
+  <updated>2014-01-01T02:43:17+08:00</updated>
+  <id>http://ryudo.tw/</id>
+  <author>
+    <name><![CDATA[Mu-Fan Teng]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Sinatra課程紀錄]]></title>
+    <link href="http://ryudo.tw/blog/2013/04/05/sinatra-course-20130329/"/>
+    <updated>2013-04-05T20:41:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2013/04/05/sinatra-course-20130329</id>
+    <content type="html"><![CDATA[<p>這次和<a href="http://blog.eddie.com.tw">龍哥</a>一起合辦<a href="http://blog.eddie.com.tw/2013/02/08/new-rubyist-wanted/">有心人的課程</a> 其中的第二天是小弟主講Sinatra &amp; Rack, 以下是講義分享</p>
+
+<script async class="speakerdeck-embed" data-id="e833e210801b01309fec12313933796a" data-ratio="1.2994923857868" src="http://ryudo.tw//speakerdeck.com/assets/embed.js"></script>
+
+
+<p>已將課程所用之原始碼放到<a href="https://github.com/ryudoawaru/sinatra-course-20130329">Github</a></p>
+
+<p>心得：</p>
+
+<ul>
+<li><p>這次準備過程還是很抖, 一開始因為發現了神奇的課程<a href="http://tekpub.com/productions/rack">Understanding Rack</a>因此想把這篇的大意放到教材中, 不過果然還是太難把這麼硬的東西表達出來啊....</p></li>
+<li><p>刺激的是除了前一天做講義到五點之外, 十點一起來還接到了公司的message得在緊急狀態之下10分鐘修了production code, 一下課又得繼續修 &amp; Deploy…</p></li>
+<li><p>4/5發現竟然有四位學員<a href="https://github.com/ryudoawaru/sinatra-course-20130329/network">fork</a>了, 真是令人感動, 其中還有人抓到我的<a href="https://github.com/ryudoawaru/sinatra-course-20130329/issues/1">bug</a>..xd</p></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

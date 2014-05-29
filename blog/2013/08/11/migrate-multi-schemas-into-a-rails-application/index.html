@@ -1,0 +1,521 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>How to migrate a PostgreSQL DB with many schemas in a multenancy Rails application - 慕凡(@ryudoawaru)'s blog</title>
+  <meta name="author" content="Mu-Fan Teng">
+
+  
+  <meta name="description" content="PostgreSQL的schema是一個非常方便的功能, 適合拿來做所謂的Multi-Tenancy類服務; 例如無名或Pixnet這類的BSP(Blog Service Provider)或是像我的FREEBBS的免費論壇服務(Forum Service Provider), 通常稱為SAAS( &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://ryudo.tw/blog/2013/08/11/migrate-multi-schemas-into-a-rails-application/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="慕凡(@ryudoawaru)'s blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">慕凡(@ryudoawaru)'s blog</a></h1>
+  
+    <h2>目前還沒想到</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:ryudo.tw" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/my-presentations">My Presentations</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">How to Migrate a PostgreSQL DB With Many Schemas in a Multenancy Rails Application</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-11T21:38:00+08:00" pubdate data-updated="true">Aug 11<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>PostgreSQL的schema是一個非常方便的功能, 適合拿來做所謂的<a href="http://www.arthurtoday.com/2010/02/multi-tenant-application-multitenancy.html#.UgeXg2T08Rw">Multi-Tenancy</a>類服務; 例如無名或Pixnet這類的BSP(Blog Service Provider)或是像我的FREEBBS的免費論壇服務(Forum Service Provider), 通常稱為SAAS(Software As A Service)系統, 可以把N個相同結構的schema放在同一個資料庫裡面; 比起MySQL只能分別放在不同的資料庫裡會有很多好處。</p>
+
+<p>假設今天我用PostgreSQL的schema功能來做一個BSP服務的話, DB內的schema會分成兩大類：</p>
+
+<ul>
+<li>管理用schema(只有一個)</li>
+<li>Blog Schema(有無數個, 每個的結構相同)</li>
+</ul>
+
+
+<p>一般狀況下, 我們在使用ActiveRecord連接PosttgreSQL時可以在連接選項設定使用Schema, 像這樣：</p>
+
+<figure class='code'><figcaption><span>database.yml  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">development</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">adapter</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">postgresql</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">encoding</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">unicode</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">database</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">SHOPON_development</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">pool</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">5</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">schema_search_path</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">base, blog1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>schema_search_path的預設值是public, 如果照以上設定, 當你執行任何migration時會先從base這個schema執行起, 也就是所有的migration都只會跑在base這個schema上面,</p>
+
+<p>但場景回到Rails/ActiveRecord上, 假如你要做一個BSP, 一般而言你有以下幾種方式：</p>
+
+<ol>
+<li>管理端(管理BSP的)和服務端(Blog服務本身)分別各自一個Rails Application目錄, 然後各有各的migrate</li>
+<li>將兩端放在同一個Rails App裡</li>
+</ol>
+
+
+<p>如果用一般的方式migrate, Rails會依照你database.yml裡設定的schema_search_path的順序找第一順位來執行migrate; 這樣你要如何migrate你的資料到不同schema呢？</p>
+
+<p>今天要講的就是將兩端放在同app裡的方式, 也就是</p>
+
+<ol>
+<li>在migrate檔內設定只能在服務端schema或是管理端schema執行</li>
+<li>有<strong>單獨migrate管理端</strong>和<strong>單獨migrate服務端</strong>的功能</li>
+</ol>
+
+
+<p><strong><em>實現1.的方式如下</em></strong>：</p>
+
+<figure class='code'><figcaption><span>migrate_control_side.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">CreateSites</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">change</span>
+</span><span class='line'>    <span class="k">if</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">schema_search_path</span> <span class="o">==</span> <span class="s1">&#39;base&#39;</span> <span class="c1">#base為管理端schema</span>
+</span><span class='line'>      <span class="n">create_table</span> <span class="ss">:sites</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:subdn</span>
+</span><span class='line'>        <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:name</span>
+</span><span class='line'>        <span class="n">t</span><span class="o">.</span><span class="n">timestamps</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>簡單來說就是當現在的 schema_search_path 不等於base則不執行create_table的動作; 如果是服務端, 則反過來設定schema_search_path不為base或public即可, 更進一步的可以將這兩種檢查寫成ActiveRecord::Migration的module, 像這樣：</p>
+
+<figure class='code'><figcaption><span>multitenancy_migration.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">module</span> <span class="nn">ActiveRecord::MultitenancyMigration</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">must_migrate_in_base</span> <span class="c1">#管理端</span>
+</span><span class='line'>    <span class="k">if</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">schema_search_path</span> <span class="o">==</span> <span class="s1">&#39;base&#39;</span>
+</span><span class='line'>      <span class="k">yield</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">must_migrate_in_site</span> <span class="c1">#服務端</span>
+</span><span class='line'>    <span class="n">schema_search_path</span> <span class="o">=</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">schema_search_path</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">!</span><span class="n">schema_search_path</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;base&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">schema_search_path</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;public&#39;</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">yield</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span><span class="o">.</span><span class="n">class_eval</span> <span class="k">do</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:MultitenancyMigration</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:MultitenancyMigration</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>由於migration檔的內部可能是以self.up(class method)或是up(instance method)的方式編寫, 因此需要同時include和extend這個模組。</p>
+
+<p><strong><em>實現2.的方式如下</em></strong>：</p>
+
+<p>需要建立for 管理端以及 for 服務端的task 來migrate 各自的schema</p>
+
+<figure class='code'><figcaption><span>base.rake</span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">namespace</span> <span class="ss">:base</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">task</span> <span class="n">migrate_db</span><span class="p">:</span> <span class="ss">:environment</span> <span class="k">do</span>
+</span><span class='line'>    <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">schema_search_path</span> <span class="o">=</span> <span class="s1">&#39;base&#39;</span>
+</span><span class='line'>    <span class="ss">Rake</span><span class="p">:</span><span class="ss">:Task</span><span class="o">[</span><span class="s1">&#39;db:migrate&#39;</span><span class="o">].</span><span class="n">invoke</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">task</span> <span class="n">rollback_db</span><span class="p">:</span> <span class="ss">:environment</span> <span class="k">do</span>
+</span><span class='line'>    <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">schema_search_path</span> <span class="o">=</span> <span class="s1">&#39;base&#39;</span>
+</span><span class='line'>    <span class="ss">Rake</span><span class="p">:</span><span class="ss">:Task</span><span class="o">[</span><span class="s1">&#39;db:rollback&#39;</span><span class="o">].</span><span class="n">invoke</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>site.rake </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">namespace</span> <span class="ss">:site</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">check_subdn_exists</span>
+</span><span class='line'>    <span class="k">if</span> <span class="no">ENV</span><span class="o">.</span><span class="n">has_key?</span><span class="p">(</span><span class="s1">&#39;SUBDN&#39;</span><span class="p">)</span>
+</span><span class='line'>      <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">schema_search_path</span> <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;SUBDN&#39;</span><span class="o">]</span>
+</span><span class='line'>      <span class="k">yield</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s2">&quot;Please assign SUBDN first!&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">desc</span> <span class="s1">&#39;Migrate Database of Individual site, have to assign SUBDN paramater!&#39;</span>
+</span><span class='line'>  <span class="n">task</span> <span class="n">migrate_db</span><span class="p">:</span> <span class="ss">:environment</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">check_subdn_exists</span> <span class="k">do</span>
+</span><span class='line'>      <span class="ss">Rake</span><span class="p">:</span><span class="ss">:Task</span><span class="o">[</span><span class="s1">&#39;db:migrate&#39;</span><span class="o">].</span><span class="n">invoke</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">desc</span> <span class="s1">&#39;Rollback migration of single site&#39;</span>
+</span><span class='line'>  <span class="n">task</span> <span class="n">rollback_db</span><span class="p">:</span> <span class="ss">:environment</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">check_subdn_exists</span> <span class="k">do</span>
+</span><span class='line'>      <span class="ss">Rake</span><span class="p">:</span><span class="ss">:Task</span><span class="o">[</span><span class="s1">&#39;db:rollback&#39;</span><span class="o">].</span><span class="n">invoke</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>簡單來說就是在migrate前先切換schema, 然後用Rake的指令呼叫原本的db:migrate/rollback出來, 當然你也可以寫一個task是去掃現存的服務端列表然後再各自migrate, 如果要寫在controller或model的話, 則必需先require rake然後再load Rakefile才行。</p>
+
+<p>以上</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Mu-Fan Teng</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-11T21:38:00+08:00" pubdate data-updated="true">Aug 11<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/rails-migration-postgresql/'>rails,migration,postgresql</a>, <a class='category' href='/blog/categories/ruby/'>ruby,</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ryudo.tw/blog/2013/08/11/migrate-multi-schemas-into-a-rails-application/" data-via="ryudoawaru" data-counturl="http://ryudo.tw/blog/2013/08/11/migrate-multi-schemas-into-a-rails-application/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/06/07/rubykaigi2013-lt/" title="Previous Post: Introduce Ruby Taiwan Community@RubyKaigi 2013[EN,CH]">&laquo; Introduce Ruby Taiwan Community@RubyKaigi 2013[EN,CH]</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/09/14/railsgirls-taipei-01/" title="Next Post: Rails Girls Taipei-01 活動主辦心得">Rails Girls Taipei-01 活動主辦心得 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>RubyKaigi 2013 LT <a href="http://rubykaigi.org/2013/lightning_talks#ryudoawaru">speaker</a></h1>
+  <a href="http://rubykaigi.org/2013/lightning_talks#ryudoawaru"><img src="http://rubykaigi.org/2013/images/badgeLightningTalker@2x.png" /></a>
+</section><section>
+  
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/01/01/my2013/">2013回顧[CH]</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/09/14/railsgirls-taipei-01/">Rails Girls Taipei-01 活動主辦心得</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/08/11/migrate-multi-schemas-into-a-rails-application/">How to migrate a PostgreSQL DB with many schemas in a multenancy Rails application</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/06/07/rubykaigi2013-lt/">Introduce Ruby Taiwan Community@RubyKaigi 2013[EN,CH]</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/05/02/tatsu-zine-translator-recruitment/">達人出版会徵求翻譯以及校稿志工事宜</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/ryudoawaru">@ryudoawaru</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'ryudoawaru',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("ryudoawaru", 6, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/ryudoawaru" class="twitter-follow-button" data-show-count="false">Follow @ryudoawaru</a>
+  
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Mu-Fan Teng -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'ryudosoctopress';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://ryudo.tw/blog/2013/08/11/migrate-multi-schemas-into-a-rails-application/';
+        var disqus_url = 'http://ryudo.tw/blog/2013/08/11/migrate-multi-schemas-into-a-rails-application/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

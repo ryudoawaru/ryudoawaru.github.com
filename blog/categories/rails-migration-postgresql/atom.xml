@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: rails,migration,postgresql | 慕凡(@ryudoawaru)'s blog]]></title>
+  <link href="http://ryudo.tw/blog/categories/rails-migration-postgresql/atom.xml" rel="self"/>
+  <link href="http://ryudo.tw/"/>
+  <updated>2014-01-01T02:43:17+08:00</updated>
+  <id>http://ryudo.tw/</id>
+  <author>
+    <name><![CDATA[Mu-Fan Teng]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[How to migrate a PostgreSQL DB with many schemas in a multenancy Rails application]]></title>
+    <link href="http://ryudo.tw/blog/2013/08/11/migrate-multi-schemas-into-a-rails-application/"/>
+    <updated>2013-08-11T21:38:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2013/08/11/migrate-multi-schemas-into-a-rails-application</id>
+    <content type="html"><![CDATA[<p>PostgreSQL的schema是一個非常方便的功能, 適合拿來做所謂的<a href="http://www.arthurtoday.com/2010/02/multi-tenant-application-multitenancy.html#.UgeXg2T08Rw">Multi-Tenancy</a>類服務; 例如無名或Pixnet這類的BSP(Blog Service Provider)或是像我的FREEBBS的免費論壇服務(Forum Service Provider), 通常稱為SAAS(Software As A Service)系統, 可以把N個相同結構的schema放在同一個資料庫裡面; 比起MySQL只能分別放在不同的資料庫裡會有很多好處。</p>
+
+<p>假設今天我用PostgreSQL的schema功能來做一個BSP服務的話, DB內的schema會分成兩大類：</p>
+
+<ul>
+<li>管理用schema(只有一個)</li>
+<li>Blog Schema(有無數個, 每個的結構相同)</li>
+</ul>
+
+
+<p>一般狀況下, 我們在使用ActiveRecord連接PosttgreSQL時可以在連接選項設定使用Schema, 像這樣：</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>database.yml  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">development</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">adapter</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">postgresql</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">encoding</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">unicode</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">database</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">SHOPON_development</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">pool</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">5</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">schema_search_path</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">base, blog1</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>schema_search_path的預設值是public, 如果照以上設定, 當你執行任何migration時會先從base這個schema執行起, 也就是所有的migration都只會跑在base這個schema上面,</p>
+
+<p>但場景回到Rails/ActiveRecord上, 假如你要做一個BSP, 一般而言你有以下幾種方式：</p>
+
+<ol>
+<li>管理端(管理BSP的)和服務端(Blog服務本身)分別各自一個Rails Application目錄, 然後各有各的migrate</li>
+<li>將兩端放在同一個Rails App裡</li>
+</ol>
+
+
+<p>如果用一般的方式migrate, Rails會依照你database.yml裡設定的schema_search_path的順序找第一順位來執行migrate; 這樣你要如何migrate你的資料到不同schema呢？</p>
+
+<p>今天要講的就是將兩端放在同app裡的方式, 也就是</p>
+
+<ol>
+<li>在migrate檔內設定只能在服務端schema或是管理端schema執行</li>
+<li>有<strong>單獨migrate管理端</strong>和<strong>單獨migrate服務端</strong>的功能</li>
+</ol>
+
+
+<p><strong><em>實現1.的方式如下</em></strong>：</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>migrate_control_side.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">CreateSites</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">change</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;if ActiveRecord::Base.connection.schema_search_path == &#39;base&#39; #base為管理端schema</span>
+</span><span class='line'><span class="sr">  create_table :sites do |t|</span>
+</span><span class='line'><span class="sr">    t.string :subdn</span>
+</span><span class='line'><span class="sr">    t.string :name</span>
+</span><span class='line'><span class="sr">    t.timestamps</span>
+</span><span class='line'><span class="sr">  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>簡單來說就是當現在的 schema_search_path 不等於base則不執行create_table的動作; 如果是服務端, 則反過來設定schema_search_path不為base或public即可, 更進一步的可以將這兩種檢查寫成ActiveRecord::Migration的module, 像這樣：</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>multitenancy_migration.rb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">module</span> <span class="nn">ActiveRecord::MultitenancyMigration</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">must_migrate_in_base</span> <span class="c1">#管理端&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">if</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">schema_search_path</span> <span class="o">==</span> <span class="s1">&#39;base&#39;</span>
+</span><span class='line'>  <span class="k">yield</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def must_migrate_in_site #服務端&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">schema_search_path</span> <span class="o">=</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">schema_search_path</span>
+</span><span class='line'><span class="k">if</span> <span class="o">!</span><span class="n">schema_search_path</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;base&#39;</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="o">!</span><span class="n">schema_search_path</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;public&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">yield</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;ActiveRecord::Migration.class_eval do</span>
+</span><span class='line'><span class="sr">  include ActiveRecord::MultitenancyMigration</span>
+</span><span class='line'><span class="sr">  extend ActiveRecord::MultitenancyMigration</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>由於migration檔的內部可能是以self.up(class method)或是up(instance method)的方式編寫, 因此需要同時include和extend這個模組。</p>
+
+<p><strong><em>實現2.的方式如下</em></strong>：</p>
+
+<p>需要建立for 管理端以及 for 服務端的task 來migrate 各自的schema
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>base.rake</span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">namespace</span> <span class="ss">:base</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">task</span> <span class="n">migrate_db</span><span class="p">:</span> <span class="ss">:environment</span> <span class="k">do</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;ActiveRecord::Base.connection.schema_search_path = &#39;base&#39;</span>
+</span><span class='line'><span class="sr">Rake::Task[&#39;db:migrate&#39;].invoke</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="n">task</span> <span class="n">rollback_db</span><span class="p">:</span> <span class="ss">:environment</span> <span class="k">do</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;ActiveRecord::Base.connection.schema_search_path = &#39;base&#39;</span>
+</span><span class='line'><span class="sr">Rake::Task[&#39;db:rollback&#39;].invoke</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>site.rake </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">namespace</span> <span class="ss">:site</span> <span class="k">do</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def check_subdn_exists&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">if</span> <span class="no">ENV</span><span class="o">.</span><span class="n">has_key?</span><span class="p">(</span><span class="s1">&#39;SUBDN&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">schema_search_path</span> <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;SUBDN&#39;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">yield</span>
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;Please assign SUBDN first!&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  desc &#39;Migrate Database of Individual site, have to assign SUBDN paramater!&#39;</span>
+</span><span class='line'><span class="sr">  task migrate_db: :environment do&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">check_subdn_exists</span> <span class="k">do</span>
+</span><span class='line'>  <span class="ss">Rake</span><span class="p">:</span><span class="ss">:Task</span><span class="o">[</span><span class="s1">&#39;db:migrate&#39;</span><span class="o">].</span><span class="n">invoke</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  desc &#39;Rollback migration of single site&#39;</span>
+</span><span class='line'><span class="sr">  task rollback_db: :environment do&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">check_subdn_exists</span> <span class="k">do</span>
+</span><span class='line'>  <span class="ss">Rake</span><span class="p">:</span><span class="ss">:Task</span><span class="o">[</span><span class="s1">&#39;db:rollback&#39;</span><span class="o">].</span><span class="n">invoke</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>簡單來說就是在migrate前先切換schema, 然後用Rake的指令呼叫原本的db:migrate/rollback出來, 當然你也可以寫一個task是去掃現存的服務端列表然後再各自migrate, 如果要寫在controller或model的話, 則必需先require rake然後再load Rakefile才行。</p>
+
+<p>以上</p>
+]]></content>
+  </entry>
+  
+</feed>
