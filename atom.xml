@@ -4,7 +4,7 @@
   <title><![CDATA[慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2014-07-04T11:10:29+08:00</updated>
+  <updated>2014-07-04T11:17:03+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[PostgreSQL Material View簡介]]></title>
+    <title type="html"><![CDATA[PostgreSQL Materialized View簡介]]></title>
     <link href="http://ryudo.tw/blog/2014/06/20/use-materizlied-view-in-pgsql/"/>
     <updated>2014-06-20T15:54:00+08:00</updated>
     <id>http://ryudo.tw/blog/2014/06/20/use-materizlied-view-in-pgsql</id>
