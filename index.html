@@ -9,9 +9,8 @@
   <meta name="author" content="Mu-Fan Teng">
 
   
-  <meta name="description" content="2013大事紀 一月, 在WebConf Taiwan 2013 發表「非典型貧窮網站維運經驗分享」
-二月, 舉辦[Ruby 20週年慶祝趴] (https://kktix.com/events/ruby20)
-四月, 接棒ihower主辦Ruby Tuesday以及Ruby Taiwan社群, &hellip;">
+  <meta name="description" content="最近在開發某個主力產品時遇到了一個問題，就是當我們在後台編輯一些資料，包含新增 / 修改 / 刪除
+，然後在沒有完成所有編輯前不想讓修改中的資料立刻在前台生效，正在苦思如何完成這項功能時，發現了PostgreSQL有一個超好用的功能叫「Materialized View」， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -68,6 +67,230 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/20/use-materizlied-view-in-pgsql/">PostgreSQL Material View簡介</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-20T15:54:00+08:00" pubdate data-updated="true">Jun 20<span>th</span>, 2014</time>
+        
+         | <a href="/blog/2014/06/20/use-materizlied-view-in-pgsql/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>最近在開發某個主力產品時遇到了一個問題，就是當我們在後台編輯一些資料，包含新增 / 修改 / 刪除
+，然後在沒有完成所有編輯前不想讓修改中的資料立刻在前台生效，正在苦思如何完成這項功能時，發現了PostgreSQL有一個超好用的功能叫「Materialized View」，於是就開始survey看看。</p>
+
+<h2>Database View</h2>
+
+<p>在<a href="http://en.wikipedia.org/wiki/View_%28SQL%29">Wikipedia</a>中的說明為：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>檢視表 (View) 是在關聯式資料庫中，將一組查詢指令構成的結果集，在實體資料表中的改變都可以立刻反應在檢視表中</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通常我們會為了特定目的，例如將某些特定條件的查詢變成一張虛擬表之類的原因，來製作一些View，例如：</p>
+
+<p><img src="/assets/2014/06/20/use-materizlied-view-in-pgsql/ex-order-erd.png"></p>
+
+<p>我們會用以下的方式建立一個View：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">CREATE</span> <span class="k">VIEW</span> <span class="n">orders_products_users</span> <span class="k">AS</span>
+</span><span class='line'><span class="k">SELECT</span>
+</span><span class='line'><span class="n">orders</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+</span><span class='line'><span class="n">users</span><span class="p">.</span><span class="n">name</span><span class="p">,</span>
+</span><span class='line'><span class="n">orders</span><span class="p">.</span><span class="n">product_id</span><span class="p">,</span>
+</span><span class='line'><span class="n">products</span><span class="p">.</span><span class="n">name</span>
+</span><span class='line'><span class="k">FROM</span>
+</span><span class='line'><span class="n">orders</span> <span class="k">JOIN</span> <span class="n">users</span> <span class="k">ON</span> <span class="n">users</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">orders</span><span class="p">.</span><span class="n">user_id</span><span class="p">,</span>
+</span><span class='line'><span class="k">JOIN</span> <span class="n">products</span> <span class="k">ON</span> <span class="n">products</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">orders</span><span class="p">.</span><span class="n">product_id</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以後我們要使用這個view時只要：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">orders_products_users</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>即可</p>
+
+<p>但是普通的view本身並沒有真正的儲存資料，預設情況下它只是一個查詢的捷徑而已，而且也不能透過update view來更新資料，所以對於使用Rails等ORM的人來說，即使已經有一些「把view當model」的Gem（例如<a href="https://github.com/stevo/activerecord-database-views">activerecord-database-views</a>）推出，還是會覺得是一個比較雞肋的功能。</p>
+
+<h2>Materialized View（以下簡稱M-View）</h2>
+
+<p>今天要介紹的這個功能和普通的View的差別，就在建立出來的view是一個查詢狀態的「快照」（Snapshot），在快照建立後，只要不更新（Refresh），即使對原本的table有任何的變更，這個M-View裡的資料也不會有任何變化，因此就可以做到前面所說的，讓後台更新的資料不影響到前台的功能，接下來讓我們來看看如何使用這個功能。</p>
+
+<h2>Postgresql的Materialized View</h2>
+
+<p>這個功能原本是出自於Oracle，號稱「開源的Oracle」的PostgreSQL也在本文撰時最新的穩定版本9.3加入了該功能，<a href="http://www.postgresql.org/docs/9.3/static/sql-creatematerializedview.html">參考資料</a>。</p>
+
+<h3>建立Materialized View</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">CREATE</span> <span class="n">MATERIALIZED</span> <span class="k">VIEW</span> <span class="k">table_name</span>
+</span><span class='line'>    <span class="k">AS</span> <span class="n">query</span>
+</span><span class='line'>    <span class="p">[</span> <span class="k">WITH</span> <span class="p">[</span> <span class="k">NO</span> <span class="p">]</span> <span class="k">DATA</span> <span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>例如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">CREATE</span> <span class="n">MATERIALIZED</span> <span class="k">VIEW</span> <span class="n">mymatview</span> <span class="k">AS</span> <span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">mytab</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上指令會以「SELECT * FROM mytab」的查詢式建立一個名為「mymatview」的M-View，而且在refresh之前，mymatview的內容不會受到原本mytab更新的影響。</p>
+
+<p>結尾的WITH DATA 和 WITH NO DATA的差別是在，會不會在建立時就把當時的資料填進去，如果WITH NO DATA的話，就必需要再使用refresh才可以把資料填進去。</p>
+
+<h3>更新Materialized View</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="n">REFRESH</span> <span class="n">MATERIALIZED</span> <span class="k">VIEW</span>  <span class="n">M</span><span class="o">-</span><span class="k">View</span><span class="err">的名稱</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>一旦下了這個指令後，就可以將現在的資料內容更新到指定的M-View上</p>
+
+<h3>移除Materialized View</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">DROP</span> <span class="n">MATERIALIZED</span> <span class="k">VIEW</span>  <span class="n">M</span><span class="o">-</span><span class="k">View</span><span class="err">的名稱</span> <span class="p">[</span><span class="k">CASCADE</span> <span class="o">|</span> <span class="k">RESTRICT</span><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>顧名思義，即完全移除該M-View，CASCADE意即在移除此物件實「一併移除相關物件」。</p>
+
+<h3>Materialized View的注意事項</h3>
+
+<ol>
+<li>和普通View一樣，不可以用UPDATE或INSERT等更新內容</li>
+<li>如果建立了M-View後，要移除關聯的資料表時需要用CASADE方式一併移除相關M-View，否則會無法移除。</li>
+<li>可以多層重疊，意即可以透過「查詢M-View建立其它M-View」</li>
+</ol>
+
+
+<h2>Materialized View的用途</h2>
+
+<ol>
+<li>加速部份查詢
+和一般View不同，M-View佔有獨立表空間，所以查詢M-View不會影響到關聯的資料表，意即如果我們將一些複雜或費時的查詢的結果用M-View建立快照的話，可以透過查詢該M-View節省下一次查詢的時間，例如某個交易資料表如果有10年份1000萬筆的話，將某一年份的交易資料獨立查詢到一個M-View之後，要查詢該年份的交易資料只要查詢該M-View，就不需要在查詢中scan全部10年份的交易資料了。</li>
+<li>實現資料版本控制
+這是我原本想要使用的目的，這個功能可以玩的地方還很多，例如我們</li>
+</ol>
+
+
+<h2>範例</h2>
+
+<p>今天假設有如下的表</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">spree_products</span>
+</span><span class='line'><span class="p">(</span>
+</span><span class='line'>  <span class="n">id</span> <span class="nb">serial</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">name</span> <span class="nb">character</span> <span class="nb">varying</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> <span class="s1">&#39;&#39;</span><span class="p">::</span><span class="nb">character</span> <span class="nb">varying</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">description</span> <span class="nb">text</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">available_on</span> <span class="k">timestamp</span> <span class="k">without</span> <span class="n">time</span> <span class="k">zone</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">deleted_at</span> <span class="k">timestamp</span> <span class="k">without</span> <span class="n">time</span> <span class="k">zone</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">slug</span> <span class="nb">character</span> <span class="nb">varying</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span>
+</span><span class='line'>  <span class="n">meta_description</span> <span class="nb">text</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">meta_keywords</span> <span class="nb">character</span> <span class="nb">varying</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span>
+</span><span class='line'>  <span class="n">tax_category_id</span> <span class="nb">integer</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">shipping_category_id</span> <span class="nb">integer</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">created_at</span> <span class="k">timestamp</span> <span class="k">without</span> <span class="n">time</span> <span class="k">zone</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">updated_at</span> <span class="k">timestamp</span> <span class="k">without</span> <span class="n">time</span> <span class="k">zone</span><span class="p">,</span>
+</span><span class='line'>  <span class="k">CONSTRAINT</span> <span class="n">spree_products_pkey</span> <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="n">id</span><span class="p">)</span>
+</span><span class='line'><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然後我們建立如下的M-View</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">CREATE</span> <span class="n">MATERIALIZED</span> <span class="k">VIEW</span> <span class="n">spree_products_mview</span> <span class="k">AS</span>
+</span><span class='line'> <span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">spree_products</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然後我們看現在的 spree_products表內容如下：
+<img src="/assets/2014/06/20/use-materizlied-view-in-pgsql/mview-original.png" alt="" />
+此時table和M-View的資料應該是一致的，此時我們將資料表的一些資料刪除：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">DELETE</span> <span class="k">FROM</span> <span class="n">spree_products</span> <span class="k">WHERE</span> <span class="n">id</span> <span class="o">=</span> <span class="mi">16</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>此時id為16的紀錄已經被移除
+<img src="/assets/2014/06/20/use-materizlied-view-in-pgsql/after-remove.png" alt="" />
+但是M-View的資料還是一樣的，如下圖
+<img src="/assets/2014/06/20/use-materizlied-view-in-pgsql/mview-after-remove.png" alt="" />
+這時如果我們下了REFRESH的話：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="n">REFRESH</span> <span class="n">MATERIALIZED</span> <span class="k">VIEW</span> <span class="n">spree_products_mview</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>M-View的資料就會和資料表上一樣了</p>
+
+<p>以上是簡介Materizlied View在PostgreSQL的作用，接下來我們還會針對如何用Rails / ActiveRecord操作這個功能作出說明。</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1005,45 +1228,9 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/03/09/first-po/">First_po</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-03-09T21:44:00+08:00" pubdate data-updated="true">Mar 9<span>th</span>, 2013</time>
-        
-         | <a href="/blog/2013/03/09/first-po/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>把部落格蓋著先~~</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/2/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -1060,6 +1247,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/06/20/use-materizlied-view-in-pgsql/">PostgreSQL Material View簡介</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/01/01/my2013/">2013回顧[CH]</a>
       </li>
     
@@ -1073,10 +1264,6 @@
     
       <li class="post">
         <a href="/blog/2013/06/07/rubykaigi2013-lt/">Introduce Ruby Taiwan Community@RubyKaigi 2013[EN,CH]</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/05/02/tatsu-zine-translator-recruitment/">達人出版会徵求翻譯以及校稿志工事宜</a>
       </li>
     
   </ul>
