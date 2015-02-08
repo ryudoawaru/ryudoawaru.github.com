@@ -4,7 +4,7 @@
   <title><![CDATA[慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2014-07-04T11:17:03+08:00</updated>
+  <updated>2015-02-08T23:46:53+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -12,6 +12,219 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[銘謝文--RubyKaigi 2014之旅以及 Rails Girls Taipei 獎助金計劃]]></title>
+    <link href="http://ryudo.tw/blog/2014/09/28/shibuya-it-tour-by-igaiga555/"/>
+    <updated>2014-09-28T22:00:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2014/09/28/shibuya-it-tour-by-igaiga555</id>
+    <content type="html"><![CDATA[<h3>緣起</h3>
+
+<p>由於有了去年第一次和高見龍等人一同參加 <a href="http://ryudo.tw/blog/2013/06/07/rubykaigi2013-lt/">RubyKaigi 2013</a> 的經驗，因此當確定今年的 RubyKaigi時程後，就非常的期待有機會能夠再次參加這場 Ruby世界最重要的研討會。</p>
+
+<p>今年的 RubyConf.tw 2014 ，做為總召，有幸召集到了許多 Rails Girls Taipei 活動的校友們做為志工一起舉辦了這場國際研討會。</p>
+
+<p>會中主要贊助商之一的 Heroku 的代表，也是 Ruby Committer 的相澤步先生提及，或許可以嘗試由 Heroku 公司和日本的社群朋友贊助一些台灣的 RG 校友去日本參加 Ruby Kaigi 2014，當時覺得這個點子非常棒，但又覺得有點不現實。</p>
+
+<p>在七月籌備 RG Taipei-4 時，透過 E-Mail 向相澤先生詢問此事之後，得到了肯定的回覆，於是就著手開始<a href="http://railsgirls.tw/2014/07/28/rubykaigi-scholarship/">選拔辦法</a>。</p>
+
+<p>在選拔過程中，也用英文向日方提交了每位報名者的近況，包含社群參與度等等的報告，最後在八月和日方一起開會共同決定了三位入選者，神奇的是過程中，本來以為只有 Heroku 公司會出錢，沒想到後來加入了 Spice Life 公司以及好幾位日本的大大，其中有幾位是甚至沒有來過台灣，單純的被 RG 的理念感召，實在是令人非常感動。</p>
+
+<p>另一方面，在規劃這次的日本行之時，就想到是否有機會可以參觀一些日本的 IT 系企業，於是就聯絡了之前認識的日本 Ruby 圈的大大們，才有幸在日本行中參觀到包括 Line / DeNA 等等的 IT 企業們。</p>
+
+<h3>成員</h3>
+
+<p><img src="https://farm6.staticflickr.com/5573/15081062158_baa41b8641_b_d.jpg" alt="" />
+Photo by Igarashi Kuniaki</p>
+
+<ol>
+<li>龍哥</li>
+<li>大兜（講者）</li>
+<li>Bruce（講者）</li>
+<li>Mason</li>
+<li>Annie（RG 獎助金計劃獲選者）</li>
+<li>阿旺（RG 獎助金計劃獲選者）</li>
+<li>Lena（RG 獎助金計劃獲選者）</li>
+</ol>
+
+
+<h3>參加了哪些活動</h3>
+
+<p>可參考下列文章與分享：</p>
+
+<ul>
+<li><a href="http://blog.annideas.com/2014/09/29/a-ruby-week-in-japan-1/">A ruby week in Japan (1) by Annie </a></li>
+<li><a href="https://awonwon.wordpress.com/2014/10/05/rubykaigi-%E6%9D%B1%E4%BA%AC%E4%B8%80%E9%80%B1%E9%81%8A-1/">RubyKaigi 東京一週遊 (1) by 阿旺</a></li>
+<li><a href="http://railsgirls.kktix.cc/events/rubykaigi2014">特別講座：Rails Girls vs. RubyKaigi</a> 的 Slide by Annie</li>
+</ul>
+
+
+<center><iframe src="http://ryudo.tw//www.slideshare.net/slideshow/embed_code/43105512?startSlide=10" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="http://ryudo.tw//www.slideshare.net/AnnieChen51/rubykaigi-43105512" title="鐵道女孩向前衝-RubyKaigi心得分享" target="_blank">鐵道女孩向前衝-RubyKaigi心得分享</a> </strong> from <strong><a href="http://ryudo.tw//www.slideshare.net/AnnieChen51" target="_blank">Annie Chen</a></strong> </div></center>
+
+
+<ul>
+<li>同上的影片紀錄</li>
+</ul>
+
+
+<center><iframe width="853" height="480" src="https://www.youtube.com/embed/ggdH2VTqZ_U" frameborder="0" allowfullscreen></iframe></center>
+
+
+<h3>結語</h3>
+
+<p>一年多前參加 RubyKaigi 2013 並參觀到日本的 RG 活動時，沒想過在台灣可以辦的起來 RG ，更沒想過有機會參與到史無前例的獎助金計劃，只能說 Ruby 社群的力量真的太神奇了！</p>
+
+<h3>特別感謝</h3>
+
+<ul>
+<li>Heroku, Inc</li>
+<li>株式会社spice life</li>
+<li>Heroku 的 相澤 步（Ayumu Aizawa） 先生</li>
+<li>Spice Life 的 五十嵐 邦明（Kuniaki Igarashi） 先生</li>
+<li>Satoshi Gunji 先生</li>
+<li>Hiroshi Shibata 先生</li>
+<li>松田 明 （Akira Matsuda）先生</li>
+<li>Haruka Iwao 小姐</li>
+<li>Chiaki Shinto 小姐</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[RubyConf Taiwan 2014]]></title>
+    <link href="http://ryudo.tw/blog/2014/07/04/rubyconftw2014-recap/"/>
+    <updated>2014-07-04T14:39:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2014/07/04/rubyconftw2014-recap</id>
+    <content type="html"><![CDATA[<p>按照往年的慣例，這篇也拖稿了超級久。</p>
+
+<h3>時間和場地</h3>
+
+<p>記得應該是 2013 的 11月左右，和 Matz 確認日期後開始找場地。</p>
+
+<p>本來一開始是想用中研院的，不過和 2012 一樣，Matz 欽訂的日期又沒空了，正在煩惱場地時想到離（當時）工作地點很近的陽明大學，剛好社群的好朋友澤清當時也還在那邊工作，於是在想到的當天就立刻去看場地，由於和澤清所屬單位（陽明大學系合中心）合辦的話可以獲得場地租金的優惠，加上場地狀況整體不差，於是當下就拍板定案，於是和 2012 一樣，又辦在了中研院以外的地方，而且一樣在台北北區。</p>
+
+<p>交通方面，由於是在石牌捷運站步行 10 分鐘的地點，因此沒有造成任何不便。</p>
+
+<p>這次場地的優點：</p>
+
+<ol>
+<li>夠大</li>
+<li>兩個場地後面是相通的</li>
+<li>很多廳</li>
+</ol>
+
+
+<p>缺點：</p>
+
+<ol>
+<li>休息區的位子較少</li>
+<li>大禮堂和其它廳的人數差距太大（1000 : 240）不過由於我們只有 290 左右的會眾，因此不是問題</li>
+</ol>
+
+
+<p><img src="https://farm8.staticflickr.com/7343/13949888418_1a56859133_b_d.jpg" alt="" />
+<img src="https://farm3.staticflickr.com/2905/14156661363_fc3c682696_b_d.jpg" alt="" /></p>
+
+<h3>Linda Liukas</h3>
+
+<p><img src="https://farm8.staticflickr.com/7357/13955615790_e9b397b6a2_b_d.jpg" alt="" /></p>
+
+<p>有鑑於 Rails Girls 在全球各地的蓬勃發展，就決定邀請 Linda 做為本次大會的 Keynote Speaker 之一，雖然一開始會擔心非技術議題大家是否會感興趣，不過看場下大家爭相和她合照的情形也就放心了，果然不愧是 Ruby 界的女神！</p>
+
+<p>其實有趣的是 2014 的 RubyKaigi 也有 RG 相關的<a href="http://rubykaigi.org/2014/presentation/S-HarukaIwao">議程</a>，看來這應該是趨勢無誤。</p>
+
+<h3>設計</h3>
+
+<p><img src="http://rubyconf.tw/2014/img/logo800.png" alt="" />
+<img src="https://farm3.staticflickr.com/2923/13949856908_bfa1778e2d_b_d.jpg" alt="" /></p>
+
+<p>這次的官網 / APP，包括所有看得到的平面設計，都是由 RG 出身的 Grace 擔任，和以往相比多出了很多的平面設計物，由於她有許多展場設計的經驗，所以我可以放心的將細節交給她。</p>
+
+<h3>Mobile APP</h3>
+
+<p>在一個不是以 APP 為主題的 conf 推出了雙平台的 APP，要感謝擔任 iOS 開發的<a href="http://blog.eddie.com.tw">龍哥</a>以及幾位 <a href="https://www.alphacamp.co">Alphacamp</a> 的學員，還有擔任 Android 開發的阿旺以及協助她的佳緯。</p>
+
+<h3>CFP &amp; 講者</h3>
+
+<p>這次的 <a href="http://rubyconftw-agenda.kktix.cc/events/rubyconftw2014-cfp">CFP</a> 讓我最意外的是，在沒有招待食宿機票的狀況下，投稿者裡面竟然有超過一半的外國投稿，有鑑於此，後來也開放了讓這些講者的所屬單位掛上了特別的 Speaker Sponsorship 作為一種回饋。</p>
+
+<p>講者（包括 Keynote）來自於包括台灣在內有七個不同的國家，分佈為：</p>
+
+<ol>
+<li>台灣：10</li>
+<li>日本：8</li>
+<li>美國：7</li>
+<li>香港：1</li>
+<li>中國：1</li>
+<li>芬蘭：1</li>
+<li>比利時：1</li>
+<li>新加坡：1</li>
+</ol>
+
+
+<p>另一個和以往差異較大的，就是出現了高達 4 位的女性講者，如果加上了 LT 的話就有 5 位了，這也算是某種程度的突破吧。</p>
+
+<h3>食物 &amp; 飲料</h3>
+
+<p>抱歉第一天搞砸了，還好第二天的便當大家還算滿意。</p>
+
+<p>飲料方面，第一次引進了飲料贊助商琅茶，這間也是由幾位前趨勢和 HTC 的工程師創業成立的，現場看起來大家很捧場，後來聽說不少外國會眾都訂了茶葉帶回去。</p>
+
+<p><img src="https://farm8.staticflickr.com/7426/14113451476_bdd06c8c4c_b_d.jpg" alt="" /></p>
+
+<h3>Party</h3>
+
+<p>和 2012 選擇了相同的場地舉辦了 Party，不過這次我們可是把整間都給包下來了，又加入了台灣和日本的 Rails Girls ，整個場面好不熱鬧。</p>
+
+<p><img src="https://farm8.staticflickr.com/7304/14138851711_80083ac273_b_d.jpg" alt="" />
+<img src="https://farm8.staticflickr.com/7436/14161770203_dab23d06dd_b_d.jpg" alt="" /></p>
+
+<h3>語言與國際化</h3>
+
+<p><img src="https://farm3.staticflickr.com/2925/14133536472_9fe6e4dbdf_b_d.jpg" alt="" /></p>
+
+<p>繼承本大會的傳統，這次的會眾中有將近 1/4 來自超過 10 個不同國家。</p>
+
+<p>受到去年 RubyKaigi 2013 的啟發，為了促進國內外會眾的交流，這次特別啟用了中翻英即時口譯在所有的中文議程上，也因此把所有的中文議程都排在了第一天。</p>
+
+<p>為了節省經費而不找口譯公司，從 ptt 口譯版上募集到了兩位超優秀的口譯 Sarah 和 Kylie，她們除了專業能力和資歷外，重要的是對整個活動的負責態度，像是在活動前一個月場勘，或是主動聯繫講者溝通演講內容等，讓我覺得能請到她們真的非常幸運。</p>
+
+<h3>Rails Girls 特別講座</h3>
+
+<p><img src="https://farm8.staticflickr.com/7392/13979240477_0816537871_b_d.jpg" alt="" /></p>
+
+<p>原本在 conf 的隔日，打算按照日本的 <a href="http://rubykaigi.doorkeeper.jp/events/3509">RubyHiroba</a> 的方式，舉辦一個 <a href="http://en.wikipedia.org/wiki/Unconference">Unconference</a> 的活動並且混合 RG，不過在和出身於 RG 的 <a href="https://hazelwei.wordpress.com/about-miss-hazel/">Hazel</a> 討論後，決定趁著這次邀請到 Linda（Rails Girls Co-Founder） 的機會來舉辦一場特別的座談會活動，也因此促成了「<a href="http://www.accupass.com/go/rgtalk427">姺語言力-程式新市場，女孩新火花</a>」的舉辦。</p>
+
+<p>一開始邀請的講者是國內的大神唐鳳和 Linda，活動進行中加入了原本在台下當聽眾的 Matz 和 @headius，讓整個座談變得更加精采。</p>
+
+<iframe width="853" height="480" src="https://www.youtube.com/embed/videoseries?list=PLfrYA2oGCwQWldZdfKDVJUGg5KcYMdYxR" frameborder="0" allowfullscreen></iframe>
+
+
+<p>在這裡必需特別推崇 Hazel，在整個講座的籌備過程中，她持續的和 Linda  以及唐鳳討論座談的細節，另外也要感謝這次的場務組長包子幫忙聯繫媒體等事宜，另外也要感謝 TEDxTaipei 贊助了活動場地，以及 Lena 贊助了活動 LOGO 的設計。</p>
+
+<p>同時也要感謝 Inside 的編輯，也是 RG 校友的 Liz 對 Linda 進行的<a href="http://www.inside.com.tw/2014/07/30/rails-girls-founder-linda-liukas-interview">深度採訪</a>，還有贊助拍攝的 <a href="https://www.facebook.com/RETINA.STUDIO.TAIWAN">Retina Studio</a></p>
+
+<h3>Rails Girls Staffs</h3>
+
+<p>自從 2013 的 9 月開始舉辦第一次的 Rails Girls Taipei 之後，就認識了許多優秀的 Rails Girls 們，加上受到去年在日本看到很多 RubyKaigi 的 staff 都是女性工程師等的啟發，覺得應該可以試著在 RG 中招募 staff 看看，結果報名者超乎想像的多，最後幾乎所有的會場 staff 都是來自 RG 校友。</p>
+
+<p><img src="https://farm8.staticflickr.com/7314/14136726064_ca92cb8b49_b_d.jpg" alt="" />
+<img src="https://farm8.staticflickr.com/7453/14133537102_8f7a63291b_b_d.jpg" alt="" /></p>
+
+<p>同時這個亮點也引起了在場許多外國朋友的注意，也進而造就了日後的 <a href="http://railsgirls.tw/2014/07/28/rubykaigi-scholarship/">RubyKaigi 獎助金計劃</a>。</p>
+
+<p>個人以為，RG Staff 對 Ruby  社群的最大意義並不是因為她們是正妹或女生，而是讓受惠於社群學習到 Ruby 的校友們有一個產生正向循環並回饋社群的機會。</p>
+
+<h3>總結</h3>
+
+<p>感謝 ihower 給我擔任總召的機會，也由於有幸參加 RubyKaigi 2013 受到了許多啟發，把 RubyConf Taiwan 的特色延續下去並成功的辦出一屆國際化又有特色的程式語言研討會，謝謝大家！</p>
+
+<h3>Next Time？</h3>
+
+<p>預計於 2015.09，敬請期待！</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[PostgreSQL Materialized View簡介]]></title>
