@@ -8,8 +8,8 @@ footer: true
 ---
 
 ###2013
-
-*  [Webconf Taiwan 2013](http://www.webconf.tw/) : [非典型貧窮網站維運經驗分享](http://www.slideshare.net/ryudoawaru/webconf2013)
+*  [RubyKaigi 2013](http://rubykaigi.org/2013/lightning_talks#ryudoawaru) : [Introduce Ruby Taiwan](http://www.slideshare.net/ryudoawaru/introduce-ruby-taiwanrubykaigi2013)
+*  [Webconf Taiwan 2013](http://www.webconf.tw/) : [非典型貧窮網站維運經驗分享](http://www.slideshare.net/ryudoawaru/webconf2013), [Video](http://www.youtube.com/watch?v=WEgoBZkS9Uw)
 
 ###2012
 

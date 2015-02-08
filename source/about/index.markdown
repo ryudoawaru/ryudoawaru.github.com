@@ -13,11 +13,16 @@ footer: true
 ***
 ##About 鄧慕凡(Mu-Fan Teng)
 ###a.k.a <u>Ryudo</u> or <u>Ryudo Awaru</u>
+
+鄧慕凡, 1997年開始遊戲製作的十年生涯; 目前任職於[五倍紅寶石股份有限公司](http://5xruby.tw); 工作之餘也積極經營Ruby語言社群, 現為台灣Ruby程式語言社群「Ruby Taiwan」的主辦人, 同時也是年度國際研討會「RubyConf Taiwan」以及Railsgirls Taipei的主辦人。
+
 *  Living in Taipei, Taiwan
 *  10 years experience in Computer Game Industry
 *  Ruby/Rails/[Sinatra](http://www.sinatrarb.com/) Programmer(from 2007)
 *  [RubyConf Taiwan](http://rubyconf.tw/) Co-Organizer
-*  Active Member of [Ruby Taiwan Group](http://ruby.tw)
+*  Co-Founder of [5xRuby.tw](http://5xruby.tw)
+*  Orgainzer of [Ruby Taiwan Community](http://ruby.tw)
+*  Organizer of [Railsgirls Taiwan / Taipei](http://railsgirls.tw) event
 *  Co-Founder of [Tomlan Software Workshop](http://www.tomlan.tw)
 
 ###Sites I Maintain or Own

@@ -1,0 +1,85 @@
+---
+layout: post
+title: "Rails Girls Taipei-01 活動主辦心得"
+date: 2013-09-14 14:39
+comments: true
+categories: railsgirls girls community rails
+---
+
+![Group photo of Rails Girls Taipei-01](http://farm6.staticflickr.com/5471/9698784100_dfb2afc625_b.jpg)
+
+以下是我和[高見龍](http://blog.eddie.com.tw/) 以及[泰安](http://blog.taian.su/) 共同主辦第一屆[Rails Girls Taipei](http://railsgirls.tw/)活動的心得
+
+###Rails Girls社群
+
+有關於Rails Girls社群的介紹可以參考[Open Foundry](http://www.openfoundry.org/index.php?option=com_content&task=view&id=9044&Itemid=4)或 [Inside](http://www.inside.com.tw/2013/08/12/rails-girls-taipei-workshop)的介紹, 在此就不再儹述。
+
+###緣起
+
+女性, 在台灣的程式社群屬於稀有動物的範疇, 一般來說在各大程式研討會中女會眾的比例通常在百分之三或以下, 所以一開始知道有[Rails Girls](http://railsgirls.com)這種活動(或著可以說是社群)時並不是特別感興趣; 轉捩點是四月和高見龍一起開[有心人課程](http://blog.eddie.com.tw/2013/04/22/1st-ruby-and-rails-training-course/)時, 發現竟然有意外多的女性學員(約佔全部學員的四分之一), 讓我們重新考慮舉辦這個活動的可能性; 研究了一下之後, 發現他是可以自由申請主辦的, 因此在五月初準備Rubykaigi 2013的行程與演講時, 就試著填寫了主站上的申請表單, Rails Girls的創辦人Linda Liukas也很快的就回應我, 讓我加入了世界各地Rails Girls活動的主辦群中。
+
+加入「世界各地的Rails Girls主辦群」之後, 就是可以加入Railsgilrs.com網站的Github Repository, 以及修改或新增網站的內容, 使用Repository內的資源(圖片/素材)之外 還有加入Rails Girls的maillist;  除此之外都要由當地的主辦人自行張羅。
+
+###在日本的見聞
+
+我在五月底至六月初和高見龍一同前往日本參加[Rubykaigi 2013](http://ryudo.tw/blog/2013/06/07/rubykaigi2013-lt)時, 有幸和日本Rails Girls的主辦人[柴田博志](http://www.hsbt.org)先生討論了如何教不會程式的女生上手Rails的方式, 他講到了一個重點「藉由copy & paste, 讓學員有成就感」。
+
+在Rubykaigi三天的議程中, 我們觀察到女性會眾的比例是遠超過5%的, 也藉機在現場認識了許多女性會眾, 發現之中甚至有原本不具程式經驗, 卻因為參加過Rails Girls活動後主動來參加RubyKaigi的女會眾; 而在Rubykaigi後一天舉辦的[Ruby Hiroba](http://rubyhiroba.org)的主題活動[Rails Girls, more extended](https://www.facebook.com/Rails GirlsMoreExtended)中, 同行的高見龍也現場觀察了日本這邊的活動情形, 如名稱上的「more extended」所示, 這是普通Rails Girls活動的進階版, 是採取由學員選擇有興趣的主題, 例如前端或後端技術等, 和熟練這些主題的教練一對二或三的教學形式, 在現場就近直接觀查教學的情形, 對於我們日後的主辦也很有幫助; 整個3+1天的活動之中的所見所聞, 都增加了我們的信心和決心。
+
+![Photo with Nakawaza and Yamaneko @Rubykaigi2013](http://farm8.staticflickr.com/7424/8901595193_1939a4de96_b_d.jpg)
+(在RubyKaigi會場和Rails Girls的學員中澤(中)以及知名的mrubyist Yamane(右)合照)
+
+###開始籌辦
+
+從日本回來之後一直忙於各種事件, 直到七月才有空開始, 除了本來就決定要一起主辦的高見龍之外, 剛好社群的朋友泰安對於這個活動都很有興趣, 因此我們就決定一起主辦這個活動。
+
+泰安的夫人本身是一位業餘的畫家, 就請他畫了現在各位看到的這個Logo
+
+![Rails Girls Taiwan Logo](/images/rg-taipei.jpg)
+
+####贊助商
+
+由於這個活動規定不能向學員收取門票, 所以最重要的是找尋贊助商; 想到之前上課的學生阿姿是國內非常知名且歷史悠久的和女性有關的網站[非常婚禮verywed](http://verywed.com)的員工, 於是請她幫忙介紹引薦該公司的老闆與技術主管, 在簡短的會談闡明本活動的宗旨後, 該公司也欣然同意贊助本次活動, 順帶一提的是該公司是台灣極少數以女性員工為主的網路公司, 連程式都是以女性員工佔多數, 感謝非常婚禮的幫忙。
+
+####場地
+
+一開始由於並不知道會有多少人報名, 決定以小而精的場地為主要的考量, 就選擇了在各大程式語言社群中頗負盛名的[CLBC慶隆商務俱樂部](http://clbc.tw)為第一順位的場地選擇; 在談完贊助後立刻前往預約, 也很幸運的預約到了想要的時間; 並且獲得老闆Tyler的同意讓我們用公益團體的優惠價格計費, 在此必需要再次的感謝CLBC。
+
+![Rails Girls Taipei-01 Venue](http://farm3.staticflickr.com/2888/9695456801_7ee681348d_b_d.jpg)
+
+####報名
+
+事先大家最擔心的就是會沒有學員, 畢竟現狀就如前面所提, 程式社群的女性成員是非常稀少的, 不過事後證明這些擔心都是多餘的; 中午開放報名後, 不到2小時就超過了150人, 更在第二天下午時已經超過了320人, 只好提前關閉註冊, 接下來篩選學員的工作反而是最花時間的, 大概花了將近十天在review報名資料上, 由於場地限制的因素, 最後只能選出31位的學員。
+
+學員的資歷方面真的是臥虎藏龍的等級, 有位學員甚至曾經在大陸的百度這種超巨型網路公司工作過, 也有學員特地從台中兩天都當日搭高鐵往返參加的, 最值得一提的是一位來自花蓮數位機會中心的老師, 為了知識傳承, 特地從東部海邊北上來參加活動。
+
+####選取標準
+
+如同國外創立這個活動的原意, 加上參考日本方面的選取標準後, 我們希望選擇的是比較沒有其它程式經驗的人, 然後重要的是, 在自介中說明以下兩件事：
+
+1.   為什麼妳想參加這個活動？
+2.   讓我們了解妳是一個怎樣的人？
+
+####事前準備
+
+雖然之前已經有一點教Ruby的經驗, 不過教完全新手的事, 從學生時代以後就沒體驗過, 這次我們決定由一位教練負責2位學員, 因此從社群徵求了15位朋友來擔任教練的工作, 在Ruby Tuesday#25的會後進行了第一次的討論; 決定了教學方向後, 教材的部份就由泰安負責主編, 其他教練協助編輯, 成果可以在[Github](https://github.com/railsgirls-taiwan)上看到; 加上一位公費留學過歐洲, 英文非常流利的教練[@JuanitoFatas](https://twitter.com/JuanitoFatas)幫忙翻譯了[Rails Girls Guides](http://guides.railsgirls.tw)為主的很多文件, 讓我們雖然是首次主辦, 但各方面規模與完整性並不輸給國外。
+
+####現場狀況
+
+雖然已經主辦過如[RubyConf Taiwan](http://ryudo.tw/blog/2013/04/23/rubyconftw-2012-memories-1) 這樣的年度國際研討會, 第一次主辦完全以女性為主的活動, 不免還是會擔心出席率等等的問題; 不過活動一切順利, 教練和學員的互動也出乎意外的良好, 可能是因為女生之間一起學習的關係, 一般程式社群中新人女會眾的集體沉默現象在這邊完全不復見, 學員都全程參與, 也沒有遲到早退的問題, 真是可喜可賀。
+
+![現場1](http://farm4.staticflickr.com/3702/9698686706_29d4fa9f51_b_d.jpg)
+![現場2](http://farm4.staticflickr.com/3671/9698677328_4ba4ab1959_b_d.jpg)
+
+####After Party
+
+教學之外, 這個活動的目的之一是促進學員和教練之間的互動, After Party也列在官方的Guides內, 因此事先就宣布並徵詢學員的參與意願; 場地方面, 想要維持品質以及營造互動的氛圍, 決定要以Lounge Bar為主, 經友人推薦之下, 選擇了費用上不算便宜的[TRIBECA](https://www.facebook.com/Tribeca.TPE), 由於學員需要自費, 原本以為會變成教練與Staff們為主的聚會, 最後還是有超過一半的學員參加, 大家也聊到了十點才散會。
+
+![Rails Girls Taipei After Party 2](http://farm4.staticflickr.com/3794/9850705143_0b013f3e26_b_d.jpg)
+![Rails Girls Taipei After Party 3](http://farm4.staticflickr.com/3793/9850684473_9c65e3c4d6_b_d.jpg)
+![Rails Girls Taipei After Party](http://farm6.staticflickr.com/5445/9851366586_f2b7fd1ed7_b_d.jpg)
+
+###感想
+
+Ruby真的是一門神奇的語言啊, 原本只是基於想要改變社群性別分布不均這個現狀的心情, 從國外引進並舉辦了這個活動, 卻得到了遠遠出乎意料的反應與成果, 看來21世紀的程式學習趨勢真的不是說說而已, 今後也會繼續這個活動下去, 感謝活動過程中一路相挺的朋友們, 謝謝大家。
+

@@ -1,0 +1,29 @@
+---
+layout: post
+title: "2013回顧[CH]"
+date: 2014-01-01 00:18
+comments: true
+categories: life
+---
+
+##2013大事紀
+
+-    一月, 在WebConf Taiwan 2013 發表「[非典型貧窮網站維運經驗分享](http://www.youtube.com/watch?v=WEgoBZkS9Uw)」
+-   二月, 舉辦[Ruby 20週年慶祝趴] (https://kktix.com/events/ruby20)
+-   四月, 接棒ihower主辦Ruby Tuesday以及[Ruby Taiwan社群](http://ruby.tw), 開始[Ruby Tuesday 22](https://kktix.com/events/ruby-tuesday-22/)
+-   五月底, 和社群朋友一同參加[Ruby Kaigi 2013](http://rubykaigi.org/2013/), 並發表[Lightning Talk](/blog/2013/06/07/rubykaigi2013-lt/)向世界的Rubyist們介紹了Ruby Taiwan社群
+-   七月, 在[Ruby Tuesday 24](https://kktix.com/events/ruby-tuesday-24)發表[日本行心得](http://rubytaiwan.tumblr.com/post/55311043584/ruby-tuesday-24), 該場Ruby Tuesday也創下了史上最多與會者的紀錄(報名115, 實到100)
+-   九月, 和[龍哥](http://blog.eddie.com.tw/)與[泰安](http://blog.taian.su/)共同[舉辦](/blog/2013/09/14/railsgirls-taipei-01/)了[第一屆Rails Girls Taipei](http://railsgirls.tw/2013/10/08/rg-taipei1st-record/);  九月底離開Resume Companion
+-  十一月, 舉辦[第二屆Rails Girls Taipei](http://railsgirls.tw/2013/11/29/rg-taipei2nd-record/), 接任[RubyConf Taiwan](http://rubyconf.tw/)總召
+
+回顧2013, 最多事件發生在經營Ruby社群方面, 雖然從小以來對辦活動或是搞社團都不太熱衷, 參與社群最初的目的也只是想要精進自己的技術和交朋友, 不知不覺Ruby社群就變成生活重心之一了, 參加RubyKaigi 2013期間的所見所聞也對我產生了很大的衝擊, 明年的目標有：
+
+-  成功舉辦RubyConf Taiwan 2014
+-  讓某個該上線的網站上線(秘)
+-  讓上述的網站正常營運
+-  持續經營Rails Girls 社群
+-  在國外的conf發表talk或session
+-  學好日文
+-  學好英文
+
+#加油！
