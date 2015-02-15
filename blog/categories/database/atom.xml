@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: pgsql, | 慕凡(@ryudoawaru)'s blog]]></title>
-  <link href="http://ryudo.tw/blog/categories/pgsql/atom.xml" rel="self"/>
+  <title><![CDATA[Category: database, | 慕凡(@ryudoawaru)'s blog]]></title>
+  <link href="http://ryudo.tw/blog/categories/database/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
   <updated>2015-02-16T00:11:33+08:00</updated>
   <id>http://ryudo.tw/</id>

@@ -5,12 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Ruby,Sinatra and Websocket - 慕凡(@ryudoawaru)'s blog</title>
+  <title>在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4 - 慕凡(@ryudoawaru)'s blog</title>
   <meta name="author" content="Mu-Fan Teng">
 
   
-  <meta name="description" content="近半年來花了很多時間在研究Ruby上實作Websocket的方式, 現介紹簡單心得如下 Base Solution: EventMachine-Websocket
-Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然在Ruby界不流行而且基本上沒在更新了, &hellip;">
+  <meta name="description" content="前言 PostgreSQL 和 MySQL 不同，資料檔格式會隨著小數點二位數以上的版號（9.3 - 9.4）變動，換句話說每當升級版本時，資料檔就必需要升級才可以繼續使用。 升級的方式有兩種： 將原本的資料執行 pg_dumpall 後再 restore 回去
+用 pg_upgrade &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +19,7 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://ryudo.tw/blog/2013/04/05/ruby-and-websocket/">
+  <link rel="canonical" href="http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="慕凡(@ryudoawaru)'s blog" type="application/atom+xml">
@@ -70,7 +70,7 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
   
   <header>
     
-      <h1 class="entry-title">Ruby,Sinatra and Websocket</h1>
+      <h1 class="entry-title">在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4</h1>
     
     
       <p class="meta">
@@ -86,7 +86,7 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
   
 
 
-<time datetime="2013-04-05T21:48:00+08:00" pubdate data-updated="true">Apr 5<span>th</span>, 2013</time>
+<time datetime="2015-02-15T22:10:00+08:00" pubdate data-updated="true">Feb 15<span>th</span>, 2015</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -95,37 +95,88 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
   </header>
 
 
-<div class="entry-content"><h3>近半年來花了很多時間在研究Ruby上實作Websocket的方式, 現介紹簡單心得如下</h3>
+<div class="entry-content"><h3>前言</h3>
 
-<p>Base Solution:</p>
+<p>PostgreSQL 和 MySQL 不同，資料檔格式會隨著小數點二位數以上的版號（9.3 - 9.4）變動，換句話說每當升級版本時，資料檔就必需要升級才可以繼續使用。</p>
+
+<p>升級的方式有兩種：</p>
 
 <ul>
-<li><a href="https://github.com/igrigorik/em-websocket">EventMachine-Websocket</a></li>
-<li><a href="http://cramp.in/">Cramp</a></li>
+<li>將原本的資料執行 <a href="http://www.postgresql.org/docs/9.4/static/app-pg-dumpall.html">pg_dumpall</a> 後再 restore 回去</li>
+<li>用 <a href="http://www.postgresql.org/docs/9.4/static/pgupgrade.html">pg_upgrade</a> 命令從舊的資料檔產生出新版本的資料檔。</li>
 </ul>
 
 
-<p>Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然在Ruby界不流行而且基本上沒在更新了, 然後想當然我也只會用EM</p>
+<p>這邊要講的是第二種情形。</p>
 
-<h2>使用過的EM類Solution：</h2>
+<h3>環境限定：</h3>
 
-<h3><a href="https://github.com/simulacre/sinatra-websocket">Sinatra-Websocket</a></h3>
+<ul>
+<li>可執行 <a href="http://brew.sh/">Homebrew</a> 的 MacOS 環境</li>
+<li>原 PostgreSQL 為 Homebrew 安裝，9.3.x 版</li>
+</ul>
 
-<p>最初的嘗試, 好處是整合性極高, 可以直接登記在Sinatra的route上以及共享一切Sinatra的設定, Application Server原則上只能用thin, 不過有致命性的memory leak問題, 簡單來說就是Thin會以為已經斷線的WS連線未斷線因此長久下去會在Thin的process上留著無數的連線進而吃掉大量記憶體, 而且作者沒有配合EM-Websocket改版, 因此被判定為不可用</p>
 
-<h3>直接用EM-Websocket當server</h3>
+<h3>步驟</h3>
 
-<p>現在的解法, 優點是完全自訂, 同時也是缺點; 等於從0開始設定一個socket server, DB/model…等等的設定都要自己寫; 另外我還比較搞缸的寫了init script變成系統服務, 前端使用haproxy</p>
+<ol>
+<li>安裝新的 PostgreSQL
 
-<h3>負載能力</h3>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>brew update
+</span><span class='line'>brew install postgresql
+</span></code></pre></td></tr></table></div></figure>
 
-<p>非常強, 只要處理掉系統的nofile<a href="https://github.com/shokai/sinatra-websocketio/wiki/C10K">設定</a>的話, 單一行程可以吃到破萬連線不是問題, 不過以現在的EM架構要開多行程處理數萬連線的話, 如果沒有再上一層的pub/sub機制就得要用fork出多行程的方式, 這時就得考慮類似mutex lock的問題了</p>
+</li>
+<li>停止現在的 PostgreSQL Daemon
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
+</span></code></pre></td></tr></table></div></figure>
+</li>
+<li>建立 9.4 的資料庫檔案
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>initdb /usr/local/var/postgres9.4 -E utf8
+</span></code></pre></td></tr></table></div></figure>
+</li>
+<li>使用 pg_upgrade 指令升級 舊PG的資料檔案到 9.4，注意這邊的 9.3.5_1 和 9.4.0 是會依照你的舊版本和實際安裝的新板本的版號而有差異的
 
-<h3>IE相容問題</h3>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>pg_upgrade -v <span class="se">\</span>
+</span><span class='line'>    -d /usr/local/var/postgres <span class="se">\</span>
+</span><span class='line'>    -D /usr/local/var/postgres9.4 <span class="se">\</span>
+</span><span class='line'>    -b /usr/local/Cellar/postgresql/9.3.5_1/bin/ <span class="se">\</span>
+</span><span class='line'>    -B /usr/local/Cellar/postgresql/9.4.0/bin/
+</span></code></pre></td></tr></table></div></figure>
+</li>
+<li>將舊資料檔備份，並且讓新資料檔的目錄更名使之變成預設的資料檔
 
-<p><a href="https://github.com/gimite/web-socket-js">web-socket-js</a>可以解決你的問題, 不過如果你要用haproxy開前端的話就必需要自己設定flash socket policy file, 使用<a href="http://rubygems.org/gems/flash_policy_server">flash_policy_server </a>可手動開這個服務</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> /usr/local/var
+</span><span class='line'>mv postgres postgres9.3
+</span><span class='line'>mv postgres9.4 postgres
+</span></code></pre></td></tr></table></div></figure>
+</li>
+<li>
+重啟 PostgreSQL
 
-<p>實際的代碼與架構會在以後說明</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
+</span></code></pre></td></tr></table></div></figure>
+</li>
+
+<li>檢查 /usr/local/var/postgres/server.log 檔是否有正常啟動 server</li>
+<li>如果原本有安裝 [pg GEM](https://rubygems.org/gems/pg) 的話要重新安裝</li>
+</ol>
+
+
+<p>以上！</p>
 </div>
 
 
@@ -148,12 +199,12 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
   
 
 
-<time datetime="2013-04-05T21:48:00+08:00" pubdate data-updated="true">Apr 5<span>th</span>, 2013</time>
+<time datetime="2015-02-15T22:10:00+08:00" pubdate data-updated="true">Feb 15<span>th</span>, 2015</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/ruby/'>ruby</a>, <a class='category' href='/blog/categories/sinatra/'>sinatra</a>, <a class='category' href='/blog/categories/websocket/'>websocket</a>
+    <a class='category' href='/blog/categories/database/'>database,</a>, <a class='category' href='/blog/categories/homebrew/'>homebrew</a>, <a class='category' href='/blog/categories/pgsql/'>pgsql,</a>, <a class='category' href='/blog/categories/postgresql/'>postgresql,</a>
   
 </span>
 
@@ -162,7 +213,7 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ryudo.tw/blog/2013/04/05/ruby-and-websocket/" data-via="ryudoawaru" data-counturl="http://ryudo.tw/blog/2013/04/05/ruby-and-websocket/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/" data-via="ryudoawaru" data-counturl="http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/" >Tweet</a>
   
   
   
@@ -173,10 +224,8 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2013/04/05/sinatra-course-20130329/" title="Previous Post: Sinatra課程紀錄">&laquo; Sinatra課程紀錄</a>
+        <a class="basic-alignment left" href="/blog/2014/09/28/shibuya-it-tour-by-igaiga555/" title="Previous Post: 銘謝文--RubyKaigi 2014之旅以及 Rails Girls Taipei 獎助金計劃">&laquo; 銘謝文--RubyKaigi 2014之旅以及 Rails Girls Taipei 獎助金計劃</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2013/04/17/rubytuesday-22/" title="Next Post: Ruby Tuesday#22">Ruby Tuesday#22 &raquo;</a>
       
     </p>
   </footer>
@@ -292,8 +341,8 @@ Cramp Ruby系的幾乎不出這兩種, 其中又以前者為大宗, 後者顯然
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://ryudo.tw/blog/2013/04/05/ruby-and-websocket/';
-        var disqus_url = 'http://ryudo.tw/blog/2013/04/05/ruby-and-websocket/';
+        var disqus_identifier = 'http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/';
+        var disqus_url = 'http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/';
         var disqus_script = 'embed.js';
       
     (function () {
