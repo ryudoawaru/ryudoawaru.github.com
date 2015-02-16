@@ -4,7 +4,7 @@
   <title><![CDATA[Category: homebrew | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/homebrew/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2015-02-16T00:11:33+08:00</updated>
+  <updated>2015-02-16T12:49:38+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -88,7 +88,9 @@ launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
 </li>
 
 <li>檢查 /usr/local/var/postgres/server.log 檔是否有正常啟動 server</li>
-<li>如果原本有安裝 [pg GEM](https://rubygems.org/gems/pg) 的話要重新安裝</li>
+<li>如果原本有安裝
+<a href="https://rubygems.org/gems/pg">pg GEM</a>
+的話要重新安裝</li>
 </ol>
 
 
