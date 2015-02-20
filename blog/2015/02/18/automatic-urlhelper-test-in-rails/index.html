@@ -5,12 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4 - 慕凡(@ryudoawaru)'s blog</title>
+  <title>自動化測試 Rails 中的 URL HELPER - 慕凡(@ryudoawaru)'s blog</title>
   <meta name="author" content="Mu-Fan Teng">
 
   
-  <meta name="description" content="前言 PostgreSQL 和 MySQL 不同，資料檔格式會隨著小數點二位數以上的版號（9.3 - 9.4）變動，換句話說每當升級版本時，資料檔就必需要升級才可以繼續使用。 升級的方式有兩種： 將原本的資料執行 pg_dumpall 後再 restore 回去
-用 pg_upgrade &hellip;">
+  <meta name="description" content="前言： 最近在某個和客戶共同開發的專案中，遇到了以下的情形： 專案的 layout / view 經過大幅的改版
+改版是把舊 layout（以下簡稱 ver1）的大部份功能改出一份新版 layout / view / controller（以下稱 ver2）
+改版後幾乎沒有移除 ver1 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +20,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/">
+  <link rel="canonical" href="http://ryudo.tw/blog/2015/02/18/automatic-urlhelper-test-in-rails/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="慕凡(@ryudoawaru)'s blog" type="application/atom+xml">
@@ -70,7 +71,7 @@
   
   <header>
     
-      <h1 class="entry-title">在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4</h1>
+      <h1 class="entry-title">自動化測試 Rails 中的 URL HELPER</h1>
     
     
       <p class="meta">
@@ -86,7 +87,7 @@
   
 
 
-<time datetime="2015-02-15T22:10:00+08:00" pubdate data-updated="true">Feb 15<span>th</span>, 2015</time>
+<time datetime="2015-02-18T12:51:00+08:00" pubdate data-updated="true">Feb 18<span>th</span>, 2015</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -95,90 +96,89 @@
   </header>
 
 
-<div class="entry-content"><h3>前言</h3>
+<div class="entry-content"><h3>前言：</h3>
 
-<p>PostgreSQL 和 MySQL 不同，資料檔格式會隨著小數點二位數以上的版號（9.3 - 9.4）變動，換句話說每當升級版本時，資料檔就必需要升級才可以繼續使用。</p>
-
-<p>升級的方式有兩種：</p>
-
-<ul>
-<li>將原本的資料執行 <a href="http://www.postgresql.org/docs/9.4/static/app-pg-dumpall.html">pg_dumpall</a> 後再 restore 回去</li>
-<li>用 <a href="http://www.postgresql.org/docs/9.4/static/pgupgrade.html">pg_upgrade</a> 命令從舊的資料檔產生出新版本的資料檔。</li>
-</ul>
-
-
-<p>這邊要講的是第二種情形。</p>
-
-<h3>環境限定：</h3>
-
-<ul>
-<li>可執行 <a href="http://brew.sh/">Homebrew</a> 的 MacOS 環境</li>
-<li>原 PostgreSQL 為 Homebrew 安裝，9.3.x 版</li>
-</ul>
-
-
-<h3>步驟</h3>
+<p>最近在某個和客戶共同開發的專案中，遇到了以下的情形：</p>
 
 <ol>
-<li>安裝新的 PostgreSQL
+<li>專案的 layout / view 經過大幅的改版</li>
+<li>改版是把舊 layout（以下簡稱 ver1）的大部份功能改出一份新版 layout / view / controller（以下稱 ver2）</li>
+<li>改版後幾乎沒有移除 ver1 重複的部份，因此系統中存著很多其實用不到的 view / controller / route</li>
+<li>又因為改版後不想改變在 production env 的 url，所以在路由設定中用了大概是類似的架構：
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>brew update
-</span><span class='line'>brew install postgresql
-</span></code></pre></td></tr></table></div></figure>
+<ul>
+<li>Development 中有 /ver1 和 /ver2 兩個 route namespace，而且有 base uri，意即可能會有 /ver1/products 和 /ver2/products</li>
+<li>Production 中，這兩個 namespace 的 base uri 會被消除，舉例來說，如果遇到 /products 的 request，系統會先找 /ver2 有沒有 /products，有的話會先使用，沒有再去找 /ver1</li>
+</ul>
+</li>
+</ol>
 
-</li>
-<li>停止現在的 PostgreSQL Daemon
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
-</span></code></pre></td></tr></table></div></figure>
-</li>
-<li>建立 9.4 的資料庫檔案
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>initdb /usr/local/var/postgres9.4 -E utf8
-</span></code></pre></td></tr></table></div></figure>
-</li>
-<li>使用 pg_upgrade 指令升級 舊PG的資料檔案到 9.4，注意這邊的 9.3.5_1 和 9.4.0 是會依照你的舊版本和實際安裝的新板本的版號而有差異的
+
+<p>所以系統最後就存在一堆功能重疊的 controller / view / layout 了，現在的工作是要移除 /ver1 和 /ver2 中重複的部份。</p>
+
+<h3>執行：</h3>
+
+<p>基本上就是高科技手工業，程序如下：</p>
+
+<ol>
+<li>找 /ver2 的 route，假設現在的目標是 resources :users</li>
+<li>在 /ver1 上找尋類似的 resource</li>
+<li>如果有，就把 /ver1 的刪掉</li>
+<li>如果不是單純的 Restful CRUD（意指有其它非 index. show, create 等標準 action 的 action）就得要一一檢查在 /ver2 上是否都有相對應的 action</li>
+<li>找到所有的 view / helper / asset / controller 中是否有用到 /ver1 上的 url helper method，然後統一取代</li>
+</ol>
+
+
+<p>以上程序有效的前提是，所有的 URL 都用 helper method 而不用純字串或 url_for 等。</p>
+
+<p>事情聽起來好像不是很難，不過這個專案可怕的地方就在於數百行的 route 中幾乎沒有單純 CRUD 的 resource，所以和同事花上了很多時間在手工上，完成後的問題就是，要怎樣確保沒有遺漏的地方。</p>
+
+<p>於是想到，是否可以將程式中所有用到的 url helper method 集合起來一一做檢查呢？最後想到的解法大意如下：</p>
+
+<ol>
+<li>用文字搜尋的程式，以正規表示式去找出程式碼中使用的 url helper method</li>
+<li>將找到的 method 集合產生列表</li>
+<li>寫 spec 去測試 view context 中是否有這些 method</li>
+</ol>
+
+
+<p>最後的測試程式碼大概長成這樣：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pg_upgrade -v <span class="se">\</span>
-</span><span class='line'>    -d /usr/local/var/postgres <span class="se">\</span>
-</span><span class='line'>    -D /usr/local/var/postgres9.4 <span class="se">\</span>
-</span><span class='line'>    -b /usr/local/Cellar/postgresql/9.3.5_1/bin/ <span class="se">\</span>
-</span><span class='line'>    -B /usr/local/Cellar/postgresql/9.4.0/bin/
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">describe</span> <span class="no">ApplicationHelper</span><span class="p">,</span> <span class="ss">:type</span> <span class="o">=&gt;</span> <span class="ss">:helper</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">fn</span> <span class="o">=</span> <span class="s2">&quot;tmp/url_helpers.txt&quot;</span>
+</span><span class='line'>  <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;ack --noheading -h &#39;[^A-Za-z0-9_.].((ver1|ver2)[</span><span class="se">\\</span><span class="s2">w_]+?\_(url|path))&#39; app/ --output &#39;$1&#39; | sort | uniq &gt; </span><span class="si">#{</span><span class="n">fn</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="nb">system</span> <span class="n">cmd</span>
+</span><span class='line'>  <span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">url_helper_name</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;Url helper </span><span class="si">#{</span><span class="n">url_helper_name</span><span class="si">}</span><span class="s2"> should be available&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">helper</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="n">url_helper_name</span><span class="o">.</span><span class="n">to_sym</span><span class="p">)</span><span class="o">.</span><span class="n">should</span> <span class="n">be</span><span class="p">(</span><span class="kp">true</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
-</li>
-<li>將舊資料檔備份，並且讓新資料檔的目錄更名使之變成預設的資料檔
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> /usr/local/var
-</span><span class='line'>mv postgres postgres9.3
-</span><span class='line'>mv postgres9.4 postgres
-</span></code></pre></td></tr></table></div></figure>
-</li>
-<li>
-重啟 PostgreSQL
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
-</span></code></pre></td></tr></table></div></figure>
-</li>
-
-<li>檢查 /usr/local/var/postgres/server.log 檔是否有正常啟動 server</li>
-<li>如果原本有安裝
-<a href="https://rubygems.org/gems/pg">pg GEM</a>
-的話要重新安裝</li>
-</ol>
 
 
-<p>以上！</p>
+<p>文字搜尋採用目前比較流行的 <a href="http://beyondgrep.com/">ack</a>，除了速度快之外又是 Perl 版的 Regexp，比 egrep 的要威，做法就是將 match 的字串輸出，再 sort 再 uniq 然後存到一個暫存檔去，接下來讀取此檔再分別於 view context 中測試是否可 respond_to。</p>
+
+<p>使用的 ack 參數如下：</p>
+
+<ul>
+<li>&#8211;noheading 不顯示檔案名在頭</li>
+<li>-h 不顯示檔名在左邊</li>
+<li>&#8211;output &#8216;$1&#8217; 只顯示批配的第 1 項</li>
+</ul>
+
+
+<p>這樣一跑完就可以放心了。</p>
 </div>
 
 
@@ -201,12 +201,12 @@
   
 
 
-<time datetime="2015-02-15T22:10:00+08:00" pubdate data-updated="true">Feb 15<span>th</span>, 2015</time>
+<time datetime="2015-02-18T12:51:00+08:00" pubdate data-updated="true">Feb 18<span>th</span>, 2015</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/database/'>database,</a>, <a class='category' href='/blog/categories/homebrew/'>homebrew</a>, <a class='category' href='/blog/categories/pgsql/'>pgsql,</a>, <a class='category' href='/blog/categories/postgresql/'>postgresql,</a>
+    <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/route/'>route</a>, <a class='category' href='/blog/categories/rspec/'>rspec</a>
   
 </span>
 
@@ -215,7 +215,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/" data-via="ryudoawaru" data-counturl="http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ryudo.tw/blog/2015/02/18/automatic-urlhelper-test-in-rails/" data-via="ryudoawaru" data-counturl="http://ryudo.tw/blog/2015/02/18/automatic-urlhelper-test-in-rails/" >Tweet</a>
   
   
   
@@ -226,10 +226,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/09/28/shibuya-it-tour-by-igaiga555/" title="Previous Post: 銘謝文--RubyKaigi 2014之旅以及 Rails Girls Taipei 獎助金計劃">&laquo; 銘謝文--RubyKaigi 2014之旅以及 Rails Girls Taipei 獎助金計劃</a>
+        <a class="basic-alignment left" href="/blog/2015/02/15/upgrade-pgsql-from-93-to-94/" title="Previous Post: 在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4">&laquo; 在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/02/18/automatic-urlhelper-test-in-rails/" title="Next Post: 自動化測試 Rails 中的 URL HELPER">自動化測試 Rails 中的 URL HELPER &raquo;</a>
       
     </p>
   </footer>
@@ -345,8 +343,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/';
-        var disqus_url = 'http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/';
+        var disqus_identifier = 'http://ryudo.tw/blog/2015/02/18/automatic-urlhelper-test-in-rails/';
+        var disqus_url = 'http://ryudo.tw/blog/2015/02/18/automatic-urlhelper-test-in-rails/';
         var disqus_script = 'embed.js';
       
     (function () {
