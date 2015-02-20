@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ssh | 慕凡(@ryudoawaru)'s blog]]></title>
+  <link href="http://ryudo.tw/blog/categories/ssh/atom.xml" rel="self"/>
+  <link href="http://ryudo.tw/"/>
+  <updated>2015-02-20T16:30:18+08:00</updated>
+  <id>http://ryudo.tw/</id>
+  <author>
+    <name><![CDATA[Mu-Fan Teng]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[解決用 Mac 登入 Linux 主機時出現的 locale 警告訊息]]></title>
+    <link href="http://ryudo.tw/blog/2015/02/20/fix-locale-in-linux/"/>
+    <updated>2015-02-20T16:07:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2015/02/20/fix-locale-in-linux</id>
+    <content type="html"><![CDATA[<p>前陣子用 Mac 登入遠端的 Linux 主機時常常遇到一個有點討厭的訊息：</p>
+
+<p><code>bash
+-bash: warning: setlocale: LC_CTYPE: cannot change locale (UTF-8)
+</code></p>
+
+<p>這個狀況是從幾個月前突然發生的，Google 之後發現兩種解法：</p>
+
+<ol>
+<li><p>修改主機 locale 設定</p>
+
+<p>編輯：/etc/environment 並輸入：
+<code>
+LANG=en_US.utf-8
+LC_ALL=en_US.utf-8
+</code></p></li>
+<li><p>修改 iterm 設定</p></li>
+</ol>
+
+
+<p><img src="images/iterm-local-setting.jpg" alt="" /></p>
+
+<p>將裡面的 "Set locale variables automatically" 取消勾選即可。</p>
+]]></content>
+  </entry>
+  
+</feed>

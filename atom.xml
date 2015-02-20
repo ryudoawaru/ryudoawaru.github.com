@@ -4,7 +4,7 @@
   <title><![CDATA[慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2015-02-20T15:56:37+08:00</updated>
+  <updated>2015-02-20T16:30:18+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -12,6 +12,38 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[解決用 Mac 登入 Linux 主機時出現的 locale 警告訊息]]></title>
+    <link href="http://ryudo.tw/blog/2015/02/20/fix-locale-in-linux/"/>
+    <updated>2015-02-20T16:07:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2015/02/20/fix-locale-in-linux</id>
+    <content type="html"><![CDATA[<p>前陣子用 Mac 登入遠端的 Linux 主機時常常遇到一個有點討厭的訊息：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>-bash: warning: setlocale: LC_CTYPE: cannot change locale <span class="o">(</span>UTF-8<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這個狀況是從幾個月前突然發生的，Google 之後發現兩種解法：</p>
+
+<ol>
+<li><p>修改主機 locale 設定</p>
+
+<p>編輯：/etc/environment 並輸入：
+<code>
+LANG=en_US.utf-8
+LC_ALL=en_US.utf-8
+</code></p></li>
+<li><p>修改 iterm 設定</p></li>
+</ol>
+
+
+<p><img src="images/iterm-local-setting.jpg" alt="" /></p>
+
+<p>將裡面的 &#8220;Set locale variables automatically&#8221; 取消勾選即可。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[自動化測試 Rails 中的 URL HELPER]]></title>
