@@ -4,7 +4,7 @@
   <title><![CDATA[慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2015-02-20T16:30:18+08:00</updated>
+  <updated>2015-02-20T16:31:29+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -39,7 +39,7 @@ LC_ALL=en_US.utf-8
 </ol>
 
 
-<p><img src="images/iterm-local-setting.jpg" alt="" /></p>
+<p><img src="http://ryudo.tw/images/iterm-local-setting.jpg" alt="" /></p>
 
 <p>將裡面的 &#8220;Set locale variables automatically&#8221; 取消勾選即可。</p>
 ]]></content>
