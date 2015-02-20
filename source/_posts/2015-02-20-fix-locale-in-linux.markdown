@@ -24,7 +24,7 @@ categories: [bash, locale, ssh, mac, iterm]
 
 2.	修改 iterm 設定
 
-![](images/iterm-local-setting.jpg)
+![](/images/iterm-local-setting.jpg)
 
 將裡面的 "Set locale variables automatically" 取消勾選即可。
 
