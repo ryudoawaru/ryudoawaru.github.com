@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rails | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2015-02-20T16:31:29+08:00</updated>
+  <updated>2015-02-24T13:51:53+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -60,34 +60,21 @@
 <ol>
 <li>用文字搜尋的程式，以正規表示式去找出程式碼中使用的 url helper method</li>
 <li>將找到的 method 集合產生列表</li>
-<li>寫 spec 去測試 view context 中是否有這些 method</li>
+<li>用列表產生 it 區塊</li>
+<li>it 區塊中使用 <a href="https://www.relishapp.com/rspec/rspec-rails/v/2-4/docs/helper-specs/helper-spec">helper spec</a> 去測試 view context 中是否有這些 method</li>
 </ol>
 
 
-<p>最後的測試程式碼大概長成這樣：</p>
+<p>因為各種因素就不公開程式碼了，文字搜尋採用目前比較流行的 <a href="http://beyondgrep.com/">ack</a>，好處是除了速度快之外又是 Perl 版的 Regexp，比 egrep 內建的更貼近 Ruby 使用的版本</p>
 
-<p>```ruby
-RSpec.describe ApplicationHelper, :type => :helper do
-  fn = "tmp/url_helpers.txt"
-  cmd = "ack --noheading -h '[<sup>A-Za-z0-9<em>.].((ver1|ver2)[\w</em>]+?_(url|path))'</sup> app/ --output '$1' | sort | uniq > #{fn}"
-  system cmd
-  File.read(fn).split.each do |url_helper_name|</p>
-
-<pre><code>it "Url helper #{url_helper_name} should be available" do
-  helper.respond_to?(url_helper_name.to_sym).should be(true)
-end
-</code></pre>
-
-<p>  end
-end</p>
-
-<p>```</p>
-
-<p>文字搜尋採用目前比較流行的 <a href="http://beyondgrep.com/">ack</a>，除了速度快之外又是 Perl 版的 Regexp，比 egrep 的要威，做法就是將 match 的字串輸出，再 sort 再 uniq 然後存到一個暫存檔去，接下來讀取此檔再分別於 view context 中測試是否可 respond_to。</p>
+<p><code>bash
+ack --noheading -h '[^A-Za-z0-9_.].((ver1|ver2)[\\w_]+?\_(url|path))' app/ --output '$1' | sort | uniq
+</code></p>
 
 <p>使用的 ack 參數如下：</p>
 
 <ul>
+<li>正規表示式為：<code>[^A-Za-z0-9_.].((ver1|ver2)[\\w_]+?\_(url|path))</code></li>
 <li>--noheading 不顯示檔案名在頭</li>
 <li>-h 不顯示檔名在左邊</li>
 <li>--output '$1' 只顯示批配的第 1 項</li>
