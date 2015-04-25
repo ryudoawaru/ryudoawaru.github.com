@@ -37,9 +37,23 @@ categories: [rails,rspec,route]
 
 1.	用文字搜尋的程式，以正規表示式去找出程式碼中使用的 url helper method
 1.	將找到的 method 集合產生列表
-1.	寫 spec 去測試 view context 中是否有這些 method
+1.	用列表產生 it 區塊
+1.	it 區塊中使用 [helper spec](https://www.relishapp.com/rspec/rspec-rails/v/2-4/docs/helper-specs/helper-spec) 去測試 view context 中是否有這些 method
 
-最後的測試程式碼大概長成這樣：
+文字搜尋採用目前比較流行的 [ack](http://beyondgrep.com/)，好處是除了速度快之外又是 Perl 版的 Regexp，比 egrep 內建的更貼近 Ruby 使用的版本
+
+```bash
+ack --noheading -h '[^A-Za-z0-9_.].((ver1|ver2)[\\w_]+?\_(url|path))' app/ --output '$1' | sort | uniq
+```
+
+使用的 ack 參數如下：
+
+*	正規表示式為：```[^A-Za-z0-9_.].((ver1|ver2)[\\w_]+?\_(url|path))```
+*	--noheading 不顯示檔案名在頭
+*	-h 不顯示檔名在左邊
+*	--output '$1' 只顯示批配的第 1 項
+
+測試的程式大概長的像這樣：
 
 ```ruby
 RSpec.describe ApplicationHelper, :type => :helper do
@@ -52,16 +66,6 @@ RSpec.describe ApplicationHelper, :type => :helper do
     end
   end
 end
-
 ```
-
-文字搜尋採用目前比較流行的 [ack](http://beyondgrep.com/)，除了速度快之外又是 Perl 版的 Regexp，比 egrep 的要威，做法就是將 match 的字串輸出，再 sort 再 uniq 然後存到一個暫存檔去，接下來讀取此檔再分別於 view context 中測試是否可 respond_to。
-
-使用的 ack 參數如下：
-
-*	--noheading 不顯示檔案名在頭
-*	-h 不顯示檔名在左邊
-*	--output '$1' 只顯示批配的第 1 項
-
 
 這樣一跑完就可以放心了。

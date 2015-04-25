@@ -16,7 +16,7 @@ categories: [bash, locale, ssh, mac, iterm]
 
 1.	修改主機 locale 設定
 	
-	編輯：/etc/environment 並輸入：
+	編輯：/etc/environment 或是 .bash_xxx 等檔案並輸入：
 	```
 	LANG=en_US.utf-8
 	LC_ALL=en_US.utf-8
@@ -28,3 +28,6 @@ categories: [bash, locale, ssh, mac, iterm]
 
 將裡面的 "Set locale variables automatically" 取消勾選即可。
 
+### 相關連結
+
+-	https://sskaje.me/2014/01/lc-ctype-issue/#.VOwSjULdVRE
