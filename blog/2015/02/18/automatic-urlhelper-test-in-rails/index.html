@@ -143,7 +143,7 @@
 </ol>
 
 
-<p>因為各種因素就不公開程式碼了，文字搜尋採用目前比較流行的 <a href="http://beyondgrep.com/">ack</a>，好處是除了速度快之外又是 Perl 版的 Regexp，比 egrep 內建的更貼近 Ruby 使用的版本</p>
+<p>文字搜尋採用目前比較流行的 <a href="http://beyondgrep.com/">ack</a>，好處是除了速度快之外又是 Perl 版的 Regexp，比 egrep 內建的更貼近 Ruby 使用的版本</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='bash'><span class='line'>ack --noheading -h <span class="s1">&#39;[^A-Za-z0-9_.].((ver1|ver2)[\\w_]+?\_(url|path))&#39;</span> app/ --output <span class="s1">&#39;$1&#39;</span> | sort | uniq
@@ -158,6 +158,31 @@
 <li>-h 不顯示檔名在左邊</li>
 <li>&#8211;output &#8216;$1&#8217; 只顯示批配的第 1 項</li>
 </ul>
+
+
+<p>測試的程式大概長的像這樣：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">describe</span> <span class="no">ApplicationHelper</span><span class="p">,</span> <span class="ss">:type</span> <span class="o">=&gt;</span> <span class="ss">:helper</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">fn</span> <span class="o">=</span> <span class="s2">&quot;tmp/url_helpers.txt&quot;</span>
+</span><span class='line'>  <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;ack --noheading -h &#39;[^A-Za-z0-9_.].((ver1|ver2)[</span><span class="se">\\</span><span class="s2">w_]+?\_(url|path))&#39; app/ --output &#39;$1&#39; | sort | uniq &gt; </span><span class="si">#{</span><span class="n">fn</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="nb">system</span> <span class="n">cmd</span>
+</span><span class='line'>  <span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">url_helper_name</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;Url helper </span><span class="si">#{</span><span class="n">url_helper_name</span><span class="si">}</span><span class="s2"> should be available&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">helper</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="n">url_helper_name</span><span class="o">.</span><span class="n">to_sym</span><span class="p">)</span><span class="o">.</span><span class="n">should</span> <span class="n">be</span><span class="p">(</span><span class="kp">true</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>這樣一跑完就可以放心了。</p>

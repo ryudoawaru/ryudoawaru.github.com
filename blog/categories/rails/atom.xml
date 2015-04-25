@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rails | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2015-02-24T14:01:28+08:00</updated>
+  <updated>2015-04-25T15:54:32+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -65,7 +65,7 @@
 </ol>
 
 
-<p>因為各種因素就不公開程式碼了，文字搜尋採用目前比較流行的 <a href="http://beyondgrep.com/">ack</a>，好處是除了速度快之外又是 Perl 版的 Regexp，比 egrep 內建的更貼近 Ruby 使用的版本</p>
+<p>文字搜尋採用目前比較流行的 <a href="http://beyondgrep.com/">ack</a>，好處是除了速度快之外又是 Perl 版的 Regexp，比 egrep 內建的更貼近 Ruby 使用的版本</p>
 
 <p><code>bash
 ack --noheading -h '[^A-Za-z0-9_.].((ver1|ver2)[\\w_]+?\_(url|path))' app/ --output '$1' | sort | uniq
@@ -80,6 +80,24 @@ ack --noheading -h '[^A-Za-z0-9_.].((ver1|ver2)[\\w_]+?\_(url|path))' app/ --out
 <li>--output '$1' 只顯示批配的第 1 項</li>
 </ul>
 
+
+<p>測試的程式大概長的像這樣：</p>
+
+<p>```ruby
+RSpec.describe ApplicationHelper, :type => :helper do
+  fn = "tmp/url_helpers.txt"
+  cmd = "ack --noheading -h '[<sup>A-Za-z0-9<em>.].((ver1|ver2)[\w</em>]+?_(url|path))'</sup> app/ --output '$1' | sort | uniq > #{fn}"
+  system cmd
+  File.read(fn).split.each do |url_helper_name|</p>
+
+<pre><code>it "Url helper #{url_helper_name} should be available" do
+  helper.respond_to?(url_helper_name.to_sym).should be(true)
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
 
 <p>這樣一跑完就可以放心了。</p>
 ]]></content>
