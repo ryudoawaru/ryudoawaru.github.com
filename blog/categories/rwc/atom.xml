@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: rwc | 慕凡(@ryudoawaru)'s blog]]></title>
+  <link href="http://ryudo.tw/blog/categories/rwc/atom.xml" rel="self"/>
+  <link href="http://ryudo.tw/"/>
+  <updated>2015-12-01T00:05:54+08:00</updated>
+  <id>http://ryudo.tw/</id>
+  <author>
+    <name><![CDATA[Mu-Fan Teng]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[大江戶 RubyKaigi 05, Asakusa.rb 以及 Ruby World Conference]]></title>
+    <link href="http://ryudo.tw/blog/2015/11/18/oedork-and-rwc/"/>
+    <updated>2015-11-18T11:03:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2015/11/18/oedork-and-rwc</id>
+    <content type="html"><![CDATA[<script async src="http://ryudo.tw//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+<p>這篇 Blog 是我和五倍紅寶石的同事趙子皓於 11 月初一同參加了<a href="http://regional.rubykaigi.org/oedo05/">大江戶 RubyKaigi'05</a> 以及 <a href="http://2015.rubyworld-conf.org">Ruby World Conference 2015</a> 並分別發表的心得記事。</p>
+
+<h3>逆邀講</h3>
+
+<p>回到今年六月，在準備 RubyConf Taiwan 2015 時，想要邀請已經連續兩屆來台的 Ruby VM 作者笹田耕一來台發表，結果由於他已經預定在 RubyConf.tw 之後的 RubyConf Portugal 發表所以未能成行，不過信件往來中突然被問到是否有興趣在 11 月的大江戶 RubyKaigi 中發表，看到信件時有點頭暈，想說竟然被大神邀講了 XD ，考慮一下之後就答應了。</p>
+
+<h3>Ruby World Conference--投稿與贊助</h3>
+
+<p>和 RubyKaigi 或是 RubyConf 系列的技術研討會不同，這個在 <a href="http://www1.city.matsue.shimane.jp/jigyousha/sangyou/ruby/">Ruby City</a> --- 松江市舉辦的研討會是以「Ruby 的應用和生態」為主的，由於敝社原本就是以促進 Ruby 在台灣的生態圈為目標，所以就和同事嘗試著投稿看看，沒想到兩個人都順利入選。</p>
+
+<p>順帶一提的是，由於在不論在社群或是公司的方面都受到了日本 Ruby 社群很多照顧，今年本著回饋的心情也贊助了這個活動，也成為了該活動史上第一個海外贊助商。</p>
+
+<h3>行程</h3>
+
+<p>由於大江戶和 RWC 剛好是在前後週，所以我們在大江戶的前一天（11/7）出發，然後在 RWC 結束後一天（11/14）回台。</p>
+
+<h3>大江戶 RubyKaigi</h3>
+
+<p>大江戶 RubyKaigi 是日本眾多<a href="http://regional.rubykaigi.org/">地區性 RubyKaigi</a> 中，歷史最悠久，規模最大的一個，主辦團隊是 Asakusa.rb，這次的場地在東京的中央區舉辦。</p>
+
+<p>這個活動和一般認知的技術研討會不同的地方，就是它有許多被稱為「生活發表會」的議程，例如去年就有像松田明的「<a href="https://www.youtube.com/watch?v=yGWFljoVwK4&amp;list=PLkcX6PjCRhhoh8e9mctY5FgUAfyzwlsTY&amp;index=14">Hacking Home</a>」之類的主題，今年的議程除了兩場 Keynote 外，又分為「Ruby Committers' Lightning Talks」以及「Ninja Talks」兩種，前者顧名思議就是 Ruby Committer 專屬的 LT 時間，後者則是每場 15 分鐘的短講，會眾約 200 多人。</p>
+
+<p>由於我自己的議程是在下午，所以在之前的議程就只有聽到一部份，以下就我自己有聽到的部份做個簡介：</p>
+
+<ol>
+<li><p>@usa：<a href="https://speakerdeck.com/unak/talk-about-io">あいおーのはなし（中譯：有關 IO 的話題）</a></p>
+
+<p>講者是 CRuby Windows 版的主要維護者，這篇主要就是在討論 CRuby IO Class 內部實作方式的演進，然後表示他要在 Windows 上 Porting m17n IO 的功能。</p></li>
+<li><p>松田明：「<a href="https://speakerdeck.com/a_matsuda/the-kaigi-must-go-on">The Kaigi Must Go On</a>」</p>
+
+<p>講者是今年五月才在 ModernWeb 登台的大神松田明，內容是關於他接任 RubyKaigi 總召的經過，其中提到了原本去年 9 月 RubyKaigi 2014 之前就已經訂好了今年 Kaigi 的場地與時間，但是因為原本的總召角谷大大生了一場病所以中斷了籌備的事情，本來已經打算停辦了，後來由於他實在太常被國內外朋友們詢問是否還會有下一屆的事情，所以最後就自己出來接任總召了，身為 RubyConf.TW 的主辦人真是感到心有戚戚焉。</p></li>
+<li><p>@Nobu：「<a href="https://speakerdeck.com/n0kada/my-best-commits-of-the-year-2015">Best Commits of the year 2015 (仮)</a>」</p>
+
+<p>作者是被稱為 "Patch Monster" 的，也是包括 Matz 在內唯三被 Heroku 聘為全職 Ruby Committer 的超級 Committer，簡短的內容提到了他在今年最滿意的幾個 Commit。</p></li>
+<li><p>小栁真太：「<a href="http://www.slideshare.net/yancyajp/rubyseenfromsqlishbrain-54870167">SQL 脳から見た Ruby（中譯：從 SQL 腦看到的 Ruby）</a>」</p>
+
+<p>講者和我一樣是 PostgreSQL 的同好，裡面講到如何把 SQL 查詢用 Ruby 語法去實作的方式，後面還提到了 PostgreSQL 的專有語法 with 等在 ActiveRecord 的用法，令人腦洞大開，with 相關介紹可以參照阿土伯大大在 Ruby Tuesday 24 的分享。</p></li>
+<li><p>西嶋悠貴：「地獄のニューヨーク（紐約）」</p>
+
+<p>講者是新進的 Ruby Committer，也是在國外工作的日本 Rubyist，裡面提到他在紐約的生活，例如怎麼租房子比較省錢，或是交通問題之類，其中最爆笑的一段就是提到當他在住宅遇到搶匪，逃到樓下對面的 PUB 後，酒保竟然跟他說「總之先來一杯再說，我請客」，遺憾的是似乎沒有公開 Slide。</p></li>
+<li><p>Kei Sawada：「<a href="https://speakerdeck.com/remore/xiang-jie-burn">詳解Burn</a>」</p>
+
+<p><a href="https://github.com/remore/burn">Burn</a> 是一個可以讓你用 DSL 去寫出任天堂 ROM 的Ruby Gem，去年在 RubyKaigi 就有聽到這個令人印象深刻的議程，這次還加上 telnet mode 的功能，後面還提到了一些 g0v。</p></li>
+</ol>
+
+
+<p>場地是在一個綜合會議中心，除了 7F 的會場外，在 13F 還提供了一個很大的休息區，休息區除了給大家交流之外還提供了會場畫面的 LIVE 直播。</p>
+
+<blockquote class="twitter-tweet" lang="zh-tw"><p lang="ja" dir="ltr">大江戸Ruby会議05の様子ですよぅ 🌊 <a href="https://twitter.com/hashtag/oedo05?src=hash">#oedo05</a> <a href="https://twitter.com/hashtag/asakusarb?src=hash">#asakusarb</a> <a href="https://t.co/lusirCDZiW">pic.twitter.com/lusirCDZiW</a></p>&mdash; 大江戸Ruby会議 (@OedoRubyKaigi) <a href="https://twitter.com/OedoRubyKaigi/status/663176126617948160">2015 11月 8日</a></blockquote>
+
+
+<p>門票方面，活動門票是 2,000， 不含午餐，After Party 是 5,000 日元，繼承 Asakusa.rb 對外國會眾友善的傳統，外國人和講者全免。</p>
+
+<h4>After Party 和二次與三次會</h4>
+
+<p>這次的 Party 是在知名的 Recruit 公司的員工餐廳舉辦，門票是分開賣的，而且還比白天的 CONF 貴（5,000 v.s. 2,000），Party 除了啤酒喝到飽之外，料理陣容也非常豪華。</p>
+
+<p><img src="https://farm1.staticflickr.com/673/22905640131_714b0627f2.jpg" alt="" />Photo by @HSBT</p>
+
+<p>在 Party 中，甚至還有講者繼續白天講的話題，現場又跟大家討論了起來。</p>
+
+<p><img src="https://farm6.staticflickr.com/5768/22868543606_36bd4b2ecc.jpg" alt="" />Photo by @HSBT</p>
+
+<p>Party 結束時大概是 9:30 左右，很神奇的是結束時，就會有一群人自動的聚集在一起等待二次會的來臨，這次的二次會就是在附近的小 Pub 裡續攤，神奇的是在那個場合中，依然看到 Patch Monster 大大在改 CRuby Source Code XD。</p>
+
+<p>由於二次會時偶然提到很想唱歌，所以就變成在附近的 KTV 進行人生第一次的三次會了 XD，最後在快一點時趕上了終電（最後一班電車）回到旅館。</p>
+
+<blockquote class="twitter-tweet" lang="zh-tw"><p lang="und" dir="ltr"><a href="https://twitter.com/hashtag/oedo05?src=hash">#oedo05</a> <a href="https://twitter.com/hashtag/rubykaraoke?src=hash">#rubykaraoke</a> <a href="https://twitter.com/hashtag/rubytw?src=hash">#rubytw</a> <a href="https://twitter.com/hashtag/asakusarb?src=hash">#asakusarb</a> <a href="https://t.co/GJ5SwSv9la">pic.twitter.com/GJ5SwSv9la</a></p>&mdash; Akira Matsuda (@a_matsuda) <a href="https://twitter.com/a_matsuda/status/663363507245547520">2015 11月 8日</a></blockquote>
+
+
+<h4>個人的發表</h4>
+
+<p>雖然不是第一次以英文在海外發表，但是和 RubyKaigi 2013 的社群簡介 LT 不同，這次是真正的在海外發表技術議題，在一個多月的準備期間，除了語言問題之外，更加重要的課題是「如何在有限時間內掌握要表達的重點」，最後把重點放在「WebSocket 的方案選擇」上。</p>
+
+<iframe src="http://ryudo.tw//www.slideshare.net/slideshow/embed_code/key/fFCoi3P2rPTkhh" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
+
+
+<p> <div style="margin-bottom:5px"> <strong> <a href="http://ryudo.tw//www.slideshare.net/ryudoawaru/websocket-for-web-rubyists" title="WebSocket For Web Rubyists" target="_blank">WebSocket For Web Rubyists</a> </strong> from <strong><a href="http://ryudo.tw//www.slideshare.net/ryudoawaru" target="_blank">Mu-Fan Teng</a></strong> </div></p>
+
+<h3>Asakusa.rb</h3>
+
+<p>Asakusa.rb 是一個在東京定期舉辦的 Ruby 社群聚會，除了定期聚會以外，也主辦包括前面提到的大江戶，以及每年 RubyKaigi 的pre-Party，一直以來都很想參加，趁著這次的機會終於可以一嘗宿願。</p>
+
+<p>這次的活動在位於秋葉原附近的<a href="http://www.esm.co.jp">永和 System Management 公司</a>舉辦，活動本身沒有主題演講等，比較像是我們經常在動漫畫裡看到的「部活」，也就是社團活動，大概在晚上七點開始會陸續的有人加入，然後有的人會聚在一起討論或是做自己的事。</p>
+
+<p><img src="/images/IMG_1700.jpg" alt="" /></p>
+
+<p>大概到了 20:30 ，松田大大就開始請大家自我介紹，大概到 9:30 前部活階段就結束了，接下來就移師到附近的居酒屋舉行二次會，這時松田大大突然對我說；「真正的 Asakusa.rb 現在才開始」，然後就是喝酒聊天了，由於小弟的日文實在不太輪轉，和大家聊天時松田大大還會很貼心的請大家對我「慢慢地講話」，大大人真好，二次會在大概 12:00 左右結束，由於還要準備週五的演講，這次就沒有參加三次會了 XD。</p>
+
+<h3>Ruby World Conference</h3>
+
+<p>和我們熟知的，針對開發者為主的 RubyConf 系列或是 RubyKaigi 不同，在 Ruby 之父的家鄉島根縣松江市舉辦的 Ruby World Conference 專注在「Ruby 的應用」而非技術。</p>
+
+<p>接著週三就前往羽田機場搭上往出云機場的飛機，在下午四點左右到達了旅館，當天晚上有限定講者和相關人士參加的 pre-Party，是在一間很傳統的日式餐廳舉辦，現場請每位講者上來自我介紹，在會場又和這次大會的 Keynote Spaker 的 Linda 女神相見歡，同時也認識了 RG 松江的主辦團隊，由於其中兩位都是媽媽，話題很快就轉移到育兒經上面 XD。</p>
+
+<p><img src="/images/P1010396.JPG" alt="" /></p>
+
+<p>Pre-Party 結束後，主辦單位很貼心的招待大家搭計程車回到旅館，<del>雖然有二三次會但是因為要準備演講的關係只好 Pass</del>。</p>
+
+<p>隔天就開始了 RWC 的正式議程，開場時先請所有的講者到舞台上合照，接著就是一些地方政治人物像是島根縣長等的致詞，和我們對一般政治人物致詞很「搞威」的印象不同，每位的致詞時間都不超過五分鐘，接下來就是 Matz 的主題演講，這次的演講主題是「Second System Syndrome」，內容和不久前 <a href="https://www.youtube.com/watch?v=cydW3bvUOKQ&amp;index=3&amp;list=PLhKZ4RWngmpDVKgAH_p_X7gtLSGsvmMJj">RubyConf Taiwan 2015 的發表</a>沒有很大的差異。</p>
+
+<p>在單軌兩天的議程中，大會提供了「雙向」的即時口譯服務，接下來的議程由於都在準備講稿和練習（我是第二天倒數第二個講者），所以幾乎都沒有參加到，真是殘念。</p>
+
+<p>會場是在當地最大的會議中心，除了三樓的演講廳之外，在一樓有一個比演講廳還大的攤位交流區，這裡同時也是會眾午餐以及晚上 Official Party 的場地，攤位的外觀和陳列方式感覺比較像台灣每年五六月間舉辦的 Computex Taipei 這樣的商業展覽，贊助商多半也是在展示自己的技術解決方案之類，沒有看到徵才。</p>
+
+<p><img src="/images/RWC-Booth-1.JPG" alt="" />
+<img src="/images/201511-OEDO-RWC/P1010427.JPG" alt="" />
+<img src="/images/201511-OEDO-RWC/P1010428.JPG" alt="" /></p>
+
+<p>除了交流區的攤位之外，還有一樓的地方旅遊介紹以及 Ruby 拉麵攤位，第二天也帶了一組 Ruby 拉麵回家。</p>
+
+<p><img src="/images/201511-OEDO-RWC/P1010420.JPG" alt="" />
+<img src="/images/201511-OEDO-RWC/P1010421.JPG" alt="" /></p>
+
+<p>三樓會場外還有一個茶席區，穿著和服的妹妹會用傳統日本茶道的方式磨出抹茶和點心然後再端上來給你。</p>
+
+<p><img src="/images/201511-OEDO-RWC/P1010397.JPG" alt="" />
+<img src="/images/201511-OEDO-RWC/P1010417.JPG" alt="" /></p>
+
+<p>（忘記拍和服美眉了Q_Q）</p>
+
+<p>第一天晚上的 Official Party 當然也是酒類無限暢飲，不過由於一直在交流遞名片聊天的關係所以幾乎沒吃到多少東西（淚～），這個 Party 除了吃吃喝喝外，還有奇妙的島根吉祥物 しまねっこ 出沒。</p>
+
+<blockquote class="twitter-tweet" lang="zh-tw"><p lang="en" dir="ltr">Meeting with Shimanekko, the mascot of Shimane. 😻 <a href="https://twitter.com/_zzak">@_zzak</a> and my next talk might just be the cat dance. <a href="https://t.co/TkgL6zK6hU">pic.twitter.com/TkgL6zK6hU</a></p>&mdash; Linda Liukas (@lindaliukas) <a href="https://twitter.com/lindaliukas/status/664777586308870144">2015 11月 12日</a></blockquote>
+
+
+<p>另一個讓我印象很深的地方，就是在會場有寄放衣服與背包的地方，超貼心。</p>
+
+<p><img src="/images/201511-OEDO-RWC/thumb_IMG_1726_1024.jpg" alt="" /></p>
+
+<p>Party 結束後，當然也是有各種二次三次會，不過一樣由於隔天有演講的關係，只能在電腦前看著已經完成發表的同事邊唱 KTV 邊發推😂。</p>
+
+<p>第二天全部議程結束後，參加了一場需要事先報名的當地特產啤酒燒肉會，接下來一樣有各種續攤，三次會是和一群日本各地的 RG 主辦人一起交流 RG 主辦的經驗等等，拜同行的日文通子皓的幫忙，可以更加輕鬆的交流了，在整個活動期間認識了許多不同城市的 RG 主辦人或教練，真的很開心。</p>
+
+<p><img src="/images/201511-OEDO-RWC/P1010455.JPG" alt="" /></p>
+
+<p>最後一天的早上，在搭車前往機場之前短暫的參觀了 RG 松江，這邊的規模雖然不大，不過會場的佈置很用心，和台灣不一樣的是，一組的配置是 2 位教練配四位學員，等於是台灣兩組的配置，現場還有機器人...以及 Matz 的立牌。</p>
+
+<p><img src="/images/201511-OEDO-RWC/P1010460.JPG" alt="" />
+<img src="/images/201511-OEDO-RWC/thumb_IMG_1775_1024.jpg" alt="" />
+<img src="/images/201511-OEDO-RWC/thumb_IMG_1769_1024.jpg" alt="" /></p>
+
+<p>在活動場後，有 Linda 女神的致詞，然後我也突然被拉上去致詞了 XD，再度獲得了另一個人生的成就。</p>
+
+<blockquote class="twitter-tweet" lang="zh-tw"><p lang="ja" dir="ltr">台湾より…！！&#10;<a href="https://twitter.com/hashtag/railsgirlsmatsue?src=hash">#railsgirlsmatsue</a> <a href="https://t.co/RBmgXMEH8k">pic.twitter.com/RBmgXMEH8k</a></p>&mdash; yadaita (@yadaita) <a href="https://twitter.com/yadaita/status/665346316826865665">2015 11月 14日</a></blockquote>
+
+
+<p>最後就在各種趕飛機（出雲 -> 羽田 -> 松山）中結束了整個行程。</p>
+
+<h3>個人成就紀錄</h3>
+
+<p>在這次八天的日本行之中，完成了各種成就，包括：</p>
+
+<ul>
+<li>在海外用英文發表技術 &amp; 非技術議題</li>
+<li>一週內兩次英文發表</li>
+<li>在英文發表前用日文自介</li>
+<li>和日本人唱 KTV</li>
+<li>二次會 &amp; 三次會</li>
+<li>趕終電</li>
+</ul>
+
+
+<h3>感想</h3>
+
+<h4>地方的熱情</h4>
+
+<p>最讓我印象深刻的，就是在日本這個國家，即使是所謂的「田舍」，也就是鄉下地方的人或是政府單位都會很努力的用實際的方式（而不是炒地皮之類）來振興地方的經濟與發展，像 RWC 這種幾乎由地方政府一手主辦的活動就是一個很顯著的例子，為了吸引外國人參加，甚至不惜重本不計成效（畢竟全場只有 15 來個外國人）的提供雙向口譯服務；同時也認識了許多地方的 IT 公司，像是 Matz 以前所屬的 <a href="http://www.netlab.jp">NaCl</a> 等等，很努力的把工作機會帶回自己出身的地方，這點和台灣是很不一樣的；另外松江的消費水平，像是食宿或交通費用（主要是計程車）幾乎和東京沒有什麼差別。</p>
+
+<p>這次也認識了很多地方 RG 活動，像是神戶、松江甚至是以前沒聽過的塩尻等等的主辦人，他們很熱心的將 RG 活動帶到自己的家鄉，同時很多 RG 的教練，例如敝公司的好捧友<a href="http://5xruby.tw/posts/interview-with-igarashi">五十嵐邦明</a>等人，也會從東京自費（或是公司贊助）過去支援；縱觀 RG 的世界各地活動列表可以發現，日本的都市數量是全世界所有國家最多的，活動的頻率也是最頻繁的，可以感受到他們社群之間互相支援的熱情。</p>
+
+<h4>多樣的 Ruby</h4>
+
+<p>一直以來 Ruby 在台灣的認知就是 = Rails，甚至還有很多人把 Rails 誤認為一門語言，雖然我也是從 Rails 入門 Ruby，但是在熟練到一定程度之後就開始著眼於 Rails 或 Web 以外的 Ruby 應用；在這次日本行中又再次見識到 Ruby 的多樣性，以及日本人把 Ruby 的應用延伸到各個層面上的努力，像是這次我就認識了用 Ruby 控制都市瓦斯的系統，或是用 mruby 控製太陽能發電系統的公司，而且在大學也有相關的研究，我想除了 Ruby 是日本發明的語言之外，也包括了日本人對基礎研究的動力，這點和台灣是非常不同的。</p>
+
+<h4>社群的熱情</h4>
+
+<p>有人認為，區別一個國家是否現代化的方式，就是在於其中的人民有沒有一個「對國家主體的認同和想像」而非對個別人物的效忠；我想這點也適用在 Ruby 或是任何的 Open Source 社群上，在日本的 Ruby 社群可以感受到大家對於 Ruby 社群這個主體的認同，各個地區的社群間也會互相支援，例如在我參加 RWC 之前，一直有「這就是很 local 的活動」的刻板印象，不過實際參加之後才發現真的有很多來自東京的 Rubyist 們或公司在會場出沒甚至贊助，包括前面提到的 RG 互相支援，都可以體現出日本的 Ruby 社群有一個共同的認同主體，進而在這個主體之下互相扶持，共同發展的熱情。</p>
+
+<h3>最後</h3>
+
+<p>整體來說，我認為這次的日本行可說是收獲滿滿，最大的遺憾是因為行程排的太緊加上八天兩場發表的關係，沒有好好的在松江當地觀光，實在是非常殘念；希望明年可以作為普通的會眾參加這些活動。</p>
+]]></content>
+  </entry>
+  
+</feed>
