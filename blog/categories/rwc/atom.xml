@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rwc | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/rwc/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2015-12-01T12:46:04+08:00</updated>
+  <updated>2015-12-12T08:23:32+09:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[大江戶 RubyKaigi 05, Asakusa.rb 以及 Ruby World Conference]]></title>
     <link href="http://ryudo.tw/blog/2015/11/18/oedork-and-rwc/"/>
-    <updated>2015-11-18T11:03:00+08:00</updated>
+    <updated>2015-11-18T11:03:00+09:00</updated>
     <id>http://ryudo.tw/blog/2015/11/18/oedork-and-rwc</id>
     <content type="html"><![CDATA[<script async src="http://ryudo.tw//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
@@ -25,13 +25,13 @@
 
 <h3>逆邀講</h3>
 
-<p>回到今年六月，在準備 RubyConf Taiwan 2015 時，想要邀請已經連續兩屆來台的 Ruby VM 作者笹田耕一來台發表，結果由於他已經預定在之後的 RubyConf Portugal 發表所以未能成行，在信件往來中突然被問到是否可以 11 月的大江戶 RubyKaigi 中發表，在驚訝和榮幸之餘想說是一個難得的機會就答應了。</p>
+<p>回到今年六月，在準備 RubyConf Taiwan 2015 時，想要邀請連續兩屆來台的 Ruby VM 作者笹田耕一來台發表，但由於他已預定在之後的 RubyConf Portugal 發表所以未能成行，在這信件一來一往中，突然被問到是否可以 11 月的大江戶 RubyKaigi 中發表，驚訝和榮幸之餘想說是一個難得的機會就答應了。</p>
 
 <h3>Ruby World Conference--投稿與贊助</h3>
 
-<p>和 RubyKaigi 或是 RubyConf 系列的技術研討會不同，這個在 <a href="http://www1.city.matsue.shimane.jp/jigyousha/sangyou/ruby/">Ruby City</a> --- 松江市舉辦的研討會是以「Ruby 的應用和生態」為主的，由於敝社原本就是以促進 Ruby 在台灣的生態圈為目標，所以就和同事嘗試著投稿看看，沒想到兩個人都順利入選。</p>
+<p>和 RubyKaigi 或是 RubyConf 系列的技術研討會不同，這個在 Ruby City — 松江市舉辦的研討會是以「Ruby 的應用和生態」為主，由於敝社原本就是以促進 Ruby 受台灣的程式生態圈愛用為目標，所以就和同事嘗試著投稿看看，沒想到兩個人都順利入選。</p>
 
-<p>除了投稿之外，由於在不論在社群或是公司的方面都受到了日本 Ruby 社群很多照顧，今年本著回饋的心情也贊助了這個活動，也成為了該活動史上第一個<a href="http://2015.rubyworld-conf.org/en/sponsors/">海外贊助商</a>。</p>
+<p>除了投稿之外，由於在不論在社群或是公司的方面都受到了日本 Ruby 社群很多照顧，今年本著回饋的心情也贊助了這個活動，也成為了該活動史上第一個海外贊助商。</p>
 
 <h3>行程</h3>
 

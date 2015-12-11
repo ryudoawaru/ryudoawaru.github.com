@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rails,migration,postgresql | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/rails-migration-postgresql/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2015-12-01T12:46:04+08:00</updated>
+  <updated>2015-12-12T08:23:32+09:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[How to migrate a PostgreSQL DB with many schemas in a multenancy Rails application]]></title>
     <link href="http://ryudo.tw/blog/2013/08/11/migrate-multi-schemas-into-a-rails-application/"/>
-    <updated>2013-08-11T21:38:00+08:00</updated>
+    <updated>2013-08-11T21:38:00+09:00</updated>
     <id>http://ryudo.tw/blog/2013/08/11/migrate-multi-schemas-into-a-rails-application</id>
     <content type="html"><![CDATA[<p>PostgreSQL的schema是一個非常方便的功能, 適合拿來做所謂的<a href="http://www.arthurtoday.com/2010/02/multi-tenant-application-multitenancy.html#.UgeXg2T08Rw">Multi-Tenancy</a>類服務; 例如無名或Pixnet這類的BSP(Blog Service Provider)或是像我的FREEBBS的免費論壇服務(Forum Service Provider), 通常稱為SAAS(Software As A Service)系統, 可以把N個相同結構的schema放在同一個資料庫裡面; 比起MySQL只能分別放在不同的資料庫裡會有很多好處。</p>
 
