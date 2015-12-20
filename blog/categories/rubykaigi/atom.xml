@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rubykaigi | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/rubykaigi/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2015-12-12T08:23:32+09:00</updated>
+  <updated>2015-12-21T00:08:02+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[大江戶 RubyKaigi 05, Asakusa.rb 以及 Ruby World Conference]]></title>
     <link href="http://ryudo.tw/blog/2015/11/18/oedork-and-rwc/"/>
-    <updated>2015-11-18T11:03:00+09:00</updated>
+    <updated>2015-11-18T11:03:00+08:00</updated>
     <id>http://ryudo.tw/blog/2015/11/18/oedork-and-rwc</id>
     <content type="html"><![CDATA[<script async src="http://ryudo.tw//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
@@ -106,7 +106,7 @@
 
 <p>隔天就開始了 RWC 的正式議程，開場時先請所有的講者到舞台上合照，接著就是一些地方政治人物像是島根縣長等的致詞，和我們對一般政治人物致詞很「搞威」的印象不同，每位的致詞時間都不超過五分鐘，接下來就是 Matz 的主題演講，這次的演講主題是「Second System Syndrome」，內容和不久前 <a href="https://www.youtube.com/watch?v=cydW3bvUOKQ&amp;index=3&amp;list=PLhKZ4RWngmpDVKgAH_p_X7gtLSGsvmMJj">RubyConf Taiwan 2015 的發表</a>沒有很大的差異。</p>
 
-<p>在單軌兩天的議程中，大會提供了「雙向」的即時口譯服務，接下來的議程由於都在準備講稿和練習（我是第二天倒數第二個講者），所以幾乎都沒有參加到，真是殘念。</p>
+<p>在單軌兩天的議程中，大會提供了「雙向」的即時口譯服務，接下來的議程由於都在準備講稿和練習（我是第二天倒數第二個講者），幾乎都沒有參加到。</p>
 
 <p>會場是在當地最大的會議中心，除了三樓的演講廳之外，在一樓有一個比演講廳還大的攤位交流區，這裡同時也是會眾午餐以及晚上 Official Party 的場地，攤位的外觀和陳列方式感覺比較像台灣每年五六月間舉辦的 Computex Taipei 這樣的商業展覽，贊助商多半也是在展示自己的技術解決方案之類，沒有看到徵才。</p>
 
@@ -170,14 +170,14 @@
 
 <h3>最後</h3>
 
-<p>整體來說，我認為這次的日本行可說是收獲滿滿，最大的遺憾是因為行程排的太緊加上八天兩場發表的關係，沒有好好的在松江當地觀光，實在是非常殘念；希望明年可以作為普通的會眾參加這些活動。</p>
+<p>整體來說，我認為這次的日本行可說是收獲滿滿，最大的遺憾是因為行程排的太緊加上八天兩場發表的關係，沒有好好的在松江當地觀光；希望明年可以作為普通的會眾參加這些活動。</p>
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[銘謝文--RubyKaigi 2014之旅以及 Rails Girls Taipei 獎助金計劃]]></title>
     <link href="http://ryudo.tw/blog/2014/09/28/shibuya-it-tour-by-igaiga555/"/>
-    <updated>2014-09-28T22:00:00+09:00</updated>
+    <updated>2014-09-28T22:00:00+08:00</updated>
     <id>http://ryudo.tw/blog/2014/09/28/shibuya-it-tour-by-igaiga555</id>
     <content type="html"><![CDATA[<h3>緣起</h3>
 
@@ -255,7 +255,7 @@ Photo by Igarashi Kuniaki</p>
   <entry>
     <title type="html"><![CDATA[Introduce Ruby Taiwan Community@RubyKaigi 2013[EN,CH]]]></title>
     <link href="http://ryudo.tw/blog/2013/06/07/rubykaigi2013-lt/"/>
-    <updated>2013-06-07T20:57:00+09:00</updated>
+    <updated>2013-06-07T20:57:00+08:00</updated>
     <id>http://ryudo.tw/blog/2013/06/07/rubykaigi2013-lt</id>
     <content type="html"><![CDATA[<p>非常榮幸本次有機會可以和台灣Ruby社群的朋友一起參加世界級的Ruby研討會<a href="http://rubykaigi.org/2013">RubyKaigi2013</a>, 做為台灣Ruby社群的主持人之一, 既然參加了就想要讓世界的Ruby朋友們知道Ruby Taiwan社群的存在, 因此在LT徵稿前就打算要投稿這個主題了.</p>
 

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: postgresql, | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/postgresql/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2015-12-12T08:23:32+09:00</updated>
+  <updated>2015-12-21T00:08:02+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4]]></title>
     <link href="http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/"/>
-    <updated>2015-02-15T22:10:00+09:00</updated>
+    <updated>2015-02-15T22:10:00+08:00</updated>
     <id>http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94</id>
     <content type="html"><![CDATA[<h3>前言</h3>
 
@@ -101,7 +101,7 @@ launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
   <entry>
     <title type="html"><![CDATA[PostgreSQL Materialized View簡介]]></title>
     <link href="http://ryudo.tw/blog/2014/06/20/use-materizlied-view-in-pgsql/"/>
-    <updated>2014-06-20T15:54:00+09:00</updated>
+    <updated>2014-06-20T15:54:00+08:00</updated>
     <id>http://ryudo.tw/blog/2014/06/20/use-materizlied-view-in-pgsql</id>
     <content type="html"><![CDATA[<p>最近在開發某個主力產品時遇到了一個問題，就是當我們在後台編輯一些資料，包含新增 / 修改 / 刪除
 ，然後在沒有完成所有編輯前不想讓修改中的資料立刻在前台生效，正在苦思如何完成這項功能時，發現了PostgreSQL有一個超好用的功能叫「Materialized View」，於是就開始survey看看。</p>

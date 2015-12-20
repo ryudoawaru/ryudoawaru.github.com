@@ -4,7 +4,7 @@
   <title><![CDATA[Category: sinatra | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/sinatra/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2015-12-12T08:23:32+09:00</updated>
+  <updated>2015-12-21T00:08:02+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Ruby,Sinatra and Websocket]]></title>
     <link href="http://ryudo.tw/blog/2013/04/05/ruby-and-websocket/"/>
-    <updated>2013-04-05T21:48:00+09:00</updated>
+    <updated>2013-04-05T21:48:00+08:00</updated>
     <id>http://ryudo.tw/blog/2013/04/05/ruby-and-websocket</id>
     <content type="html"><![CDATA[<h3>近半年來花了很多時間在研究Ruby上實作Websocket的方式, 現介紹簡單心得如下</h3>
 
@@ -55,7 +55,7 @@
   <entry>
     <title type="html"><![CDATA[Sinatra課程紀錄]]></title>
     <link href="http://ryudo.tw/blog/2013/04/05/sinatra-course-20130329/"/>
-    <updated>2013-04-05T20:41:00+09:00</updated>
+    <updated>2013-04-05T20:41:00+08:00</updated>
     <id>http://ryudo.tw/blog/2013/04/05/sinatra-course-20130329</id>
     <content type="html"><![CDATA[<p>這次和<a href="http://blog.eddie.com.tw">龍哥</a>一起合辦<a href="http://blog.eddie.com.tw/2013/02/08/new-rubyist-wanted/">有心人的課程</a> 其中的第二天是小弟主講Sinatra &amp; Rack, 以下是講義分享</p>
 

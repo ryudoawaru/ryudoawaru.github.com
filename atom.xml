@@ -4,7 +4,7 @@
   <title><![CDATA[慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2015-12-12T08:23:32+09:00</updated>
+  <updated>2015-12-21T00:08:02+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[大江戶 RubyKaigi 05, Asakusa.rb 以及 Ruby World Conference]]></title>
     <link href="http://ryudo.tw/blog/2015/11/18/oedork-and-rwc/"/>
-    <updated>2015-11-18T11:03:00+09:00</updated>
+    <updated>2015-11-18T11:03:00+08:00</updated>
     <id>http://ryudo.tw/blog/2015/11/18/oedork-and-rwc</id>
     <content type="html"><![CDATA[<script async src="http://ryudo.tw//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
@@ -106,7 +106,7 @@
 
 <p>隔天就開始了 RWC 的正式議程，開場時先請所有的講者到舞台上合照，接著就是一些地方政治人物像是島根縣長等的致詞，和我們對一般政治人物致詞很「搞威」的印象不同，每位的致詞時間都不超過五分鐘，接下來就是 Matz 的主題演講，這次的演講主題是「Second System Syndrome」，內容和不久前 <a href="https://www.youtube.com/watch?v=cydW3bvUOKQ&amp;index=3&amp;list=PLhKZ4RWngmpDVKgAH_p_X7gtLSGsvmMJj">RubyConf Taiwan 2015 的發表</a>沒有很大的差異。</p>
 
-<p>在單軌兩天的議程中，大會提供了「雙向」的即時口譯服務，接下來的議程由於都在準備講稿和練習（我是第二天倒數第二個講者），所以幾乎都沒有參加到，真是殘念。</p>
+<p>在單軌兩天的議程中，大會提供了「雙向」的即時口譯服務，接下來的議程由於都在準備講稿和練習（我是第二天倒數第二個講者），幾乎都沒有參加到。</p>
 
 <p>會場是在當地最大的會議中心，除了三樓的演講廳之外，在一樓有一個比演講廳還大的攤位交流區，這裡同時也是會眾午餐以及晚上 Official Party 的場地，攤位的外觀和陳列方式感覺比較像台灣每年五六月間舉辦的 Computex Taipei 這樣的商業展覽，贊助商多半也是在展示自己的技術解決方案之類，沒有看到徵才。</p>
 
@@ -170,14 +170,14 @@
 
 <h3>最後</h3>
 
-<p>整體來說，我認為這次的日本行可說是收獲滿滿，最大的遺憾是因為行程排的太緊加上八天兩場發表的關係，沒有好好的在松江當地觀光，實在是非常殘念；希望明年可以作為普通的會眾參加這些活動。</p>
+<p>整體來說，我認為這次的日本行可說是收獲滿滿，最大的遺憾是因為行程排的太緊加上八天兩場發表的關係，沒有好好的在松江當地觀光；希望明年可以作為普通的會眾參加這些活動。</p>
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[RubyConf Taiwan 2015 ]]></title>
     <link href="http://ryudo.tw/blog/2015/09/20/rubyconftw-2015-retro/"/>
-    <updated>2015-09-20T10:34:00+09:00</updated>
+    <updated>2015-09-20T10:34:00+08:00</updated>
     <id>http://ryudo.tw/blog/2015/09/20/rubyconftw-2015-retro</id>
     <content type="html"><![CDATA[<p><img src="http://ryudo.tw/images/rubyconftw2015-og.png" alt="" /></p>
 
@@ -312,7 +312,7 @@
   <entry>
     <title type="html"><![CDATA[解決用 Mac 登入 Linux 主機時出現的 locale 警告訊息]]></title>
     <link href="http://ryudo.tw/blog/2015/02/20/fix-locale-in-linux/"/>
-    <updated>2015-02-20T16:07:00+09:00</updated>
+    <updated>2015-02-20T16:07:00+08:00</updated>
     <id>http://ryudo.tw/blog/2015/02/20/fix-locale-in-linux</id>
     <content type="html"><![CDATA[<p>前陣子用 Mac 登入遠端的 Linux 主機時常常遇到一個有點討厭的訊息：</p>
 
@@ -351,7 +351,7 @@ LC_ALL=en_US.utf-8
   <entry>
     <title type="html"><![CDATA[自動化測試 Rails 中的 URL HELPER]]></title>
     <link href="http://ryudo.tw/blog/2015/02/18/automatic-urlhelper-test-in-rails/"/>
-    <updated>2015-02-18T12:51:00+09:00</updated>
+    <updated>2015-02-18T12:51:00+08:00</updated>
     <id>http://ryudo.tw/blog/2015/02/18/automatic-urlhelper-test-in-rails</id>
     <content type="html"><![CDATA[<h3>前言：</h3>
 
@@ -449,7 +449,7 @@ LC_ALL=en_US.utf-8
   <entry>
     <title type="html"><![CDATA[在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4]]></title>
     <link href="http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/"/>
-    <updated>2015-02-15T22:10:00+09:00</updated>
+    <updated>2015-02-15T22:10:00+08:00</updated>
     <id>http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94</id>
     <content type="html"><![CDATA[<h3>前言</h3>
 
@@ -541,7 +541,7 @@ LC_ALL=en_US.utf-8
   <entry>
     <title type="html"><![CDATA[銘謝文--RubyKaigi 2014之旅以及 Rails Girls Taipei 獎助金計劃]]></title>
     <link href="http://ryudo.tw/blog/2014/09/28/shibuya-it-tour-by-igaiga555/"/>
-    <updated>2014-09-28T22:00:00+09:00</updated>
+    <updated>2014-09-28T22:00:00+08:00</updated>
     <id>http://ryudo.tw/blog/2014/09/28/shibuya-it-tour-by-igaiga555</id>
     <content type="html"><![CDATA[<h3>緣起</h3>
 
@@ -619,7 +619,7 @@ Photo by Igarashi Kuniaki</p>
   <entry>
     <title type="html"><![CDATA[RubyConf Taiwan 2014]]></title>
     <link href="http://ryudo.tw/blog/2014/07/04/rubyconftw2014-recap/"/>
-    <updated>2014-07-04T14:39:00+09:00</updated>
+    <updated>2014-07-04T14:39:00+08:00</updated>
     <id>http://ryudo.tw/blog/2014/07/04/rubyconftw2014-recap</id>
     <content type="html"><![CDATA[<p>按照往年的慣例，這篇也拖稿了超級久。</p>
 
@@ -754,7 +754,7 @@ Photo by Igarashi Kuniaki</p>
   <entry>
     <title type="html"><![CDATA[PostgreSQL Materialized View簡介]]></title>
     <link href="http://ryudo.tw/blog/2014/06/20/use-materizlied-view-in-pgsql/"/>
-    <updated>2014-06-20T15:54:00+09:00</updated>
+    <updated>2014-06-20T15:54:00+08:00</updated>
     <id>http://ryudo.tw/blog/2014/06/20/use-materizlied-view-in-pgsql</id>
     <content type="html"><![CDATA[<p>最近在開發某個主力產品時遇到了一個問題，就是當我們在後台編輯一些資料，包含新增 / 修改 / 刪除
 ，然後在沒有完成所有編輯前不想讓修改中的資料立刻在前台生效，正在苦思如何完成這項功能時，發現了PostgreSQL有一個超好用的功能叫「Materialized View」，於是就開始survey看看。</p>
@@ -949,7 +949,7 @@ Photo by Igarashi Kuniaki</p>
   <entry>
     <title type="html"><![CDATA[2013回顧[CH]]]></title>
     <link href="http://ryudo.tw/blog/2014/01/01/my2013/"/>
-    <updated>2014-01-01T00:18:00+09:00</updated>
+    <updated>2014-01-01T00:18:00+08:00</updated>
     <id>http://ryudo.tw/blog/2014/01/01/my2013</id>
     <content type="html"><![CDATA[<h2>2013大事紀</h2>
 
@@ -984,7 +984,7 @@ Photo by Igarashi Kuniaki</p>
   <entry>
     <title type="html"><![CDATA[Rails Girls Taipei-01 活動主辦心得]]></title>
     <link href="http://ryudo.tw/blog/2013/09/14/railsgirls-taipei-01/"/>
-    <updated>2013-09-14T14:39:00+09:00</updated>
+    <updated>2013-09-14T14:39:00+08:00</updated>
     <id>http://ryudo.tw/blog/2013/09/14/railsgirls-taipei-01</id>
     <content type="html"><![CDATA[<p><img src="http://farm6.staticflickr.com/5471/9698784100_dfb2afc625_b.jpg" alt="Group photo of Rails Girls Taipei-01" /></p>
 
@@ -1071,7 +1071,7 @@ Photo by Igarashi Kuniaki</p>
   <entry>
     <title type="html"><![CDATA[How to migrate a PostgreSQL DB with many schemas in a multenancy Rails application]]></title>
     <link href="http://ryudo.tw/blog/2013/08/11/migrate-multi-schemas-into-a-rails-application/"/>
-    <updated>2013-08-11T21:38:00+09:00</updated>
+    <updated>2013-08-11T21:38:00+08:00</updated>
     <id>http://ryudo.tw/blog/2013/08/11/migrate-multi-schemas-into-a-rails-application</id>
     <content type="html"><![CDATA[<p>PostgreSQL的schema是一個非常方便的功能, 適合拿來做所謂的<a href="http://www.arthurtoday.com/2010/02/multi-tenant-application-multitenancy.html#.UgeXg2T08Rw">Multi-Tenancy</a>類服務; 例如無名或Pixnet這類的BSP(Blog Service Provider)或是像我的FREEBBS的免費論壇服務(Forum Service Provider), 通常稱為SAAS(Software As A Service)系統, 可以把N個相同結構的schema放在同一個資料庫裡面; 比起MySQL只能分別放在不同的資料庫裡會有很多好處。</p>
 
@@ -1296,7 +1296,7 @@ Photo by Igarashi Kuniaki</p>
   <entry>
     <title type="html"><![CDATA[Introduce Ruby Taiwan Community@RubyKaigi 2013[EN,CH]]]></title>
     <link href="http://ryudo.tw/blog/2013/06/07/rubykaigi2013-lt/"/>
-    <updated>2013-06-07T20:57:00+09:00</updated>
+    <updated>2013-06-07T20:57:00+08:00</updated>
     <id>http://ryudo.tw/blog/2013/06/07/rubykaigi2013-lt</id>
     <content type="html"><![CDATA[<p>非常榮幸本次有機會可以和台灣Ruby社群的朋友一起參加世界級的Ruby研討會<a href="http://rubykaigi.org/2013">RubyKaigi2013</a>, 做為台灣Ruby社群的主持人之一, 既然參加了就想要讓世界的Ruby朋友們知道Ruby Taiwan社群的存在, 因此在LT徵稿前就打算要投稿這個主題了.</p>
 
@@ -1389,7 +1389,7 @@ Photo by Igarashi Kuniaki</p>
   <entry>
     <title type="html"><![CDATA[達人出版会徵求翻譯以及校稿志工事宜]]></title>
     <link href="http://ryudo.tw/blog/2013/05/02/tatsu-zine-translator-recruitment/"/>
-    <updated>2013-05-02T12:00:00+09:00</updated>
+    <updated>2013-05-02T12:00:00+08:00</updated>
     <id>http://ryudo.tw/blog/2013/05/02/tatsu-zine-translator-recruitment</id>
     <content type="html"><![CDATA[<p>大家好：</p>
 
@@ -1443,7 +1443,7 @@ Photo by Igarashi Kuniaki</p>
   <entry>
     <title type="html"><![CDATA[RubyConf Taiwan 2012回憶錄(上)]]></title>
     <link href="http://ryudo.tw/blog/2013/04/23/rubyconftw-2012-memories-1/"/>
-    <updated>2013-04-23T23:08:00+09:00</updated>
+    <updated>2013-04-23T23:08:00+08:00</updated>
     <id>http://ryudo.tw/blog/2013/04/23/rubyconftw-2012-memories-1</id>
     <content type="html"><![CDATA[<p>其實活動都結束半年了, 不過還是寫一下紀錄好了, 本篇為準備期間的紀錄</p>
 
@@ -1540,7 +1540,7 @@ Photo by Igarashi Kuniaki</p>
   <entry>
     <title type="html"><![CDATA[Ruby Tuesday#22]]></title>
     <link href="http://ryudo.tw/blog/2013/04/17/rubytuesday-22/"/>
-    <updated>2013-04-17T16:12:00+09:00</updated>
+    <updated>2013-04-17T16:12:00+08:00</updated>
     <id>http://ryudo.tw/blog/2013/04/17/rubytuesday-22</id>
     <content type="html"><![CDATA[<p>由於之前已經比較久沒辦的關係, 相信大家都悶了, 剛好這次找到了相當不錯的場地<a href="https://www.facebook.com/hdxcafe">HDX Cafe</a>, 加上兩位新人講者<a href="http://blog.taian.su/">泰安</a>和<a href="http://tonytonyjan.net/">大兜</a>, 所以就決定要開辦Tuesday啦; 這個場地好的點在於：</p>
 
@@ -1562,7 +1562,7 @@ Photo by Igarashi Kuniaki</p>
   <entry>
     <title type="html"><![CDATA[Ruby,Sinatra and Websocket]]></title>
     <link href="http://ryudo.tw/blog/2013/04/05/ruby-and-websocket/"/>
-    <updated>2013-04-05T21:48:00+09:00</updated>
+    <updated>2013-04-05T21:48:00+08:00</updated>
     <id>http://ryudo.tw/blog/2013/04/05/ruby-and-websocket</id>
     <content type="html"><![CDATA[<h3>近半年來花了很多時間在研究Ruby上實作Websocket的方式, 現介紹簡單心得如下</h3>
 
@@ -1601,7 +1601,7 @@ Photo by Igarashi Kuniaki</p>
   <entry>
     <title type="html"><![CDATA[Sinatra課程紀錄]]></title>
     <link href="http://ryudo.tw/blog/2013/04/05/sinatra-course-20130329/"/>
-    <updated>2013-04-05T20:41:00+09:00</updated>
+    <updated>2013-04-05T20:41:00+08:00</updated>
     <id>http://ryudo.tw/blog/2013/04/05/sinatra-course-20130329</id>
     <content type="html"><![CDATA[<p>這次和<a href="http://blog.eddie.com.tw">龍哥</a>一起合辦<a href="http://blog.eddie.com.tw/2013/02/08/new-rubyist-wanted/">有心人的課程</a> 其中的第二天是小弟主講Sinatra &amp; Rack, 以下是講義分享</p>
 
@@ -1624,7 +1624,7 @@ Photo by Igarashi Kuniaki</p>
   <entry>
     <title type="html"><![CDATA[first_po]]></title>
     <link href="http://ryudo.tw/blog/2013/03/09/first-po/"/>
-    <updated>2013-03-09T21:44:00+09:00</updated>
+    <updated>2013-03-09T21:44:00+08:00</updated>
     <id>http://ryudo.tw/blog/2013/03/09/first-po</id>
     <content type="html"><![CDATA[<p>把部落格蓋著先~~</p>
 ]]></content>

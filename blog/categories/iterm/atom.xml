@@ -4,7 +4,7 @@
   <title><![CDATA[Category: iterm | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/iterm/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2015-12-12T08:23:32+09:00</updated>
+  <updated>2015-12-21T00:08:02+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[解決用 Mac 登入 Linux 主機時出現的 locale 警告訊息]]></title>
     <link href="http://ryudo.tw/blog/2015/02/20/fix-locale-in-linux/"/>
-    <updated>2015-02-20T16:07:00+09:00</updated>
+    <updated>2015-02-20T16:07:00+08:00</updated>
     <id>http://ryudo.tw/blog/2015/02/20/fix-locale-in-linux</id>
     <content type="html"><![CDATA[<p>前陣子用 Mac 登入遠端的 Linux 主機時常常遇到一個有點討厭的訊息：</p>
 
