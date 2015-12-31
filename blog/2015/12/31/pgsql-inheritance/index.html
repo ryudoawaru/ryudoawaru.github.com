@@ -1,0 +1,510 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Table Inheritance in PostgreSQL - 慕凡(@ryudoawaru)'s blog</title>
+  <meta name="author" content="Mu-Fan Teng">
+
+  
+  <meta name="description" content="前言 Single Table Inheritance（以下簡稱 STI） 是我們在 Rails 常用的一個功能，一般來說 STI 在 Rails 的實現方式如下： 一張資料表
+多個 ActiveRecord Class 使用這張表
+預設用 type 這個欄位來界定這筆紀錄所屬的 class &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://ryudo.tw/blog/2015/12/31/pgsql-inheritance/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="慕凡(@ryudoawaru)'s blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">慕凡(@ryudoawaru)'s blog</a></h1>
+  
+    <h2>目前還沒想到</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:ryudo.tw" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/my-presentations">My Presentations</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Table Inheritance in PostgreSQL</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-12-31T12:17:00+08:00" pubdate data-updated="true">Dec 31<span>st</span>, 2015</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h3>前言</h3>
+
+<p><a href="http://api.rubyonrails.org/classes/ActiveRecord/Inheritance.html">Single Table Inheritance</a>（以下簡稱 STI） 是我們在 Rails 常用的一個功能，一般來說 STI 在 Rails 的實現方式如下：</p>
+
+<ol>
+<li>一張資料表</li>
+<li>多個 ActiveRecord Class 使用這張表</li>
+<li>預設用 type 這個欄位來界定這筆紀錄所屬的 class</li>
+</ol>
+
+
+<p>這樣做的好處是子類別可以用父類別的欄位，主要的缺點是在可能會浪費到不需要的欄位；Rails 之所以這樣設計，主要是因為大部份的 RDBMS 系統除了 PostgreSQL 和 Oracle 以外幾乎都沒有實作 Table Inheritance。</p>
+
+<h3>PostgreSQL 的 Table Inheritance</h3>
+
+<p>PostgreSQL 的 Table Inheritance 和 STI 最大的差別在於多表繼承，在官網上就有相當詳細的<a href="http://www.postgresql.org/docs/9.1/static/ddl-inherit.html">介紹</a></p>
+
+<p>接下來我們就來介紹如何在 Rails 中用 PostgreSQL 的 Table Inheritance 來實作 ActiveRecord 的物件繼承。</p>
+
+<h4>期望的 Schema</h4>
+
+<p><img src="/images/pgsql-inheritance/schema.png" alt="" /></p>
+
+<h4>實作</h4>
+
+<figure class='code'><figcaption><span>建立父類別 User</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rails g model User
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CreateUsers</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span><span class="o">[</span><span class="mi">5</span><span class="o">.</span><span class="mi">0</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">change</span>
+</span><span class='line'>    <span class="n">create_table</span> <span class="ss">:users</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:username</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:password</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:type</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">timestamps</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>建立 sub-class Staff</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rails g model Staff
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CreateStaffs</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span><span class="o">[</span><span class="mi">5</span><span class="o">.</span><span class="mi">0</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">up</span>
+</span><span class='line'>    <span class="n">execute</span> <span class="o">&lt;&lt;-</span><span class="no">SQL</span>
+</span><span class='line'><span class="sh">    CREATE TABLE staffs(level integer,CONSTRAINT &quot;PK&quot; PRIMARY KEY (id))</span>
+</span><span class='line'><span class="sh">    INHERITS(users)</span>
+</span><span class='line'><span class="no">    SQL</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">down</span>
+</span><span class='line'>    <span class="n">drop_table</span> <span class="ss">:staffs</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Staff</span> <span class="o">&lt;</span> <span class="no">User</span>
+</span><span class='line'>  <span class="nb">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="s1">&#39;staffs&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>和原本 STI 的行為不同，由於 ActiveRecord Migration 並沒有內建相關功能，所以需要自行撰寫 SQL 式來建立 Staffs 表，在建立時需實際指定繼承自 users 表，並且將額外附加的欄位等屬性設定進去即可。</p>
+
+<p>在 Model 的程式方面，必需指定子類別的資料表，否則 Rails 會按照 STI 預設行為去使用父類別的資料表（users）。</p>
+
+<p>在這個範例中，在 staffs 表建立的資料都會出現在 users 表上，反之則不會。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="s1">&#39;ryudo&#39;</span><span class="p">,</span> <span class="ss">password</span><span class="p">:</span><span class="s1">&#39;12345&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="no">Staff</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span><span class="s1">&#39;Jodeci&#39;</span><span class="p">,</span><span class="ss">password</span><span class="p">:</span><span class="s1">&#39;12345&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:username</span><span class="p">)</span>
+</span><span class='line'>   <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;users&quot;</span><span class="o">.</span><span class="s2">&quot;username&quot;</span> <span class="no">FROM</span> <span class="s2">&quot;users&quot;</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="o">[</span><span class="s2">&quot;ryudo&quot;</span><span class="p">,</span> <span class="s2">&quot;Jodeci&quot;</span><span class="o">]</span>
+</span><span class='line'><span class="no">Staff</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:username</span><span class="p">)</span>
+</span><span class='line'>   <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;staffs&quot;</span><span class="o">.</span><span class="s2">&quot;username&quot;</span> <span class="no">FROM</span> <span class="s2">&quot;staffs&quot;</span> <span class="no">WHERE</span> <span class="s2">&quot;staffs&quot;</span><span class="o">.</span><span class="s2">&quot;type&quot;</span> <span class="no">IN</span> <span class="p">(</span><span class="s1">&#39;Staff&#39;</span><span class="p">)</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="o">[</span><span class="s2">&quot;Jodeci&quot;</span><span class="o">]</span>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">count</span> <span class="c1">#=&gt; 2</span>
+</span><span class='line'><span class="no">Staff</span><span class="o">.</span><span class="n">count</span> <span class="c1">#=&gt; 1</span>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">last</span>
+</span><span class='line'>  <span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">6</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;users&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;users&quot;</span> <span class="no">ORDER</span> <span class="no">BY</span> <span class="s2">&quot;users&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">DESC</span> <span class="no">LIMIT</span> <span class="vg">$1</span>  <span class="o">[[</span><span class="s2">&quot;LIMIT&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="o">]]</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;Staff id: 2, username: &quot;Jodeci&quot;, password: &quot;12345&quot;, type: &quot;Staff&quot;, created_at: &quot;2015-12-31 07:12:16&quot;, updated_at: &quot;2015-12-31 07:12:16&quot;&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>Table Inheritance 會繼承的東西：</h4>
+
+<ul>
+<li>欄位資訊：包括預設值或是 NOT NULL，也就是在 SQL 建構式中看到欄位敘述的內容。</li>
+<li>父表上的欄位變動：也就是之後在父表上新增刪除修改欄位的變動，會確實的反應到子表上。</li>
+</ul>
+
+
+<h4>Table Inheritance 不會繼承的東西：</h4>
+
+<ul>
+<li>欄位資訊以外的全部：包括 Primary Key、Constraint 或是 Index 等。</li>
+</ul>
+
+
+<h4>主鍵重複值問題</h4>
+
+<p>這應該是最大的困擾之一，就是繼承的子表的主鍵是可以和父表的值重複的，例如以下的程式碼是可以正確執行的：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="ss">username</span><span class="p">:</span> <span class="s1">&#39;ryudo&#39;</span><span class="p">,</span> <span class="ss">password</span><span class="p">:</span><span class="s1">&#39;12345&#39;</span><span class="p">)</span> <span class="c1">#=&gt; 建立 id 為 1 的 User</span>
+</span><span class='line'><span class="no">Staff</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="ss">username</span><span class="p">:</span><span class="s1">&#39;Jodeci&#39;</span><span class="p">,</span><span class="ss">password</span><span class="p">:</span><span class="s1">&#39;12345&#39;</span><span class="p">)</span> <span class="c1">#=&gt; 建立 id 為 1 的 Staff</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這樣在 users 表會真的有兩筆 id 為 1 的紀錄，而且目前無法用資料庫的方式去迴避這個問題，不過由於兩個 id 之間是共用同一個 Sequence，在不指定 id 建立資料的狀況下，id 的值是不會重複的。</p>
+
+<h4>inheritance_column 存廢問題：</h4>
+
+<p>在上面的範例中，我們可以看到原本 STI 的 inheritance_column，也就是 type 這個欄位的存在，原本 STI 的設計是：子類別的資料將會自動在 type 上加上類別名稱，查詢 Staff 時也會預設查詢 type 為 Staff 的資料。</p>
+
+<p>這個設計是因為在資料同屬一張表的前提下，必需用一個欄位去區分類別的關係，而在 Table Inheritance 下，由於每個類別有獨立的資料表，在查詢子類別時已經不需要用 type 這個條件了；但是如果在父類別的資料表查詢時，還是需要用 inheritance_column 去區分出這筆資料所屬的類別，否則所有父類別資料表的資料在 ActiveRecord 中會被視為父類別的資料。</p>
+
+<h4>多表繼承</h4>
+
+<p>其實是有這項功能的，但是目前還沒想到需要使用的場合所以這次就不討論了。</p>
+
+<h3>是否要使用這個功能？</h3>
+
+<h4>好處</h4>
+
+<ul>
+<li>比起 ActiveRecord 提供的 STI 更趨近於物件化</li>
+<li>由於資料表是物理上的切分，等於是一種 Partitioning，在資料量大的時候可以提升子表的效能</li>
+<li>同上，減少欄位或 Index 等資源不必要的浪費</li>
+</ul>
+
+
+<h4>壞處</h4>
+
+<ul>
+<li>Rails 預設不支援相關的 Migration 操作，需手動撰寫 SQL</li>
+<li>同上，在 Model 的設定上必需客製一些設定</li>
+</ul>
+
+
+<p>以上！</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Mu-Fan Teng</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-12-31T12:17:00+08:00" pubdate data-updated="true">Dec 31<span>st</span>, 2015</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/inheritance/'>inheritance</a>, <a class='category' href='/blog/categories/pgsql/'>pgsql</a>, <a class='category' href='/blog/categories/postgresql/'>postgresql</a>, <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a>, <a class='category' href='/blog/categories/sti/'>sti</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ryudo.tw/blog/2015/12/31/pgsql-inheritance/" data-via="ryudoawaru" data-counturl="http://ryudo.tw/blog/2015/12/31/pgsql-inheritance/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/11/18/oedork-and-rwc/" title="Previous Post: 大江戶 RubyKaigi 05, Asakusa.rb 以及 Ruby World Conference">&laquo; 大江戶 RubyKaigi 05, Asakusa.rb 以及 Ruby World Conference</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Ruby World Conference 2015  <a href="http://2015.rubyworld-conf.org/ja/program/">Speaker</a></h1>
+  <a href="http://2015.rubyworld-conf.org"><img src="/images/rwc2015_banner_A02@2x.png" /></a>
+</section>
+<section>
+  <h1>Oedo RubyKaigi 05 Speaker</h1>
+  <a href="http://regional.rubykaigi.org/oedo05"><img src="/images/CTSrVNNWIAQRTdc.png" /></a>
+</section>
+<section>
+  <h1>RubyKaigi 2013 LT <a href="http://rubykaigi.org/2013/lightning_talks#ryudoawaru">speaker</a></h1>
+  <a href="http://rubykaigi.org/2013/lightning_talks#ryudoawaru"><img src="/images/badgeLightningTalker@2x.png" /></a>
+</section><section>
+  
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/12/31/pgsql-inheritance/">Table Inheritance in PostgreSQL</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/18/oedork-and-rwc/">大江戶 RubyKaigi 05, Asakusa.rb 以及 Ruby World Conference</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/20/rubyconftw-2015-retro/">RubyConf Taiwan 2015 </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/20/fix-locale-in-linux/">解決用 Mac 登入 Linux 主機時出現的 locale 警告訊息</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/18/automatic-urlhelper-test-in-rails/">自動化測試 Rails 中的 URL HELPER</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/ryudoawaru">@ryudoawaru</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'ryudoawaru',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("ryudoawaru", 6, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/ryudoawaru" class="twitter-follow-button" data-show-count="false">Follow @ryudoawaru</a>
+  
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Mu-Fan Teng -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'ryudosoctopress';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://ryudo.tw/blog/2015/12/31/pgsql-inheritance/';
+        var disqus_url = 'http://ryudo.tw/blog/2015/12/31/pgsql-inheritance/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

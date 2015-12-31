@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: postgresql, | 慕凡(@ryudoawaru)'s blog]]></title>
+  <title><![CDATA[Category: postgresql | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/postgresql/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2015-12-21T00:08:02+08:00</updated>
+  <updated>2015-12-31T17:23:29+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -14,239 +14,165 @@
 
   
   <entry>
-    <title type="html"><![CDATA[在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4]]></title>
-    <link href="http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/"/>
-    <updated>2015-02-15T22:10:00+08:00</updated>
-    <id>http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94</id>
+    <title type="html"><![CDATA[Table Inheritance in PostgreSQL]]></title>
+    <link href="http://ryudo.tw/blog/2015/12/31/pgsql-inheritance/"/>
+    <updated>2015-12-31T12:17:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2015/12/31/pgsql-inheritance</id>
     <content type="html"><![CDATA[<h3>前言</h3>
 
-<p>PostgreSQL 和 MySQL 不同，資料檔格式會隨著小數點二位數以上的版號（9.3 - 9.4）變動，換句話說每當升級版本時，資料檔就必需要升級才可以繼續使用。</p>
-
-<p>升級的方式有兩種：</p>
-
-<ul>
-<li>將原本的資料執行 <a href="http://www.postgresql.org/docs/9.4/static/app-pg-dumpall.html">pg_dumpall</a> 後再 restore 回去</li>
-<li>用 <a href="http://www.postgresql.org/docs/9.4/static/pgupgrade.html">pg_upgrade</a> 命令從舊的資料檔產生出新版本的資料檔。</li>
-</ul>
-
-
-<p>這邊要講的是第二種情形。</p>
-
-<h3>環境限定：</h3>
-
-<ul>
-<li>可執行 <a href="http://brew.sh/">Homebrew</a> 的 MacOS 環境</li>
-<li>原 PostgreSQL 為 Homebrew 安裝，9.3.x 版</li>
-</ul>
-
-
-<h3>步驟</h3>
+<p><a href="http://api.rubyonrails.org/classes/ActiveRecord/Inheritance.html">Single Table Inheritance</a>（以下簡稱 STI） 是我們在 Rails 常用的一個功能，一般來說 STI 在 Rails 的實現方式如下：</p>
 
 <ol>
-<li>安裝新的 PostgreSQL
-
-```bash
-brew update
-brew install postgresql
-```
-
-</li>
-<li>停止現在的 PostgreSQL Daemon
-```bash
-launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
-```
-</li>
-<li>建立 9.4 的資料庫檔案
-```bash
-initdb /usr/local/var/postgres9.4 -E utf8
-```
-</li>
-<li>使用 pg_upgrade 指令升級 舊PG的資料檔案到 9.4，注意這邊的 9.3.5_1 和 9.4.0 是會依照你的舊版本和實際安裝的新板本的版號而有差異的
-
-```bash
-pg_upgrade -v \
-    -d /usr/local/var/postgres \
-    -D /usr/local/var/postgres9.4 \
-    -b /usr/local/Cellar/postgresql/9.3.5_1/bin/ \
-    -B /usr/local/Cellar/postgresql/9.4.0/bin/
-```
-</li>
-<li>將舊資料檔備份，並且讓新資料檔的目錄更名使之變成預設的資料檔
-
-```bash
-cd /usr/local/var
-mv postgres postgres9.3
-mv postgres9.4 postgres
-```
-</li>
-<li>
-重啟 PostgreSQL
-
-```bash
-launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
-```
-</li>
-
-<li>檢查 /usr/local/var/postgres/server.log 檔是否有正常啟動 server</li>
-<li>如果原本有安裝
-<a href="https://rubygems.org/gems/pg">pg GEM</a>
-的話要重新安裝</li>
+<li>一張資料表</li>
+<li>多個 ActiveRecord Class 使用這張表</li>
+<li>預設用 type 這個欄位來界定這筆紀錄所屬的 class</li>
 </ol>
+
+
+<p>這樣做的好處是子類別可以用父類別的欄位，主要的缺點是在可能會浪費到不需要的欄位；Rails 之所以這樣設計，主要是因為大部份的 RDBMS 系統除了 PostgreSQL 和 Oracle 以外幾乎都沒有實作 Table Inheritance。</p>
+
+<h3>PostgreSQL 的 Table Inheritance</h3>
+
+<p>PostgreSQL 的 Table Inheritance 和 STI 最大的差別在於多表繼承，在官網上就有相當詳細的<a href="http://www.postgresql.org/docs/9.1/static/ddl-inherit.html">介紹</a></p>
+
+<p>接下來我們就來介紹如何在 Rails 中用 PostgreSQL 的 Table Inheritance 來實作 ActiveRecord 的物件繼承。</p>
+
+<h4>期望的 Schema</h4>
+
+<p><img src="/images/pgsql-inheritance/schema.png" alt="" /></p>
+
+<h4>實作</h4>
+
+<p><code>bash 建立父類別 User
+rails g model User
+</code></p>
+
+<p>``` ruby
+class CreateUsers &lt; ActiveRecord::Migration[5.0]
+  def change</p>
+
+<pre><code>create_table :users do |t|
+  t.string :username
+  t.string :password
+  t.string :type
+  t.timestamps
+end
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>class User &lt; ApplicationRecord</p>
+
+<p>end
+```</p>
+
+<p><code>bash 建立 sub-class Staff
+rails g model Staff
+</code></p>
+
+<p>``` ruby
+class CreateStaffs &lt; ActiveRecord::Migration[5.0]
+  def up</p>
+
+<pre><code>execute &lt;&lt;-SQL
+CREATE TABLE staffs(level integer,CONSTRAINT "PK" PRIMARY KEY (id))
+INHERITS(users)
+SQL
+</code></pre>
+
+<p>  end</p>
+
+<p>  def down</p>
+
+<pre><code>drop_table :staffs
+</code></pre>
+
+<p>  end
+end
+class Staff &lt; User
+  self.table_name = 'staffs'
+end
+```</p>
+
+<p>和原本 STI 的行為不同，由於 ActiveRecord Migration 並沒有內建相關功能，所以需要自行撰寫 SQL 式來建立 Staffs 表，在建立時需實際指定繼承自 users 表，並且將額外附加的欄位等屬性設定進去即可。</p>
+
+<p>在 Model 的程式方面，必需指定子類別的資料表，否則 Rails 會按照 STI 預設行為去使用父類別的資料表（users）。</p>
+
+<p>在這個範例中，在 staffs 表建立的資料都會出現在 users 表上，反之則不會。</p>
+
+<p><code>ruby
+User.create(username: 'ryudo', password:'12345')
+Staff.create(username:'Jodeci',password:'12345')
+User.pluck(:username)
+   (0.4ms)  SELECT "users"."username" FROM "users"
+ =&gt; ["ryudo", "Jodeci"]
+Staff.pluck(:username)
+   (0.4ms)  SELECT "staffs"."username" FROM "staffs" WHERE "staffs"."type" IN ('Staff')
+ =&gt; ["Jodeci"]
+User.count #=&gt; 2
+Staff.count #=&gt; 1
+User.last
+  User Load (0.6ms)  SELECT  "users".* FROM "users" ORDER BY "users"."id" DESC LIMIT $1  [["LIMIT", 1]]
+ =&gt; #&lt;Staff id: 2, username: "Jodeci", password: "12345", type: "Staff", created_at: "2015-12-31 07:12:16", updated_at: "2015-12-31 07:12:16"&gt;
+</code></p>
+
+<h4>Table Inheritance 會繼承的東西：</h4>
+
+<ul>
+<li>欄位資訊：包括預設值或是 NOT NULL，也就是在 SQL 建構式中看到欄位敘述的內容。</li>
+<li>父表上的欄位變動：也就是之後在父表上新增刪除修改欄位的變動，會確實的反應到子表上。</li>
+</ul>
+
+
+<h4>Table Inheritance 不會繼承的東西：</h4>
+
+<ul>
+<li>欄位資訊以外的全部：包括 Primary Key、Constraint 或是 Index 等。</li>
+</ul>
+
+
+<h4>主鍵重複值問題</h4>
+
+<p>這應該是最大的困擾之一，就是繼承的子表的主鍵是可以和父表的值重複的，例如以下的程式碼是可以正確執行的：</p>
+
+<p><code>ruby
+User.create(id:1, username: 'ryudo', password:'12345') #=&gt; 建立 id 為 1 的 User
+Staff.create(id:1,username:'Jodeci',password:'12345') #=&gt; 建立 id 為 1 的 Staff
+</code></p>
+
+<p>這樣在 users 表會真的有兩筆 id 為 1 的紀錄，而且目前無法用資料庫的方式去迴避這個問題，不過由於兩個 id 之間是共用同一個 Sequence，在不指定 id 建立資料的狀況下，id 的值是不會重複的。</p>
+
+<h4>inheritance_column 存廢問題：</h4>
+
+<p>在上面的範例中，我們可以看到原本 STI 的 inheritance_column，也就是 type 這個欄位的存在，原本 STI 的設計是：子類別的資料將會自動在 type 上加上類別名稱，查詢 Staff 時也會預設查詢 type 為 Staff 的資料。</p>
+
+<p>這個設計是因為在資料同屬一張表的前提下，必需用一個欄位去區分類別的關係，而在 Table Inheritance 下，由於每個類別有獨立的資料表，在查詢子類別時已經不需要用 type 這個條件了；但是如果在父類別的資料表查詢時，還是需要用 inheritance_column 去區分出這筆資料所屬的類別，否則所有父類別資料表的資料在 ActiveRecord 中會被視為父類別的資料。</p>
+
+<h4>多表繼承</h4>
+
+<p>其實是有這項功能的，但是目前還沒想到需要使用的場合所以這次就不討論了。</p>
+
+<h3>是否要使用這個功能？</h3>
+
+<h4>好處</h4>
+
+<ul>
+<li>比起 ActiveRecord 提供的 STI 更趨近於物件化</li>
+<li>由於資料表是物理上的切分，等於是一種 Partitioning，在資料量大的時候可以提升子表的效能</li>
+<li>同上，減少欄位或 Index 等資源不必要的浪費</li>
+</ul>
+
+
+<h4>壞處</h4>
+
+<ul>
+<li>Rails 預設不支援相關的 Migration 操作，需手動撰寫 SQL</li>
+<li>同上，在 Model 的設定上必需客製一些設定</li>
+</ul>
 
 
 <p>以上！</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[PostgreSQL Materialized View簡介]]></title>
-    <link href="http://ryudo.tw/blog/2014/06/20/use-materizlied-view-in-pgsql/"/>
-    <updated>2014-06-20T15:54:00+08:00</updated>
-    <id>http://ryudo.tw/blog/2014/06/20/use-materizlied-view-in-pgsql</id>
-    <content type="html"><![CDATA[<p>最近在開發某個主力產品時遇到了一個問題，就是當我們在後台編輯一些資料，包含新增 / 修改 / 刪除
-，然後在沒有完成所有編輯前不想讓修改中的資料立刻在前台生效，正在苦思如何完成這項功能時，發現了PostgreSQL有一個超好用的功能叫「Materialized View」，於是就開始survey看看。</p>
-
-<h2>Database View</h2>
-
-<p>在<a href="http://en.wikipedia.org/wiki/View_%28SQL%29">Wikipedia</a>中的說明為：
-<code>
-檢視表 (View) 是在關聯式資料庫中，將一組查詢指令構成的結果集，在實體資料表中的改變都可以立刻反應在檢視表中
-</code></p>
-
-<p>通常我們會為了特定目的，例如將某些特定條件的查詢變成一張虛擬表之類的原因，來製作一些View，例如：</p>
-
-<p><img src="/assets/2014/06/20/use-materizlied-view-in-pgsql/ex-order-erd.png"></p>
-
-<p>我們會用以下的方式建立一個View：</p>
-
-<p>```sql</p>
-
-<p>CREATE VIEW orders_products_users AS
-SELECT
-orders.user_id,
-users.name,
-orders.product_id,
-products.name
-FROM
-orders JOIN users ON users.id = orders.user_id,
-JOIN products ON products.id = orders.product_id</p>
-
-<p>```</p>
-
-<p>以後我們要使用這個view時只要：
-<code>sql
-SELECT * FROM orders_products_users;
-</code></p>
-
-<p>即可</p>
-
-<p>但是普通的view本身並沒有真正的儲存資料，預設情況下它只是一個查詢的捷徑而已，而且也不能透過update view來更新資料，所以對於使用Rails等ORM的人來說，即使已經有一些「把view當model」的Gem（例如<a href="https://github.com/stevo/activerecord-database-views">activerecord-database-views</a>）推出，還是會覺得是一個比較雞肋的功能。</p>
-
-<h2>Materialized View（以下簡稱M-View）</h2>
-
-<p>今天要介紹的這個功能和普通的View的差別，就在建立出來的view是一個查詢狀態的「快照」（Snapshot），在快照建立後，只要不更新（Refresh），即使對原本的table有任何的變更，這個M-View裡的資料也不會有任何變化，因此就可以做到前面所說的，讓後台更新的資料不影響到前台的功能，接下來讓我們來看看如何使用這個功能。</p>
-
-<h2>Postgresql的Materialized View</h2>
-
-<p>這個功能原本是出自於Oracle，號稱「開源的Oracle」的PostgreSQL也在本文撰時最新的穩定版本9.3加入了該功能，<a href="http://www.postgresql.org/docs/9.3/static/sql-creatematerializedview.html">參考資料</a>。</p>
-
-<h3>建立Materialized View</h3>
-
-<p>```sql
-CREATE MATERIALIZED VIEW table_name</p>
-
-<pre><code>AS query
-[ WITH [ NO ] DATA ]
-</code></pre>
-
-<p><code>
-例如：
-</code>sql
-CREATE MATERIALIZED VIEW mymatview AS SELECT * FROM mytab;
-```
-以上指令會以「SELECT * FROM mytab」的查詢式建立一個名為「mymatview」的M-View，而且在refresh之前，mymatview的內容不會受到原本mytab更新的影響。</p>
-
-<p>結尾的WITH DATA 和 WITH NO DATA的差別是在，會不會在建立時就把當時的資料填進去，如果WITH NO DATA的話，就必需要再使用refresh才可以把資料填進去。</p>
-
-<h3>更新Materialized View</h3>
-
-<p><code>sql
-REFRESH MATERIALIZED VIEW  M-View的名稱
-</code>
-一旦下了這個指令後，就可以將現在的資料內容更新到指定的M-View上</p>
-
-<h3>移除Materialized View</h3>
-
-<p><code>sql
-DROP MATERIALIZED VIEW  M-View的名稱 [CASCADE | RESTRICT]
-</code>
-顧名思義，即完全移除該M-View，CASCADE意即在移除此物件實「一併移除相關物件」。</p>
-
-<h3>Materialized View的注意事項</h3>
-
-<ol>
-<li>和普通View一樣，不可以用UPDATE或INSERT等更新內容</li>
-<li>如果建立了M-View後，要移除關聯的資料表時需要用CASADE方式一併移除相關M-View，否則會無法移除。</li>
-<li>可以多層重疊，意即可以透過「查詢M-View建立其它M-View」</li>
-</ol>
-
-
-<h2>Materialized View的用途</h2>
-
-<ol>
-<li>加速部份查詢
-和一般View不同，M-View佔有獨立表空間，所以查詢M-View不會影響到關聯的資料表，意即如果我們將一些複雜或費時的查詢的結果用M-View建立快照的話，可以透過查詢該M-View節省下一次查詢的時間，例如某個交易資料表如果有10年份1000萬筆的話，將某一年份的交易資料獨立查詢到一個M-View之後，要查詢該年份的交易資料只要查詢該M-View，就不需要在查詢中scan全部10年份的交易資料了。</li>
-<li>實現資料版本控制
-這是我原本想要使用的目的，這個功能可以玩的地方還很多，例如我們</li>
-</ol>
-
-
-<h2>範例</h2>
-
-<p>今天假設有如下的表</p>
-
-<p><code>sql
-CREATE TABLE spree_products
-(
-  id serial NOT NULL,
-  name character varying(255) NOT NULL DEFAULT ''::character varying,
-  description text,
-  available_on timestamp without time zone,
-  deleted_at timestamp without time zone,
-  slug character varying(255),
-  meta_description text,
-  meta_keywords character varying(255),
-  tax_category_id integer,
-  shipping_category_id integer,
-  created_at timestamp without time zone,
-  updated_at timestamp without time zone,
-  CONSTRAINT spree_products_pkey PRIMARY KEY (id)
-)
-</code>
-然後我們建立如下的M-View
-<code>sql
-CREATE MATERIALIZED VIEW spree_products_mview AS
- SELECT * FROM spree_products;
-</code>
-然後我們看現在的 spree_products表內容如下：
-<img src="/assets/2014/06/20/use-materizlied-view-in-pgsql/mview-original.png" alt="" />
-此時table和M-View的資料應該是一致的，此時我們將資料表的一些資料刪除：
-<code>sql
-DELETE FROM spree_products WHERE id = 16;
-</code>
-此時id為16的紀錄已經被移除
-<img src="/assets/2014/06/20/use-materizlied-view-in-pgsql/after-remove.png" alt="" />
-但是M-View的資料還是一樣的，如下圖
-<img src="/assets/2014/06/20/use-materizlied-view-in-pgsql/mview-after-remove.png" alt="" />
-這時如果我們下了REFRESH的話：</p>
-
-<p><code>sql
-REFRESH MATERIALIZED VIEW spree_products_mview;
-</code></p>
-
-<p>M-View的資料就會和資料表上一樣了</p>
-
-<p>以上是簡介Materizlied View在PostgreSQL的作用，接下來我們還會針對如何用Rails / ActiveRecord操作這個功能作出說明。</p>
 ]]></content>
   </entry>
   

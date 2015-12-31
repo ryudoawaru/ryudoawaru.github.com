@@ -9,7 +9,9 @@
   <meta name="author" content="Mu-Fan Teng">
 
   
-  <meta name="description" content="這篇 Blog 是我和五倍紅寶石的同事趙子皓於 11 月初一同參加了大江戶 RubyKaigi&#8217;05 以及 Ruby World Conference 2015 並分別發表的心得記事。 逆邀講 回到今年六月，在準備 RubyConf Taiwan 2015 時，想要邀請連續兩屆來台的 &hellip;">
+  <meta name="description" content="前言 Single Table Inheritance（以下簡稱 STI） 是我們在 Rails 常用的一個功能，一般來說 STI 在 Rails 的實現方式如下： 一張資料表
+多個 ActiveRecord Class 使用這張表
+預設用 type 這個欄位來界定這筆紀錄所屬的 class &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +68,241 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/12/31/pgsql-inheritance/">Table Inheritance in PostgreSQL</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-12-31T12:17:00+08:00" pubdate data-updated="true">Dec 31<span>st</span>, 2015</time>
+        
+         | <a href="/blog/2015/12/31/pgsql-inheritance/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>前言</h3>
+
+<p><a href="http://api.rubyonrails.org/classes/ActiveRecord/Inheritance.html">Single Table Inheritance</a>（以下簡稱 STI） 是我們在 Rails 常用的一個功能，一般來說 STI 在 Rails 的實現方式如下：</p>
+
+<ol>
+<li>一張資料表</li>
+<li>多個 ActiveRecord Class 使用這張表</li>
+<li>預設用 type 這個欄位來界定這筆紀錄所屬的 class</li>
+</ol>
+
+
+<p>這樣做的好處是子類別可以用父類別的欄位，主要的缺點是在可能會浪費到不需要的欄位；Rails 之所以這樣設計，主要是因為大部份的 RDBMS 系統除了 PostgreSQL 和 Oracle 以外幾乎都沒有實作 Table Inheritance。</p>
+
+<h3>PostgreSQL 的 Table Inheritance</h3>
+
+<p>PostgreSQL 的 Table Inheritance 和 STI 最大的差別在於多表繼承，在官網上就有相當詳細的<a href="http://www.postgresql.org/docs/9.1/static/ddl-inherit.html">介紹</a></p>
+
+<p>接下來我們就來介紹如何在 Rails 中用 PostgreSQL 的 Table Inheritance 來實作 ActiveRecord 的物件繼承。</p>
+
+<h4>期望的 Schema</h4>
+
+<p><img src="/images/pgsql-inheritance/schema.png" alt="" /></p>
+
+<h4>實作</h4>
+
+<figure class='code'><figcaption><span>建立父類別 User</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rails g model User
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CreateUsers</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span><span class="o">[</span><span class="mi">5</span><span class="o">.</span><span class="mi">0</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">change</span>
+</span><span class='line'>    <span class="n">create_table</span> <span class="ss">:users</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:username</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:password</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:type</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">timestamps</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>建立 sub-class Staff</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rails g model Staff
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CreateStaffs</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span><span class="o">[</span><span class="mi">5</span><span class="o">.</span><span class="mi">0</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">up</span>
+</span><span class='line'>    <span class="n">execute</span> <span class="o">&lt;&lt;-</span><span class="no">SQL</span>
+</span><span class='line'><span class="sh">    CREATE TABLE staffs(level integer,CONSTRAINT &quot;PK&quot; PRIMARY KEY (id))</span>
+</span><span class='line'><span class="sh">    INHERITS(users)</span>
+</span><span class='line'><span class="no">    SQL</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">down</span>
+</span><span class='line'>    <span class="n">drop_table</span> <span class="ss">:staffs</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Staff</span> <span class="o">&lt;</span> <span class="no">User</span>
+</span><span class='line'>  <span class="nb">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="s1">&#39;staffs&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>和原本 STI 的行為不同，由於 ActiveRecord Migration 並沒有內建相關功能，所以需要自行撰寫 SQL 式來建立 Staffs 表，在建立時需實際指定繼承自 users 表，並且將額外附加的欄位等屬性設定進去即可。</p>
+
+<p>在 Model 的程式方面，必需指定子類別的資料表，否則 Rails 會按照 STI 預設行為去使用父類別的資料表（users）。</p>
+
+<p>在這個範例中，在 staffs 表建立的資料都會出現在 users 表上，反之則不會。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="s1">&#39;ryudo&#39;</span><span class="p">,</span> <span class="ss">password</span><span class="p">:</span><span class="s1">&#39;12345&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="no">Staff</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span><span class="s1">&#39;Jodeci&#39;</span><span class="p">,</span><span class="ss">password</span><span class="p">:</span><span class="s1">&#39;12345&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:username</span><span class="p">)</span>
+</span><span class='line'>   <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;users&quot;</span><span class="o">.</span><span class="s2">&quot;username&quot;</span> <span class="no">FROM</span> <span class="s2">&quot;users&quot;</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="o">[</span><span class="s2">&quot;ryudo&quot;</span><span class="p">,</span> <span class="s2">&quot;Jodeci&quot;</span><span class="o">]</span>
+</span><span class='line'><span class="no">Staff</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:username</span><span class="p">)</span>
+</span><span class='line'>   <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;staffs&quot;</span><span class="o">.</span><span class="s2">&quot;username&quot;</span> <span class="no">FROM</span> <span class="s2">&quot;staffs&quot;</span> <span class="no">WHERE</span> <span class="s2">&quot;staffs&quot;</span><span class="o">.</span><span class="s2">&quot;type&quot;</span> <span class="no">IN</span> <span class="p">(</span><span class="s1">&#39;Staff&#39;</span><span class="p">)</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="o">[</span><span class="s2">&quot;Jodeci&quot;</span><span class="o">]</span>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">count</span> <span class="c1">#=&gt; 2</span>
+</span><span class='line'><span class="no">Staff</span><span class="o">.</span><span class="n">count</span> <span class="c1">#=&gt; 1</span>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">last</span>
+</span><span class='line'>  <span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">6</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span>  <span class="s2">&quot;users&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;users&quot;</span> <span class="no">ORDER</span> <span class="no">BY</span> <span class="s2">&quot;users&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">DESC</span> <span class="no">LIMIT</span> <span class="vg">$1</span>  <span class="o">[[</span><span class="s2">&quot;LIMIT&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="o">]]</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;Staff id: 2, username: &quot;Jodeci&quot;, password: &quot;12345&quot;, type: &quot;Staff&quot;, created_at: &quot;2015-12-31 07:12:16&quot;, updated_at: &quot;2015-12-31 07:12:16&quot;&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>Table Inheritance 會繼承的東西：</h4>
+
+<ul>
+<li>欄位資訊：包括預設值或是 NOT NULL，也就是在 SQL 建構式中看到欄位敘述的內容。</li>
+<li>父表上的欄位變動：也就是之後在父表上新增刪除修改欄位的變動，會確實的反應到子表上。</li>
+</ul>
+
+
+<h4>Table Inheritance 不會繼承的東西：</h4>
+
+<ul>
+<li>欄位資訊以外的全部：包括 Primary Key、Constraint 或是 Index 等。</li>
+</ul>
+
+
+<h4>主鍵重複值問題</h4>
+
+<p>這應該是最大的困擾之一，就是繼承的子表的主鍵是可以和父表的值重複的，例如以下的程式碼是可以正確執行的：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="ss">username</span><span class="p">:</span> <span class="s1">&#39;ryudo&#39;</span><span class="p">,</span> <span class="ss">password</span><span class="p">:</span><span class="s1">&#39;12345&#39;</span><span class="p">)</span> <span class="c1">#=&gt; 建立 id 為 1 的 User</span>
+</span><span class='line'><span class="no">Staff</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="ss">username</span><span class="p">:</span><span class="s1">&#39;Jodeci&#39;</span><span class="p">,</span><span class="ss">password</span><span class="p">:</span><span class="s1">&#39;12345&#39;</span><span class="p">)</span> <span class="c1">#=&gt; 建立 id 為 1 的 Staff</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這樣在 users 表會真的有兩筆 id 為 1 的紀錄，而且目前無法用資料庫的方式去迴避這個問題，不過由於兩個 id 之間是共用同一個 Sequence，在不指定 id 建立資料的狀況下，id 的值是不會重複的。</p>
+
+<h4>inheritance_column 存廢問題：</h4>
+
+<p>在上面的範例中，我們可以看到原本 STI 的 inheritance_column，也就是 type 這個欄位的存在，原本 STI 的設計是：子類別的資料將會自動在 type 上加上類別名稱，查詢 Staff 時也會預設查詢 type 為 Staff 的資料。</p>
+
+<p>這個設計是因為在資料同屬一張表的前提下，必需用一個欄位去區分類別的關係，而在 Table Inheritance 下，由於每個類別有獨立的資料表，在查詢子類別時已經不需要用 type 這個條件了；但是如果在父類別的資料表查詢時，還是需要用 inheritance_column 去區分出這筆資料所屬的類別，否則所有父類別資料表的資料在 ActiveRecord 中會被視為父類別的資料。</p>
+
+<h4>多表繼承</h4>
+
+<p>其實是有這項功能的，但是目前還沒想到需要使用的場合所以這次就不討論了。</p>
+
+<h3>是否要使用這個功能？</h3>
+
+<h4>好處</h4>
+
+<ul>
+<li>比起 ActiveRecord 提供的 STI 更趨近於物件化</li>
+<li>由於資料表是物理上的切分，等於是一種 Partitioning，在資料量大的時候可以提升子表的效能</li>
+<li>同上，減少欄位或 Index 等資源不必要的浪費</li>
+</ul>
+
+
+<h4>壞處</h4>
+
+<ul>
+<li>Rails 預設不支援相關的 Migration 操作，需手動撰寫 SQL</li>
+<li>同上，在 Model 的設定上必需客製一些設定</li>
+</ul>
+
+
+<p>以上！</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1296,122 +1533,6 @@ Photo by Igarashi Kuniaki</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/09/14/railsgirls-taipei-01/">Rails Girls Taipei-01 活動主辦心得</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-09-14T14:39:00+08:00" pubdate data-updated="true">Sep 14<span>th</span>, 2013</time>
-        
-         | <a href="/blog/2013/09/14/railsgirls-taipei-01/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="http://farm6.staticflickr.com/5471/9698784100_dfb2afc625_b.jpg" alt="Group photo of Rails Girls Taipei-01" /></p>
-
-<p>以下是我和<a href="http://blog.eddie.com.tw/">高見龍</a> 以及<a href="http://blog.taian.su/">泰安</a> 共同主辦第一屆<a href="http://railsgirls.tw/">Rails Girls Taipei</a>活動的心得</p>
-
-<h3>Rails Girls社群</h3>
-
-<p>有關於Rails Girls社群的介紹可以參考<a href="http://www.openfoundry.org/index.php?option=com_content&amp;task=view&amp;id=9044&amp;Itemid=4">Open Foundry</a>或 <a href="http://www.inside.com.tw/2013/08/12/rails-girls-taipei-workshop">Inside</a>的介紹, 在此就不再儹述。</p>
-
-<h3>緣起</h3>
-
-<p>女性, 在台灣的程式社群屬於稀有動物的範疇, 一般來說在各大程式研討會中女會眾的比例通常在百分之三或以下, 所以一開始知道有<a href="http://railsgirls.com">Rails Girls</a>這種活動(或著可以說是社群)時並不是特別感興趣; 轉捩點是四月和高見龍一起開<a href="http://blog.eddie.com.tw/2013/04/22/1st-ruby-and-rails-training-course/">有心人課程</a>時, 發現竟然有意外多的女性學員(約佔全部學員的四分之一), 讓我們重新考慮舉辦這個活動的可能性; 研究了一下之後, 發現他是可以自由申請主辦的, 因此在五月初準備Rubykaigi 2013的行程與演講時, 就試著填寫了主站上的申請表單, Rails Girls的創辦人Linda Liukas也很快的就回應我, 讓我加入了世界各地Rails Girls活動的主辦群中。</p>
-
-<p>加入「世界各地的Rails Girls主辦群」之後, 就是可以加入Railsgilrs.com網站的Github Repository, 以及修改或新增網站的內容, 使用Repository內的資源(圖片/素材)之外 還有加入Rails Girls的maillist;  除此之外都要由當地的主辦人自行張羅。</p>
-
-<h3>在日本的見聞</h3>
-
-<p>我在五月底至六月初和高見龍一同前往日本參加<a href="http://ryudo.tw/blog/2013/06/07/rubykaigi2013-lt">Rubykaigi 2013</a>時, 有幸和日本Rails Girls的主辦人<a href="http://www.hsbt.org">柴田博志</a>先生討論了如何教不會程式的女生上手Rails的方式, 他講到了一個重點「藉由copy &amp; paste, 讓學員有成就感」。</p>
-
-<p>在Rubykaigi三天的議程中, 我們觀察到女性會眾的比例是遠超過5%的, 也藉機在現場認識了許多女性會眾, 發現之中甚至有原本不具程式經驗, 卻因為參加過Rails Girls活動後主動來參加RubyKaigi的女會眾; 而在Rubykaigi後一天舉辦的<a href="http://rubyhiroba.org">Ruby Hiroba</a>的主題活動<a href="https://www.facebook.com/Rails%20GirlsMoreExtended">Rails Girls, more extended</a>中, 同行的高見龍也現場觀察了日本這邊的活動情形, 如名稱上的「more extended」所示, 這是普通Rails Girls活動的進階版, 是採取由學員選擇有興趣的主題, 例如前端或後端技術等, 和熟練這些主題的教練一對二或三的教學形式, 在現場就近直接觀查教學的情形, 對於我們日後的主辦也很有幫助; 整個3+1天的活動之中的所見所聞, 都增加了我們的信心和決心。</p>
-
-<p><img src="http://farm8.staticflickr.com/7424/8901595193_1939a4de96_b_d.jpg" alt="Photo with Nakawaza and Yamaneko @Rubykaigi2013" />
-(在RubyKaigi會場和Rails Girls的學員中澤(中)以及知名的mrubyist Yamane(右)合照)</p>
-
-<h3>開始籌辦</h3>
-
-<p>從日本回來之後一直忙於各種事件, 直到七月才有空開始, 除了本來就決定要一起主辦的高見龍之外, 剛好社群的朋友泰安對於這個活動都很有興趣, 因此我們就決定一起主辦這個活動。</p>
-
-<p>泰安的夫人本身是一位業餘的畫家, 就請他畫了現在各位看到的這個Logo</p>
-
-<p><img src="/images/rg-taipei.jpg" alt="Rails Girls Taiwan Logo" /></p>
-
-<h4>贊助商</h4>
-
-<p>由於這個活動規定不能向學員收取門票, 所以最重要的是找尋贊助商; 想到之前上課的學生阿姿是國內非常知名且歷史悠久的和女性有關的網站<a href="http://verywed.com">非常婚禮verywed</a>的員工, 於是請她幫忙介紹引薦該公司的老闆與技術主管, 在簡短的會談闡明本活動的宗旨後, 該公司也欣然同意贊助本次活動, 順帶一提的是該公司是台灣極少數以女性員工為主的網路公司, 連程式都是以女性員工佔多數, 感謝非常婚禮的幫忙。</p>
-
-<h4>場地</h4>
-
-<p>一開始由於並不知道會有多少人報名, 決定以小而精的場地為主要的考量, 就選擇了在各大程式語言社群中頗負盛名的<a href="http://clbc.tw">CLBC慶隆商務俱樂部</a>為第一順位的場地選擇; 在談完贊助後立刻前往預約, 也很幸運的預約到了想要的時間; 並且獲得老闆Tyler的同意讓我們用公益團體的優惠價格計費, 在此必需要再次的感謝CLBC。</p>
-
-<p><img src="http://farm3.staticflickr.com/2888/9695456801_7ee681348d_b_d.jpg" alt="Rails Girls Taipei-01 Venue" /></p>
-
-<h4>報名</h4>
-
-<p>事先大家最擔心的就是會沒有學員, 畢竟現狀就如前面所提, 程式社群的女性成員是非常稀少的, 不過事後證明這些擔心都是多餘的; 中午開放報名後, 不到2小時就超過了150人, 更在第二天下午時已經超過了320人, 只好提前關閉註冊, 接下來篩選學員的工作反而是最花時間的, 大概花了將近十天在review報名資料上, 由於場地限制的因素, 最後只能選出31位的學員。</p>
-
-<p>學員的資歷方面真的是臥虎藏龍的等級, 有位學員甚至曾經在大陸的百度這種超巨型網路公司工作過, 也有學員特地從台中兩天都當日搭高鐵往返參加的, 最值得一提的是一位來自花蓮數位機會中心的老師, 為了知識傳承, 特地從東部海邊北上來參加活動。</p>
-
-<h4>選取標準</h4>
-
-<p>如同國外創立這個活動的原意, 加上參考日本方面的選取標準後, 我們希望選擇的是比較沒有其它程式經驗的人, 然後重要的是, 在自介中說明以下兩件事：</p>
-
-<ol>
-<li>為什麼妳想參加這個活動？</li>
-<li>讓我們了解妳是一個怎樣的人？</li>
-</ol>
-
-
-<h4>事前準備</h4>
-
-<p>雖然之前已經有一點教Ruby的經驗, 不過教完全新手的事, 從學生時代以後就沒體驗過, 這次我們決定由一位教練負責2位學員, 因此從社群徵求了15位朋友來擔任教練的工作, 在Ruby Tuesday#25的會後進行了第一次的討論; 決定了教學方向後, 教材的部份就由泰安負責主編, 其他教練協助編輯, 成果可以在<a href="https://github.com/railsgirls-taiwan">Github</a>上看到; 加上一位公費留學過歐洲, 英文非常流利的教練<a href="https://twitter.com/JuanitoFatas">@JuanitoFatas</a>幫忙翻譯了<a href="http://guides.railsgirls.tw">Rails Girls Guides</a>為主的很多文件, 讓我們雖然是首次主辦, 但各方面規模與完整性並不輸給國外。</p>
-
-<h4>現場狀況</h4>
-
-<p>雖然已經主辦過如<a href="http://ryudo.tw/blog/2013/04/23/rubyconftw-2012-memories-1">RubyConf Taiwan</a> 這樣的年度國際研討會, 第一次主辦完全以女性為主的活動, 不免還是會擔心出席率等等的問題; 不過活動一切順利, 教練和學員的互動也出乎意外的良好, 可能是因為女生之間一起學習的關係, 一般程式社群中新人女會眾的集體沉默現象在這邊完全不復見, 學員都全程參與, 也沒有遲到早退的問題, 真是可喜可賀。</p>
-
-<p><img src="http://farm4.staticflickr.com/3702/9698686706_29d4fa9f51_b_d.jpg" alt="現場1" />
-<img src="http://farm4.staticflickr.com/3671/9698677328_4ba4ab1959_b_d.jpg" alt="現場2" /></p>
-
-<h4>After Party</h4>
-
-<p>教學之外, 這個活動的目的之一是促進學員和教練之間的互動, After Party也列在官方的Guides內, 因此事先就宣布並徵詢學員的參與意願; 場地方面, 想要維持品質以及營造互動的氛圍, 決定要以Lounge Bar為主, 經友人推薦之下, 選擇了費用上不算便宜的<a href="https://www.facebook.com/Tribeca.TPE">TRIBECA</a>, 由於學員需要自費, 原本以為會變成教練與Staff們為主的聚會, 最後還是有超過一半的學員參加, 大家也聊到了十點才散會。</p>
-
-<p><img src="http://farm4.staticflickr.com/3794/9850705143_0b013f3e26_b_d.jpg" alt="Rails Girls Taipei After Party 2" />
-<img src="http://farm4.staticflickr.com/3793/9850684473_9c65e3c4d6_b_d.jpg" alt="Rails Girls Taipei After Party 3" />
-<img src="http://farm6.staticflickr.com/5445/9851366586_f2b7fd1ed7_b_d.jpg" alt="Rails Girls Taipei After Party" /></p>
-
-<h3>感想</h3>
-
-<p>Ruby真的是一門神奇的語言啊, 原本只是基於想要改變社群性別分布不均這個現狀的心情, 從國外引進並舉辦了這個活動, 卻得到了遠遠出乎意料的反應與成果, 看來21世紀的程式學習趨勢真的不是說說而已, 今後也會繼續這個活動下去, 感謝活動過程中一路相挺的朋友們, 謝謝大家。</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1439,6 +1560,10 @@ Photo by Igarashi Kuniaki</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/12/31/pgsql-inheritance/">Table Inheritance in PostgreSQL</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/18/oedork-and-rwc/">大江戶 RubyKaigi 05, Asakusa.rb 以及 Ruby World Conference</a>
       </li>
     
@@ -1452,10 +1577,6 @@ Photo by Igarashi Kuniaki</p>
     
       <li class="post">
         <a href="/blog/2015/02/18/automatic-urlhelper-test-in-rails/">自動化測試 Rails 中的 URL HELPER</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/15/upgrade-pgsql-from-93-to-94/">在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4</a>
       </li>
     
   </ul>
