@@ -4,7 +4,7 @@
   <title><![CDATA[Category: sti | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/sti/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2015-12-31T17:23:29+08:00</updated>
+  <updated>2016-01-11T21:49:26+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -43,11 +43,13 @@
 
 <h4>實作</h4>
 
-<p><code>bash 建立父類別 User
+<p>建立父類別 User</p>
+
+<p><code>bash
 rails g model User
 </code></p>
 
-<p>``` ruby
+<p>```ruby
 class CreateUsers &lt; ActiveRecord::Migration[5.0]
   def change</p>
 
@@ -62,16 +64,17 @@ end
 <p>  end
 end</p>
 
-<p>class User &lt; ApplicationRecord</p>
-
-<p>end
+<p>class User &lt; ApplicationRecord
+end
 ```</p>
 
-<p><code>bash 建立 sub-class Staff
+<p>建立 sub-class Staff</p>
+
+<p><code>bash
 rails g model Staff
 </code></p>
 
-<p>``` ruby
+<p>```ruby
 class CreateStaffs &lt; ActiveRecord::Migration[5.0]
   def up</p>
 
@@ -136,7 +139,7 @@ User.last
 
 <p>這應該是最大的困擾之一，就是繼承的子表的主鍵是可以和父表的值重複的，例如以下的程式碼是可以正確執行的：</p>
 
-<p><code>ruby
+<p><code>ruby 測試title
 User.create(id:1, username: 'ryudo', password:'12345') #=&gt; 建立 id 為 1 的 User
 Staff.create(id:1,username:'Jodeci',password:'12345') #=&gt; 建立 id 為 1 的 Staff
 </code></p>

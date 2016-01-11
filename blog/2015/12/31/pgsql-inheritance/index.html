@@ -121,7 +121,9 @@
 
 <h4>實作</h4>
 
-<figure class='code'><figcaption><span>建立父類別 User</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<p>建立父類別 User</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='bash'><span class='line'>rails g model User
 </span></code></pre></td></tr></table></div></figure>
 
@@ -141,7 +143,6 @@
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
-<span class='line-number'>14</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CreateUsers</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span><span class="o">[</span><span class="mi">5</span><span class="o">.</span><span class="mi">0</span><span class="o">]</span>
 </span><span class='line'>  <span class="k">def</span> <span class="nf">change</span>
 </span><span class='line'>    <span class="n">create_table</span> <span class="ss">:users</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
@@ -154,14 +155,13 @@
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
-</span><span class='line'>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
+<p>建立 sub-class Staff</p>
 
-
-<figure class='code'><figcaption><span>建立 sub-class Staff</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='bash'><span class='line'>rails g model Staff
 </span></code></pre></td></tr></table></div></figure>
 
@@ -255,7 +255,7 @@
 
 <p>這應該是最大的困擾之一，就是繼承的子表的主鍵是可以和父表的值重複的，例如以下的程式碼是可以正確執行的：</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span>測試title</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="ss">username</span><span class="p">:</span> <span class="s1">&#39;ryudo&#39;</span><span class="p">,</span> <span class="ss">password</span><span class="p">:</span><span class="s1">&#39;12345&#39;</span><span class="p">)</span> <span class="c1">#=&gt; 建立 id 為 1 的 User</span>
 </span><span class='line'><span class="no">Staff</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="ss">username</span><span class="p">:</span><span class="s1">&#39;Jodeci&#39;</span><span class="p">,</span><span class="ss">password</span><span class="p">:</span><span class="s1">&#39;12345&#39;</span><span class="p">)</span> <span class="c1">#=&gt; 建立 id 為 1 的 Staff</span>
@@ -454,7 +454,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - Mu-Fan Teng -
+  Copyright &copy; 2016 - Mu-Fan Teng -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
