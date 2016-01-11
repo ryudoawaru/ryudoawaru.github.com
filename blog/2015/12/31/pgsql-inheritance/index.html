@@ -111,7 +111,14 @@
 
 <h3>PostgreSQL 的 Table Inheritance</h3>
 
-<p>PostgreSQL 的 Table Inheritance 和 STI 最大的差別在於多表繼承，在官網上就有相當詳細的<a href="http://www.postgresql.org/docs/9.1/static/ddl-inherit.html">介紹</a></p>
+<p>PostgreSQL 的 Table Inheritance 和 STI 最大的差別在於多表繼承，在官網上就有相當詳細的<a href="http://www.postgresql.org/docs/9.1/static/ddl-inherit.html">介紹</a>，基本上就是在資料表之間實作出繼承的關係，B 表繼承 A 表的話，則：</p>
+
+<ul>
+<li>B 表會有所有 A 表的欄位資訊</li>
+<li>即使日後 A 表欄位有所變動，也會即時反應到 B 表上</li>
+<li>B 表所建立的資料，在查尋 A 表時會全部出現，反之則無</li>
+</ul>
+
 
 <p>接下來我們就來介紹如何在 Rails 中用 PostgreSQL 的 Table Inheritance 來實作 ActiveRecord 的物件繼承。</p>
 
