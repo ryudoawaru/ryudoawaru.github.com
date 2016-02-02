@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4 - 慕凡(@ryudoawaru)'s blog</title>
+  <title>在 OSX 下升級 Homebrew 安裝的 PostgreSQL(dump 版) - 慕凡(@ryudoawaru)'s blog</title>
   <meta name="author" content="Mu-Fan Teng">
 
   
-  <meta name="description" content="前言 PostgreSQL 和 MySQL 不同，資料檔格式會隨著小數點二位數以上的版號（9.3 - 9.4）變動，換句話說每當升級版本時，資料檔就必需要升級才可以繼續使用。 升級的方式有兩種： 將原本的資料執行 pg_dumpall 後再 restore 回去
-用 pg_upgrade &hellip;">
+  <meta name="description" content="前言 繼上一篇的 在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4 之後，最近由於更換筆電 / 不想用 TimeMachine 加上剛好 PostgreSQL 9.5 發佈的關係，必需重新用 Homebrew 安裝 PostgreSQL 9.5， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/">
+  <link rel="canonical" href="http://ryudo.tw/blog/2016/02/02/upgrade-postgresql-on-osx/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="慕凡(@ryudoawaru)'s blog" type="application/atom+xml">
@@ -70,7 +69,7 @@
   
   <header>
     
-      <h1 class="entry-title">在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4</h1>
+      <h1 class="entry-title">在 OSX 下升級 Homebrew 安裝的 PostgreSQL(dump 版)</h1>
     
     
       <p class="meta">
@@ -86,7 +85,7 @@
   
 
 
-<time datetime="2015-02-15T22:10:00+08:00" pubdate data-updated="true">Feb 15<span>th</span>, 2015</time>
+<time datetime="2016-02-02T15:28:00+08:00" pubdate data-updated="true">Feb 2<span>nd</span>, 2016</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -97,88 +96,54 @@
 
 <div class="entry-content"><h3>前言</h3>
 
-<p>PostgreSQL 和 MySQL 不同，資料檔格式會隨著小數點二位數以上的版號（9.3 - 9.4）變動，換句話說每當升級版本時，資料檔就必需要升級才可以繼續使用。</p>
+<p>繼上一篇的 <a href="/blog/2015/02/15/upgrade-pgsql-from-93-to-94/">在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4</a> 之後，最近由於更換筆電 / 不想用 TimeMachine 加上剛好 PostgreSQL 9.5 發佈的關係，必需重新用 Homebrew 安裝 PostgreSQL 9.5，本來使用了前篇所介紹的方式來移轉舊版 PostgreSQL 9.4 的資料檔，但是很神奇地發現在所有 Rails App 的 DB 中的 schema_migration 表的資料通通遺失了，所以就必需要使用另一種方式來升級。</p>
 
-<p>升級的方式有兩種：</p>
+<h3>升級的方式</h3>
+
+<p>一般來說有以下兩種</p>
 
 <ul>
-<li>將原本的資料執行 <a href="http://www.postgresql.org/docs/9.4/static/app-pg-dumpall.html">pg_dumpall</a> 後再 restore 回去</li>
-<li>用 <a href="http://www.postgresql.org/docs/9.4/static/pgupgrade.html">pg_upgrade</a> 命令從舊的資料檔產生出新版本的資料檔。</li>
+<li><p>從資料檔案 (raw data file) 轉移</p>
+
+<p>不像 MySQL，PostgreSQL 每個版本的 raw data file 都是不相容的（註：MySQL 也要看 Storage Engine），所以當升級新版的時候是不能直接套用的，PostgreSQL 也提供了 pg_upgrade 指令來幫助升級，這也是前一篇的主題。</p></li>
+<li><p>使用 SQL 檔案轉移</p>
+
+<p>使用 pg_dump 或 pg_dumpall 等工具將舊 DB Dump 成 SQL 指令的格式，再輸入到新 DB 上即可></p></li>
 </ul>
 
 
-<p>這邊要講的是第二種情形。</p>
-
-<h3>環境限定：</h3>
-
-<ul>
-<li>可執行 <a href="http://brew.sh/">Homebrew</a> 的 MacOS 環境</li>
-<li>原 PostgreSQL 為 Homebrew 安裝，9.3.x 版</li>
-</ul>
-
-
-<h3>步驟</h3>
+<h3>流程</h3>
 
 <ol>
-<li>安裝新的 PostgreSQL
+<li><p>更改資料檔目錄</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>brew update
-</span><span class='line'>brew install postgresql
-</span></code></pre></td></tr></table></div></figure>
+<p>Homebrew 預設的資料檔目錄在 <code>/usr/local/var/postgres</code> 請把它移到另一個目錄去</p></li>
+<li><p>自舊版 PostgreSQL Dump SQL 檔案</p>
 
-</li>
-<li>停止現在的 PostgreSQL Daemon
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
-</span></code></pre></td></tr></table></div></figure>
-</li>
-<li>建立 9.4 的資料庫檔案
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>initdb /usr/local/var/postgres9.4 -E utf8
-</span></code></pre></td></tr></table></div></figure>
-</li>
-<li>使用 pg_upgrade 指令升級 舊PG的資料檔案到 9.4，注意這邊的 9.3.5_1 和 9.4.0 是會依照你的舊版本和實際安裝的新板本的版號而有差異的
+<p>如果還沒有升級新版前，就直接執行</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pg_upgrade -v <span class="se">\</span>
-</span><span class='line'>    -d /usr/local/var/postgres <span class="se">\</span>
-</span><span class='line'>    -D /usr/local/var/postgres9.4 <span class="se">\</span>
-</span><span class='line'>    -b /usr/local/Cellar/postgresql/9.3.5_1/bin/ <span class="se">\</span>
-</span><span class='line'>    -B /usr/local/Cellar/postgresql/9.4.0/bin/
-</span></code></pre></td></tr></table></div></figure>
-</li>
-<li>將舊資料檔備份，並且讓新資料檔的目錄更名使之變成預設的資料檔
+<p><code>
+pg_dumpall -c -f 目的檔案名
+</code></p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> /usr/local/var
-</span><span class='line'>mv postgres postgres9.3
-</span><span class='line'>mv postgres9.4 postgres
-</span></code></pre></td></tr></table></div></figure>
-</li>
-<li>
-重啟 PostgreSQL
+<p>即可，選項 -c 是在 dump 檔中附加移除既存 DB 的指令，可視個人需求決定要不要加。</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
-</span></code></pre></td></tr></table></div></figure>
-</li>
+<p>要是已經升級新版的話，由於 PostgreSQL 套件的發佈者都很貼心的把所有檔案照版本排列，所以可以用以下的指令開啟一個暫時的 PostgreSQL Daemon</p>
 
-<li>檢查 /usr/local/var/postgres/server.log 檔是否有正常啟動 server</li>
-<li>如果原本有安裝
-<a href="https://rubygems.org/gems/pg">pg GEM</a>
-的話要重新安裝</li>
+<p><code>
+/usr/local/Cellar/postgresql/9.4.1/bin/postmaster -D /usr/local/var/postgres94/ -k /tmp/pg94/ -p 8822
+</code></p>
+
+<p>選項中 -D 是指定資料檔目錄，-k 是 socket file 的目錄，-p 是 port，要注意這兩者都不能和執行中的新版本重疊，這樣就順利開啟了服務，然後再執行 <code>pg_dumpall -c -p 8822 -h /tmp/pg94</code> 就可以取得 dump SQL 檔了</p></li>
+<li><p>自 dump SQL 檔還原到新版資料庫中</p>
+
+<p>在上一步的 dump 指令中就可以用 pipe 一步完成了：</p>
+
+<p><code>pg_dumpall -c -p 8822 -h /tmp/pg94 | psql postgres</code></p></li>
 </ol>
 
 
-<p>以上！</p>
+<p>以上</p>
 </div>
 
 
@@ -201,12 +166,12 @@
   
 
 
-<time datetime="2015-02-15T22:10:00+08:00" pubdate data-updated="true">Feb 15<span>th</span>, 2015</time>
+<time datetime="2016-02-02T15:28:00+08:00" pubdate data-updated="true">Feb 2<span>nd</span>, 2016</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/database/'>database,</a>, <a class='category' href='/blog/categories/homebrew/'>homebrew</a>, <a class='category' href='/blog/categories/pgsql/'>pgsql,</a>, <a class='category' href='/blog/categories/postgresql/'>postgresql,</a>
+    <a class='category' href='/blog/categories/database/'>database,</a>, <a class='category' href='/blog/categories/homebrew/'>homebrew,</a>, <a class='category' href='/blog/categories/pg-dump/'>pg_dump_</a>, <a class='category' href='/blog/categories/pgsql/'>pgsql,</a>, <a class='category' href='/blog/categories/postgresql/'>postgresql,</a>
   
 </span>
 
@@ -215,7 +180,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/" data-via="ryudoawaru" data-counturl="http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://ryudo.tw/blog/2016/02/02/upgrade-postgresql-on-osx/" data-via="ryudoawaru" data-counturl="http://ryudo.tw/blog/2016/02/02/upgrade-postgresql-on-osx/" >Tweet</a>
   
   
   
@@ -226,10 +191,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/09/28/shibuya-it-tour-by-igaiga555/" title="Previous Post: 銘謝文--RubyKaigi 2014之旅以及 Rails Girls Taipei 獎助金計劃">&laquo; 銘謝文--RubyKaigi 2014之旅以及 Rails Girls Taipei 獎助金計劃</a>
+        <a class="basic-alignment left" href="/blog/2015/12/31/pgsql-inheritance/" title="Previous Post: Table Inheritance in PostgreSQL">&laquo; Table Inheritance in PostgreSQL</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/02/18/automatic-urlhelper-test-in-rails/" title="Next Post: 自動化測試 Rails 中的 URL HELPER">自動化測試 Rails 中的 URL HELPER &raquo;</a>
       
     </p>
   </footer>
@@ -353,8 +316,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/';
-        var disqus_url = 'http://ryudo.tw/blog/2015/02/15/upgrade-pgsql-from-93-to-94/';
+        var disqus_identifier = 'http://ryudo.tw/blog/2016/02/02/upgrade-postgresql-on-osx/';
+        var disqus_url = 'http://ryudo.tw/blog/2016/02/02/upgrade-postgresql-on-osx/';
         var disqus_script = 'embed.js';
       
     (function () {

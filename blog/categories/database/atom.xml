@@ -4,7 +4,7 @@
   <title><![CDATA[Category: database, | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/database/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2016-01-11T22:00:32+08:00</updated>
+  <updated>2016-02-02T16:24:47+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -12,6 +12,64 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[在 OSX 下升級 Homebrew 安裝的 PostgreSQL(dump 版)]]></title>
+    <link href="http://ryudo.tw/blog/2016/02/02/upgrade-postgresql-on-osx/"/>
+    <updated>2016-02-02T15:28:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2016/02/02/upgrade-postgresql-on-osx</id>
+    <content type="html"><![CDATA[<h3>前言</h3>
+
+<p>繼上一篇的 <a href="/blog/2015/02/15/upgrade-pgsql-from-93-to-94/">在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4</a> 之後，最近由於更換筆電 / 不想用 TimeMachine 加上剛好 PostgreSQL 9.5 發佈的關係，必需重新用 Homebrew 安裝 PostgreSQL 9.5，本來使用了前篇所介紹的方式來移轉舊版 PostgreSQL 9.4 的資料檔，但是很神奇地發現在所有 Rails App 的 DB 中的 schema_migration 表的資料通通遺失了，所以就必需要使用另一種方式來升級。</p>
+
+<h3>升級的方式</h3>
+
+<p>一般來說有以下兩種</p>
+
+<ul>
+<li><p>從資料檔案 (raw data file) 轉移</p>
+
+<p>不像 MySQL，PostgreSQL 每個版本的 raw data file 都是不相容的（註：MySQL 也要看 Storage Engine），所以當升級新版的時候是不能直接套用的，PostgreSQL 也提供了 pg_upgrade 指令來幫助升級，這也是前一篇的主題。</p></li>
+<li><p>使用 SQL 檔案轉移</p>
+
+<p>使用 pg_dump 或 pg_dumpall 等工具將舊 DB Dump 成 SQL 指令的格式，再輸入到新 DB 上即可></p></li>
+</ul>
+
+
+<h3>流程</h3>
+
+<ol>
+<li><p>更改資料檔目錄</p>
+
+<p>Homebrew 預設的資料檔目錄在 <code>/usr/local/var/postgres</code> 請把它移到另一個目錄去</p></li>
+<li><p>自舊版 PostgreSQL Dump SQL 檔案</p>
+
+<p>如果還沒有升級新版前，就直接執行</p>
+
+<p><code>
+pg_dumpall -c -f 目的檔案名
+</code></p>
+
+<p>即可，選項 -c 是在 dump 檔中附加移除既存 DB 的指令，可視個人需求決定要不要加。</p>
+
+<p>要是已經升級新版的話，由於 PostgreSQL 套件的發佈者都很貼心的把所有檔案照版本排列，所以可以用以下的指令開啟一個暫時的 PostgreSQL Daemon</p>
+
+<p><code>
+/usr/local/Cellar/postgresql/9.4.1/bin/postmaster -D /usr/local/var/postgres94/ -k /tmp/pg94/ -p 8822
+</code></p>
+
+<p>選項中 -D 是指定資料檔目錄，-k 是 socket file 的目錄，-p 是 port，要注意這兩者都不能和執行中的新版本重疊，這樣就順利開啟了服務，然後再執行 <code>pg_dumpall -c -p 8822 -h /tmp/pg94</code> 就可以取得 dump SQL 檔了</p></li>
+<li><p>自 dump SQL 檔還原到新版資料庫中</p>
+
+<p>在上一步的 dump 指令中就可以用 pipe 一步完成了：</p>
+
+<p><code>pg_dumpall -c -p 8822 -h /tmp/pg94 | psql postgres</code></p></li>
+</ol>
+
+
+<p>以上</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4]]></title>

@@ -9,9 +9,7 @@
   <meta name="author" content="Mu-Fan Teng">
 
   
-  <meta name="description" content="前言 Single Table Inheritance（以下簡稱 STI） 是我們在 Rails 常用的一個功能，一般來說 STI 在 Rails 的實現方式如下： 一張資料表
-多個 ActiveRecord Class 使用這張表
-預設用 type 這個欄位來界定這筆紀錄所屬的 class &hellip;">
+  <meta name="description" content="前言 繼上一篇的 在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4 之後，最近由於更換筆電 / 不想用 TimeMachine 加上剛好 PostgreSQL 9.5 發佈的關係，必需重新用 Homebrew 安裝 PostgreSQL 9.5， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -68,6 +66,93 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/02/02/upgrade-postgresql-on-osx/">在 OSX 下升級 Homebrew 安裝的 PostgreSQL(dump 版)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-02-02T15:28:00+08:00" pubdate data-updated="true">Feb 2<span>nd</span>, 2016</time>
+        
+         | <a href="/blog/2016/02/02/upgrade-postgresql-on-osx/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>前言</h3>
+
+<p>繼上一篇的 <a href="/blog/2015/02/15/upgrade-pgsql-from-93-to-94/">在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4</a> 之後，最近由於更換筆電 / 不想用 TimeMachine 加上剛好 PostgreSQL 9.5 發佈的關係，必需重新用 Homebrew 安裝 PostgreSQL 9.5，本來使用了前篇所介紹的方式來移轉舊版 PostgreSQL 9.4 的資料檔，但是很神奇地發現在所有 Rails App 的 DB 中的 schema_migration 表的資料通通遺失了，所以就必需要使用另一種方式來升級。</p>
+
+<h3>升級的方式</h3>
+
+<p>一般來說有以下兩種</p>
+
+<ul>
+<li><p>從資料檔案 (raw data file) 轉移</p>
+
+<p>不像 MySQL，PostgreSQL 每個版本的 raw data file 都是不相容的（註：MySQL 也要看 Storage Engine），所以當升級新版的時候是不能直接套用的，PostgreSQL 也提供了 pg_upgrade 指令來幫助升級，這也是前一篇的主題。</p></li>
+<li><p>使用 SQL 檔案轉移</p>
+
+<p>使用 pg_dump 或 pg_dumpall 等工具將舊 DB Dump 成 SQL 指令的格式，再輸入到新 DB 上即可></p></li>
+</ul>
+
+
+<h3>流程</h3>
+
+<ol>
+<li><p>更改資料檔目錄</p>
+
+<p>Homebrew 預設的資料檔目錄在 <code>/usr/local/var/postgres</code> 請把它移到另一個目錄去</p></li>
+<li><p>自舊版 PostgreSQL Dump SQL 檔案</p>
+
+<p>如果還沒有升級新版前，就直接執行</p>
+
+<p><code>
+pg_dumpall -c -f 目的檔案名
+</code></p>
+
+<p>即可，選項 -c 是在 dump 檔中附加移除既存 DB 的指令，可視個人需求決定要不要加。</p>
+
+<p>要是已經升級新版的話，由於 PostgreSQL 套件的發佈者都很貼心的把所有檔案照版本排列，所以可以用以下的指令開啟一個暫時的 PostgreSQL Daemon</p>
+
+<p><code>
+/usr/local/Cellar/postgresql/9.4.1/bin/postmaster -D /usr/local/var/postgres94/ -k /tmp/pg94/ -p 8822
+</code></p>
+
+<p>選項中 -D 是指定資料檔目錄，-k 是 socket file 的目錄，-p 是 port，要注意這兩者都不能和執行中的新版本重疊，這樣就順利開啟了服務，然後再執行 <code>pg_dumpall -c -p 8822 -h /tmp/pg94</code> 就可以取得 dump SQL 檔了</p></li>
+<li><p>自 dump SQL 檔還原到新版資料庫中</p>
+
+<p>在上一步的 dump 指令中就可以用 pipe 一步完成了：</p>
+
+<p><code>pg_dumpall -c -p 8822 -h /tmp/pg94 | psql postgres</code></p></li>
+</ol>
+
+
+<p>以上</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1480,70 +1565,6 @@ Photo by Igarashi Kuniaki</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/01/01/my2013/">2013回顧[CH]</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-01-01T00:18:00+08:00" pubdate data-updated="true">Jan 1<span>st</span>, 2014</time>
-        
-         | <a href="/blog/2014/01/01/my2013/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>2013大事紀</h2>
-
-<ul>
-<li> 一月, 在WebConf Taiwan 2013 發表「<a href="http://www.youtube.com/watch?v=WEgoBZkS9Uw">非典型貧窮網站維運經驗分享</a>」</li>
-<li>二月, 舉辦[Ruby 20週年慶祝趴] (https://kktix.com/events/ruby20)</li>
-<li>四月, 接棒ihower主辦Ruby Tuesday以及<a href="http://ruby.tw">Ruby Taiwan社群</a>, 開始<a href="https://kktix.com/events/ruby-tuesday-22/">Ruby Tuesday 22</a></li>
-<li>五月底, 和社群朋友一同參加<a href="http://rubykaigi.org/2013/">Ruby Kaigi 2013</a>, 並發表<a href="/blog/2013/06/07/rubykaigi2013-lt/">Lightning Talk</a>向世界的Rubyist們介紹了Ruby Taiwan社群</li>
-<li>七月, 在<a href="https://kktix.com/events/ruby-tuesday-24">Ruby Tuesday 24</a>發表<a href="http://rubytaiwan.tumblr.com/post/55311043584/ruby-tuesday-24">日本行心得</a>, 該場Ruby Tuesday也創下了史上最多與會者的紀錄(報名115, 實到100)</li>
-<li>九月, 和<a href="http://blog.eddie.com.tw/">龍哥</a>與<a href="http://blog.taian.su/">泰安</a>共同<a href="/blog/2013/09/14/railsgirls-taipei-01/">舉辦</a>了<a href="http://railsgirls.tw/2013/10/08/rg-taipei1st-record/">第一屆Rails Girls Taipei</a>;  九月底離開Resume Companion</li>
-<li>十一月, 舉辦<a href="http://railsgirls.tw/2013/11/29/rg-taipei2nd-record/">第二屆Rails Girls Taipei</a>, 接任<a href="http://rubyconf.tw/">RubyConf Taiwan</a>總召</li>
-</ul>
-
-
-<p>回顧2013, 最多事件發生在經營Ruby社群方面, 雖然從小以來對辦活動或是搞社團都不太熱衷, 參與社群最初的目的也只是想要精進自己的技術和交朋友, 不知不覺Ruby社群就變成生活重心之一了, 參加RubyKaigi 2013期間的所見所聞也對我產生了很大的衝擊, 明年的目標有：</p>
-
-<ul>
-<li>成功舉辦RubyConf Taiwan 2014</li>
-<li>讓某個該上線的網站上線(秘)</li>
-<li>讓上述的網站正常營運</li>
-<li>持續經營Rails Girls 社群</li>
-<li>在國外的conf發表talk或session</li>
-<li>學好日文</li>
-<li>學好英文</li>
-</ul>
-
-
-<h1>加油！</h1>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1571,6 +1592,10 @@ Photo by Igarashi Kuniaki</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/02/02/upgrade-postgresql-on-osx/">在 OSX 下升級 Homebrew 安裝的 PostgreSQL(dump 版)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/31/pgsql-inheritance/">Table Inheritance in PostgreSQL</a>
       </li>
     
@@ -1584,10 +1609,6 @@ Photo by Igarashi Kuniaki</p>
     
       <li class="post">
         <a href="/blog/2015/02/20/fix-locale-in-linux/">解決用 Mac 登入 Linux 主機時出現的 locale 警告訊息</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/18/automatic-urlhelper-test-in-rails/">自動化測試 Rails 中的 URL HELPER</a>
       </li>
     
   </ul>
