@@ -4,7 +4,7 @@
   <title><![CDATA[慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2016-02-02T16:24:47+08:00</updated>
+  <updated>2016-02-16T11:36:33+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -12,6 +12,40 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[將 5xruby.tw 升級到 Rails 5.0.0.beta2]]></title>
+    <link href="http://ryudo.tw/blog/2016/02/05/upgrade-5xruby-to-5-dot-0-beta/"/>
+    <updated>2016-02-05T15:01:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2016/02/05/upgrade-5xruby-to-5-dot-0-beta</id>
+    <content type="html"><![CDATA[<p>最近將敝公司 5xruby.tw 的官網的 Rails 版本升級到 5.0.0.beta2，具體的升級 commit 主要在 <a href="https://github.com/5xRuby/5xruby.tw/commit/5d7587d341e63bb0260c52410dafd4514c38bbc4">5d7587d</a>，以下是一些步驟說明：</p>
+
+<ol>
+<li>確認 Ruby 版本在 2.2.1 以上，最好是 2.3</li>
+<li>在 Gemfile 設定 rails 的版本為 5.0.0.beta2</li>
+<li>同時，確認所有安裝的 Rubygem 是否需要升級，將版號設定好</li>
+<li>執行 <code>bundle update</code></li>
+<li>先執行 <code>rails update</code> 確認是否每個檔案都需要更改，先讓每個檔案都被覆寫到，再回頭看 diff 進行必要修改</li>
+</ol>
+
+
+<p>需要配合升級的 RubyGem</p>
+
+<ol>
+<li>kaminari: 請用 Github 上的 Master branch</li>
+<li>simple_form: 請使用最新版 3.2.1</li>
+<li>acts-as-taggable-on: 一定要用 Master branch，即使版號看起來一樣</li>
+<li>rack-mini-profiler: Master branch</li>
+<li>Rails 相關的 Asset Rubygems</li>
+<li>Capistrano 升級後配合修改 Capfile 中的版號</li>
+</ol>
+
+
+<p>這次升級比預料中平穩，沒有花很多時間就完成了。</p>
+
+<p>以上</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[在 OSX 下升級 Homebrew 安裝的 PostgreSQL(dump 版)]]></title>
@@ -1893,15 +1927,6 @@ Photo by Igarashi Kuniaki</p>
 <li><p>4/5發現竟然有四位學員<a href="https://github.com/ryudoawaru/sinatra-course-20130329/network">fork</a>了, 真是令人感動, 其中還有人抓到我的<a href="https://github.com/ryudoawaru/sinatra-course-20130329/issues/1">bug</a>..xd</p></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[first_po]]></title>
-    <link href="http://ryudo.tw/blog/2013/03/09/first-po/"/>
-    <updated>2013-03-09T21:44:00+08:00</updated>
-    <id>http://ryudo.tw/blog/2013/03/09/first-po</id>
-    <content type="html"><![CDATA[<p>把部落格蓋著先~~</p>
 ]]></content>
   </entry>
   
