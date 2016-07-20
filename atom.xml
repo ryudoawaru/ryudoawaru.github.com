@@ -4,7 +4,7 @@
   <title><![CDATA[慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2016-02-16T14:29:13+08:00</updated>
+  <updated>2016-07-20T21:44:53+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -12,6 +12,99 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[用 Let's Encrypt 免費 SSL 加密服務在 Nginx 下達成免費的 SSL]]></title>
+    <link href="http://ryudo.tw/blog/2016/02/23/apply-letsencrypt-ssl-under-nginx/"/>
+    <updated>2016-02-23T12:40:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2016/02/23/apply-letsencrypt-ssl-under-nginx</id>
+    <content type="html"><![CDATA[<p><a href="https://letsencrypt.org/">Let&#8217;s Encrypt</a> 是一個（目前）免費的 SSL 服務，它和其它 SSL 服務商的不同，除了免費之外，就是它需要透過一些方式來驗證你對網站的所有權來申請與更新憑證，而且一次憑證的有效期限（目前）最大是 90 天，也就是說你要持續定期的更新憑證才能使用。</p>
+
+<h3>Let&#8217;s Encrypt 運作原理</h3>
+
+<p>如<a href="https://letsencrypt.org/howitworks/technology/">官網</a>所示，比較白話一點的流程大概是：</p>
+
+<ol>
+<li>用指令向 Let&#8217;s Encrypt 要求產生驗證 host example.com 的檔案</li>
+<li>LE 給你驗證檔案</li>
+<li>你將檔案放在 http://example.com/.well-known/acme-challenge 下</li>
+<li>LE 會發出 HTTP Request 驗證該檔案是否存在前述 URL 下</li>
+<li>如果有，則發放證書</li>
+</ol>
+
+
+<p>今天要講的是用 Nginx 加上<a href="https://github.com/zealot128/ruby-letsencrypt-cli">Let&#8217;s Encrypt Ruby Cli</a>的驗證方法</p>
+
+<h4>安裝 Let&#8217;s Encrypt Ruby Cli</h4>
+
+<p>安裝方式就是單純的 <code>gem install letsencrypt-cli</code> 即可。</p>
+
+<h4>事前準備</h4>
+
+<ul>
+<li>安裝好 Gem</li>
+<li>預備好以下目錄：
+
+<ul>
+<li>key-directory：放 key 的地方</li>
+<li>webroot-path：在前述的 step 3 給 LE 做 acme-challenge 的檔案放置目錄</li>
+<li>放置 account_key 的目錄，通常會放在你的 home</li>
+<li>在你要生 SSL 證書的網站的 Virtual Host 的設定內放置以下設定並重啟 nginx，讓 LE 可以用 <code>http://example.com/.well-known/acme-challenge</code> 的網址認證 ：</li>
+</ul>
+</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>server{
+</span><span class='line'>  ...
+</span><span class='line'>  location '/.well-known/acme-challenge/' {
+</span><span class='line'>    default_type "text/plain";
+</span><span class='line'>    alias /var/www/acme-challenge/;
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>註冊 account，執行：<code>letsencrypt-cli register xxx.ooo.com</code></li>
+<li>讓 LE 認證你的網站，執行：<code>letsencrypt-cli authorize --webroot-path /var/www/acme-challenge example.com</code></li>
+<li>生成 key：<code>cd key-directory &amp;&amp; letsencrypt-cli cert example.com</code>，會生成：cert.pem  chain.pem  fullchain.pem  key.pem 等四個檔案</li>
+<li>設定 Nginx 在 Virtual Host 使用剛才產生的檔案：</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>server{
+</span><span class='line'>   ...
+</span><span class='line'>   ssl_certificate key-directory/fullchain.pem;
+</span><span class='line'>   ssl_certificate_key key-directory/key.pem;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>重啟 Nginx，完成</li>
+</ul>
+
+
+<h3>問題整理：</h3>
+
+<ul>
+<li>執行 letsencrypt-cli 出現 <code>Acme::Client::Error::Malformed</code> 錯誤：請降級你的 json-jwt  gem 到 1.5.2</li>
+<li>openssl 版本太舊：openssl 版本建議在 1.0.2 以上</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[將 5xruby.tw 升級到 Rails 5.0.0.beta2]]></title>
@@ -1904,29 +1997,6 @@ Photo by Igarashi Kuniaki</p>
 <p><a href="https://github.com/gimite/web-socket-js">web-socket-js</a>可以解決你的問題, 不過如果你要用haproxy開前端的話就必需要自己設定flash socket policy file, 使用<a href="http://rubygems.org/gems/flash_policy_server">flash_policy_server </a>可手動開這個服務</p>
 
 <p>實際的代碼與架構會在以後說明</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Sinatra課程紀錄]]></title>
-    <link href="http://ryudo.tw/blog/2013/04/05/sinatra-course-20130329/"/>
-    <updated>2013-04-05T20:41:00+08:00</updated>
-    <id>http://ryudo.tw/blog/2013/04/05/sinatra-course-20130329</id>
-    <content type="html"><![CDATA[<p>這次和<a href="http://blog.eddie.com.tw">龍哥</a>一起合辦<a href="http://blog.eddie.com.tw/2013/02/08/new-rubyist-wanted/">有心人的課程</a> 其中的第二天是小弟主講Sinatra &amp; Rack, 以下是講義分享</p>
-
-<script async class="speakerdeck-embed" data-id="e833e210801b01309fec12313933796a" data-ratio="1.2994923857868" src="http://ryudo.tw//speakerdeck.com/assets/embed.js"></script>
-
-
-<p>已將課程所用之原始碼放到<a href="https://github.com/ryudoawaru/sinatra-course-20130329">Github</a></p>
-
-<p>心得：</p>
-
-<ul>
-<li><p>這次準備過程還是很抖, 一開始因為發現了神奇的課程<a href="http://tekpub.com/productions/rack">Understanding Rack</a>因此想把這篇的大意放到教材中, 不過果然還是太難把這麼硬的東西表達出來啊&#8230;.</p></li>
-<li><p>刺激的是除了前一天做講義到五點之外, 十點一起來還接到了公司的message得在緊急狀態之下10分鐘修了production code, 一下課又得繼續修 &amp; Deploy…</p></li>
-<li><p>4/5發現竟然有四位學員<a href="https://github.com/ryudoawaru/sinatra-course-20130329/network">fork</a>了, 真是令人感動, 其中還有人抓到我的<a href="https://github.com/ryudoawaru/sinatra-course-20130329/issues/1">bug</a>..xd</p></li>
-</ul>
-
 ]]></content>
   </entry>
   
