@@ -72,7 +72,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2016/02/23/apply-letsencrypt-ssl-under-nginx/">用 Let&#8217;s Encrypt 免費 SSL 加密服務在 Nginx 下達成免費的 SSL</a></h1>
+      <h1 class="entry-title"><a href="/blog/2016/02/23/apply-letsencrypt-ssl-under-nginx/">用 Letsencrypt-cli Rubygem 在 Nginx 上實裝 Let&#8217;s Encrypt 免費 SSL 服務</a></h1>
     
     
       <p class="meta">
@@ -112,7 +112,16 @@
 </ol>
 
 
-<p>今天要講的是用 Nginx 加上<a href="https://github.com/zealot128/ruby-letsencrypt-cli">Let&#8217;s Encrypt Ruby Cli</a>的驗證方法</p>
+<p>今天要講的是用 Nginx 加上<a href="https://github.com/zealot128/ruby-letsencrypt-cli">Let&#8217;s Encrypt Ruby Cli Rubygem</a>的驗證方法</p>
+
+<h4>為何要使用 ruby-letsencrypt-cli 而非 LE 官方版本 CLI</h4>
+
+<ul>
+<li>不需要 root 權限即可執行</li>
+<li>函式庫相依性較簡單</li>
+<li>功能相對單純</li>
+</ul>
+
 
 <h4>安裝 Let&#8217;s Encrypt Ruby Cli</h4>
 
@@ -151,7 +160,7 @@
 
 
 <ul>
-<li>註冊 account，執行：<code>letsencrypt-cli register xxx.ooo.com</code></li>
+<li>註冊 account，執行：<code>letsencrypt-cli register xxx.ooo.com</code> ，產生帳號密鑰 account_key.pem</li>
 <li>讓 LE 認證你的網站，執行：<code>letsencrypt-cli authorize --webroot-path /var/www/acme-challenge example.com</code></li>
 <li>生成 key：<code>cd key-directory &amp;&amp; letsencrypt-cli cert example.com</code>，會生成：cert.pem  chain.pem  fullchain.pem  key.pem 等四個檔案</li>
 <li>設定 Nginx 在 Virtual Host 使用剛才產生的檔案：</li>
@@ -175,11 +184,23 @@
 </ul>
 
 
+<h4>更新 Key</h4>
+
+<p>執行</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>letsencrypt-cli manage --days-valid 30 -a :account_key.pem的位置: --webroot-path /var/www/acme-challenge --key-directory /etc/letsencrypt/live :你要更新的 hosts 以空白分隔:
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>建議把它加到 crontab 中定時執行</p>
+
 <h3>問題整理：</h3>
 
 <ul>
 <li>執行 letsencrypt-cli 出現 <code>Acme::Client::Error::Malformed</code> 錯誤：請降級你的 json-jwt  gem 到 1.5.2</li>
-<li>openssl 版本太舊：openssl 版本建議在 1.0.2 以上</li>
+<li>出現 Account Key Note Found：命令列加上 <code>-a :account_key.pem的位置:</code></li>
+<li>openssl 版本太舊：openssl 版本建議在 1.0.2 以上，特別是如果要跑 http/2 的話</li>
 </ul>
 
 </div>
@@ -1389,7 +1410,7 @@ Photo by Igarashi Kuniaki</p>
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2016/02/23/apply-letsencrypt-ssl-under-nginx/">用 Let&#8217;s Encrypt 免費 SSL 加密服務在 Nginx 下達成免費的 SSL</a>
+        <a href="/blog/2016/02/23/apply-letsencrypt-ssl-under-nginx/">用 letsencrypt-cli Rubygem 在 Nginx 上實裝 Let&#8217;s Encrypt 免費 SSL 服務</a>
       </li>
     
       <li class="post">
