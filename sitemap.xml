@@ -70,23 +70,27 @@
     </url>
     <url>
         <loc>http://ryudo.tw/blog/2015/11/18/oedork-and-rwc/</loc>
-        <lastmod>2016-01-11T21:48:53+08:00</lastmod>
+        <lastmod>2017-01-11T18:05:04+08:00</lastmod>
     </url>
     <url>
         <loc>http://ryudo.tw/blog/2015/12/31/pgsql-inheritance/</loc>
-        <lastmod>2016-01-11T22:00:02+08:00</lastmod>
+        <lastmod>2017-01-11T18:05:04+08:00</lastmod>
     </url>
     <url>
         <loc>http://ryudo.tw/blog/2016/02/02/upgrade-postgresql-on-osx/</loc>
-        <lastmod>2016-02-02T16:24:30+08:00</lastmod>
+        <lastmod>2017-01-11T18:05:04+08:00</lastmod>
     </url>
     <url>
         <loc>http://ryudo.tw/blog/2016/02/05/upgrade-5xruby-to-5-dot-0-beta/</loc>
-        <lastmod>2016-02-16T11:36:00+08:00</lastmod>
+        <lastmod>2017-01-11T18:05:04+08:00</lastmod>
     </url>
     <url>
         <loc>http://ryudo.tw/blog/2016/02/23/apply-letsencrypt-ssl-under-nginx/</loc>
-        <lastmod>2016-08-17T18:06:17+08:00</lastmod>
+        <lastmod>2017-01-11T18:05:04+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://ryudo.tw/blog/2016/09/26/my-rubykaigi-2016-tour/</loc>
+        <lastmod>2017-01-11T18:49:00+08:00</lastmod>
     </url>
     <url>
         <loc>http://ryudo.tw/about/</loc>
@@ -94,11 +98,11 @@
     </url>
     <url>
         <loc>http://ryudo.tw/blog/archives/</loc>
-        <lastmod>2016-08-17T18:06:17+08:00</lastmod>
+        <lastmod>2017-01-11T18:49:00+08:00</lastmod>
     </url>
     <url>
         <loc>http://ryudo.tw/</loc>
-        <lastmod>2016-08-17T18:06:17+08:00</lastmod>
+        <lastmod>2017-01-11T18:49:00+08:00</lastmod>
     </url>
     <url>
         <loc>http://ryudo.tw/my-presentations/</loc>
