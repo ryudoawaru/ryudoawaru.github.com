@@ -9,7 +9,10 @@
   <meta name="author" content="Mu-Fan Teng">
 
   
-  <meta name="description" content="今年的 RubyKaigi 2016 是我從 2013 以來，連續第四年參加的 RubyKaigi，前面三次除了去年以外都有留下一些紀錄（2013, 2014） RubyKaigi 是神馬？ RubyKaigi 是日本最大的 Ruby 語言年度研討會，Kaigi 就是日文漢字的「会議」， &hellip;">
+  <meta name="description" content="本篇文章簡介在目前最新版的 RHEL 系 OS 上安裝 Rails Stack 的方式 本篇文章的 Rails Stack 包含： 系統上可以跑多重版本的 Ruby
+Rails 5
+PostgreSQL 9.6
+使用 Passenger 為 Application Server，Nginx 為 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +69,230 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017/">Install Ruby / Rails / Passenger / PostgreSQL Stack in RHEL and Variant OS (前篇)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-01-24T15:10:00+08:00" pubdate data-updated="true">Jan 24<span>th</span>, 2017</time>
+        
+         | <a href="/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本篇文章簡介在目前最新版的 RHEL 系 OS 上安裝 Rails Stack 的方式</p>
+
+<p>本篇文章的 Rails Stack 包含：</p>
+
+<ol>
+<li>系統上可以跑多重版本的 Ruby</li>
+<li>Rails 5</li>
+<li>PostgreSQL 9.6</li>
+<li>使用 Passenger 為 Application Server，Nginx 為 Web Frontend Server</li>
+</ol>
+
+
+<p>本篇文章適用的 Linux Distribution：</p>
+
+<ol>
+<li>RedHat Enterprise 7</li>
+<li>CentOS 7</li>
+<li>Fedora 24+</li>
+<li>其它 RHEL 衍生的，以 systemd 為啟動系統的 Linux Distribution 們 (理論上)</li>
+</ol>
+
+
+<p>從乾淨的 OS 開始，步驟大致如下：</p>
+
+<ul>
+<li>安裝必要套件</li>
+<li>安裝 PGDG Repo &amp; PostgreSQL</li>
+<li>編譯 Ruby</li>
+<li>安裝與編譯 Passenger / Nginx Extension</li>
+<li>編譯 Nginx</li>
+<li>啟動設定</li>
+<li>Logrotate &amp;&amp; iptables 設定</li>
+</ul>
+
+
+<h3>安裝必要套件</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>yum groupinstall <span class="s2">&quot;Development Tools&quot;</span>，
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果是 Fedora 的話，通常還會有 &#8220;C Development Tools and Libraries&#8221; 和 &#8220;D Development Tools and Libraries&#8221; 兩種</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>yum install v8-devel v8 screen libmcrypt-devel wget libxslt-devel libxml2-devel gdbm-devel libffi-devel zlib-devel openssl-devel libyaml-devel readline-devel curl-devel  pcre-devel git memcached-devel valgrind-devel ImageMagick-devel ImageMagick npm geoip-devel pcre-devel gd-devel openssl-devel
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>套件說明：</h4>
+
+<p>主要是針對編譯 Ruby 所需，以及其它常見的 RubyGem 如 RMagick 或是 Asset Pipeline 編譯 JS 所需要的套件等。</p>
+
+<h3>安裝 PGDG Repo / PostgreSQL</h3>
+
+<h4>什麼是 <a href="https://yum.postgresql.org/repopackages.php">PGDG</a></h4>
+
+<p>PGDG (PostgreSQL Global Development Group) 是 PostgreSQL (以下簡稱 PgSQL) 的開發單位的簡稱，PGDG Repo 是 PgSQL 的官方為各大 Linux Distribution 提供的套件庫。</p>
+
+<h4>安裝步驟：</h4>
+
+<p>在<a href="https://yum.postgresql.org/repopackages.php">這邊</a>找到對應的 PgSQL 版本與 Distribution 的對應 RPM Url 後，在 Console 下：</p>
+
+<p>以 Fedora 25 + PgSQL 9.6 為例：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rpm -Uvh https://download.postgresql.org/pub/repos/yum/9.6/fedora/fedora-25-x86_64/pgdg-fedora96-9.6-3.noarch.rpm
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然後安裝 PgSQL Server 與開發套件</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>yum install postgresql96 postgresql96-devel postgresql96-server postgresql96-libs postgresql96-contrib
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>請注意如果你安裝的不是 9.6 的話，請將上面的 96 改成對應的版號即可</p>
+
+<h3>編譯 Ruby</h3>
+
+<p>這邊不使用 rvm 或 rbenv 等 Ruby 版本管理套件，而是採用將不同的 Ruby 版本安裝到不同路徑的方式來解決可能在 Server 上同時運行多版本 Ruby 的需求。</p>
+
+<p>路徑設定原則：</p>
+
+<p>例如 2.3 就安裝到 <code>/usr/local/ruby23</code>，2.4就在 <code>/usr/local/ruby24</code> 以此類推</p>
+
+<p>流程：</p>
+
+<ul>
+<li>下載 CRuby source code</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> /usr/src <span class="o">&amp;&amp;</span> wget https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.3.tar.bz2
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>解壓縮</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>tar -jxvpf ruby-2.3.3.tar.bz2
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>configure</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd </span>ruby-2.3.3 <span class="o">&amp;&amp;</span> ./configure --prefix<span class="o">=</span>/usr/local/ruby23
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>make</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>make <span class="o">&amp;&amp;</span> make install
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其它版本可以比照辦理。</p>
+
+<h3>安裝 Passenger 與 Nginx Module</h3>
+
+<ul>
+<li>在執行任何 Ruby 指令前請記得設定系統路徑到要使用 Ruby 版本的 bin 目錄，例如：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:/usr/local/ruby23/bin:
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或是把以上內容加到 <code>~/.bash_profile</code> 的尾端，讓每次登入時自動執行。</p>
+
+<ul>
+<li>安裝 bundler &amp; passenger Gem</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>gem install passenger bundler
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>此時要注意安裝的 Passenger 版號，進入 Passenger 目錄編譯 Passenger Nginx Module，以 Ruby 2.3 和 Passenger 5.1.1 為例：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> /usr/local/ruby23/lib/ruby/gems/2.3.0/gems/passenger-5.1.1/
+</span><span class='line'>rake nginx
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>下載 Nginx 源碼並使用編譯好的 Passenger Module 編譯 (以 1.10.1 版為例)</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> /usr/src <span class="o">&amp;&amp;</span> wget http://nginx.org/download/nginx-1.10.1.tar.gz
+</span><span class='line'>
+</span><span class='line'>tar -zxvf nginx-1.10.1.tar.gz <span class="o">&amp;&amp;</span> <span class="nb">cd </span>nginx-1.10.1
+</span><span class='line'>
+</span><span class='line'>./configure --with-http_v2_module --with-http_ssl_module --prefix<span class="o">=</span>/usr/local/nginx --with-http_image_filter_module --with-http_gzip_static_module --with-http_secure_link_module --with-http_stub_status_module --add-module<span class="o">=</span><span class="s2">&quot;/usr/local/ruby23/lib/ruby/gems/2.3.0/gems/passenger-5.1.1/src/nginx_module&quot;</span>
+</span><span class='line'>
+</span><span class='line'>make <span class="o">&amp;&amp;</span> make install <span class="c">#這裡會將 Nginx 安裝到 /usr/local/nginx 下</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>至此為止 Nginx 已設定完成</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1289,127 +1516,6 @@ LC_ALL=en_US.utf-8
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/15/upgrade-pgsql-from-93-to-94/">在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-15T22:10:00+08:00" pubdate data-updated="true">Feb 15<span>th</span>, 2015</time>
-        
-         | <a href="/blog/2015/02/15/upgrade-pgsql-from-93-to-94/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>前言</h3>
-
-<p>PostgreSQL 和 MySQL 不同，資料檔格式會隨著小數點二位數以上的版號（9.3 - 9.4）變動，換句話說每當升級版本時，資料檔就必需要升級才可以繼續使用。</p>
-
-<p>升級的方式有兩種：</p>
-
-<ul>
-<li>將原本的資料執行 <a href="http://www.postgresql.org/docs/9.4/static/app-pg-dumpall.html">pg_dumpall</a> 後再 restore 回去</li>
-<li>用 <a href="http://www.postgresql.org/docs/9.4/static/pgupgrade.html">pg_upgrade</a> 命令從舊的資料檔產生出新版本的資料檔。</li>
-</ul>
-
-
-<p>這邊要講的是第二種情形。</p>
-
-<h3>環境限定：</h3>
-
-<ul>
-<li>可執行 <a href="http://brew.sh/">Homebrew</a> 的 MacOS 環境</li>
-<li>原 PostgreSQL 為 Homebrew 安裝，9.3.x 版</li>
-</ul>
-
-
-<h3>步驟</h3>
-
-<ol>
-<li>安裝新的 PostgreSQL
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>brew update
-</span><span class='line'>brew install postgresql
-</span></code></pre></td></tr></table></div></figure>
-
-</li>
-<li>停止現在的 PostgreSQL Daemon
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
-</span></code></pre></td></tr></table></div></figure>
-</li>
-<li>建立 9.4 的資料庫檔案
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>initdb /usr/local/var/postgres9.4 -E utf8
-</span></code></pre></td></tr></table></div></figure>
-</li>
-<li>使用 pg_upgrade 指令升級 舊PG的資料檔案到 9.4，注意這邊的 9.3.5_1 和 9.4.0 是會依照你的舊版本和實際安裝的新板本的版號而有差異的
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pg_upgrade -v <span class="se">\</span>
-</span><span class='line'>    -d /usr/local/var/postgres <span class="se">\</span>
-</span><span class='line'>    -D /usr/local/var/postgres9.4 <span class="se">\</span>
-</span><span class='line'>    -b /usr/local/Cellar/postgresql/9.3.5_1/bin/ <span class="se">\</span>
-</span><span class='line'>    -B /usr/local/Cellar/postgresql/9.4.0/bin/
-</span></code></pre></td></tr></table></div></figure>
-</li>
-<li>將舊資料檔備份，並且讓新資料檔的目錄更名使之變成預設的資料檔
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> /usr/local/var
-</span><span class='line'>mv postgres postgres9.3
-</span><span class='line'>mv postgres9.4 postgres
-</span></code></pre></td></tr></table></div></figure>
-</li>
-<li>
-重啟 PostgreSQL
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
-</span></code></pre></td></tr></table></div></figure>
-</li>
-
-<li>檢查 /usr/local/var/postgres/server.log 檔是否有正常啟動 server</li>
-<li>如果原本有安裝
-<a href="https://rubygems.org/gems/pg">pg GEM</a>
-的話要重新安裝</li>
-</ol>
-
-
-<p>以上！</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1437,6 +1543,10 @@ LC_ALL=en_US.utf-8
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017/">Install Ruby / Rails / Passenger / PostgreSQL Stack in RHEL and variant OS (前篇)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/09/26/my-rubykaigi-2016-tour/">RubyKaigi 2016</a>
       </li>
     
@@ -1450,10 +1560,6 @@ LC_ALL=en_US.utf-8
     
       <li class="post">
         <a href="/blog/2016/02/02/upgrade-postgresql-on-osx/">在 OSX 下升級 Homebrew 安裝的 PostgreSQL(dump 版)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/12/31/pgsql-inheritance/">Table Inheritance in PostgreSQL</a>
       </li>
     
   </ul>

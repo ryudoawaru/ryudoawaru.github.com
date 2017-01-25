@@ -4,7 +4,7 @@
   <title><![CDATA[慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2017-01-12T11:46:44+08:00</updated>
+  <updated>2017-01-25T11:55:30+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -12,6 +12,201 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Install Ruby / Rails / Passenger / PostgreSQL Stack in RHEL and variant OS (前篇)]]></title>
+    <link href="http://ryudo.tw/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017/"/>
+    <updated>2017-01-24T15:10:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017</id>
+    <content type="html"><![CDATA[<p>本篇文章簡介在目前最新版的 RHEL 系 OS 上安裝 Rails Stack 的方式</p>
+
+<p>本篇文章的 Rails Stack 包含：</p>
+
+<ol>
+<li>系統上可以跑多重版本的 Ruby</li>
+<li>Rails 5</li>
+<li>PostgreSQL 9.6</li>
+<li>使用 Passenger 為 Application Server，Nginx 為 Web Frontend Server</li>
+</ol>
+
+
+<p>本篇文章適用的 Linux Distribution：</p>
+
+<ol>
+<li>RedHat Enterprise 7</li>
+<li>CentOS 7</li>
+<li>Fedora 24+</li>
+<li>其它 RHEL 衍生的，以 systemd 為啟動系統的 Linux Distribution 們 (理論上)</li>
+</ol>
+
+
+<p>從乾淨的 OS 開始，步驟大致如下：</p>
+
+<ul>
+<li>安裝必要套件</li>
+<li>安裝 PGDG Repo &amp; PostgreSQL</li>
+<li>編譯 Ruby</li>
+<li>安裝與編譯 Passenger / Nginx Extension</li>
+<li>編譯 Nginx</li>
+<li>啟動設定</li>
+<li>Logrotate &amp;&amp; iptables 設定</li>
+</ul>
+
+
+<h3>安裝必要套件</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>yum groupinstall <span class="s2">&quot;Development Tools&quot;</span>，
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果是 Fedora 的話，通常還會有 &#8220;C Development Tools and Libraries&#8221; 和 &#8220;D Development Tools and Libraries&#8221; 兩種</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>yum install v8-devel v8 screen libmcrypt-devel wget libxslt-devel libxml2-devel gdbm-devel libffi-devel zlib-devel openssl-devel libyaml-devel readline-devel curl-devel  pcre-devel git memcached-devel valgrind-devel ImageMagick-devel ImageMagick npm geoip-devel pcre-devel gd-devel openssl-devel
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>套件說明：</h4>
+
+<p>主要是針對編譯 Ruby 所需，以及其它常見的 RubyGem 如 RMagick 或是 Asset Pipeline 編譯 JS 所需要的套件等。</p>
+
+<h3>安裝 PGDG Repo / PostgreSQL</h3>
+
+<h4>什麼是 <a href="https://yum.postgresql.org/repopackages.php">PGDG</a></h4>
+
+<p>PGDG (PostgreSQL Global Development Group) 是 PostgreSQL (以下簡稱 PgSQL) 的開發單位的簡稱，PGDG Repo 是 PgSQL 的官方為各大 Linux Distribution 提供的套件庫。</p>
+
+<h4>安裝步驟：</h4>
+
+<p>在<a href="https://yum.postgresql.org/repopackages.php">這邊</a>找到對應的 PgSQL 版本與 Distribution 的對應 RPM Url 後，在 Console 下：</p>
+
+<p>以 Fedora 25 + PgSQL 9.6 為例：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rpm -Uvh https://download.postgresql.org/pub/repos/yum/9.6/fedora/fedora-25-x86_64/pgdg-fedora96-9.6-3.noarch.rpm
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然後安裝 PgSQL Server 與開發套件</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>yum install postgresql96 postgresql96-devel postgresql96-server postgresql96-libs postgresql96-contrib
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>請注意如果你安裝的不是 9.6 的話，請將上面的 96 改成對應的版號即可</p>
+
+<h3>編譯 Ruby</h3>
+
+<p>這邊不使用 rvm 或 rbenv 等 Ruby 版本管理套件，而是採用將不同的 Ruby 版本安裝到不同路徑的方式來解決可能在 Server 上同時運行多版本 Ruby 的需求。</p>
+
+<p>路徑設定原則：</p>
+
+<p>例如 2.3 就安裝到 <code>/usr/local/ruby23</code>，2.4就在 <code>/usr/local/ruby24</code> 以此類推</p>
+
+<p>流程：</p>
+
+<ul>
+<li>下載 CRuby source code</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> /usr/src <span class="o">&amp;&amp;</span> wget https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.3.tar.bz2
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>解壓縮</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>tar -jxvpf ruby-2.3.3.tar.bz2
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>configure</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd </span>ruby-2.3.3 <span class="o">&amp;&amp;</span> ./configure --prefix<span class="o">=</span>/usr/local/ruby23
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>make</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>make <span class="o">&amp;&amp;</span> make install
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其它版本可以比照辦理。</p>
+
+<h3>安裝 Passenger 與 Nginx Module</h3>
+
+<ul>
+<li>在執行任何 Ruby 指令前請記得設定系統路徑到要使用 Ruby 版本的 bin 目錄，例如：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:/usr/local/ruby23/bin:
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或是把以上內容加到 <code>~/.bash_profile</code> 的尾端，讓每次登入時自動執行。</p>
+
+<ul>
+<li>安裝 bundler &amp; passenger Gem</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>gem install passenger bundler
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>此時要注意安裝的 Passenger 版號，進入 Passenger 目錄編譯 Passenger Nginx Module，以 Ruby 2.3 和 Passenger 5.1.1 為例：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> /usr/local/ruby23/lib/ruby/gems/2.3.0/gems/passenger-5.1.1/
+</span><span class='line'>rake nginx
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>下載 Nginx 源碼並使用編譯好的 Passenger Module 編譯 (以 1.10.1 版為例)</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> /usr/src <span class="o">&amp;&amp;</span> wget http://nginx.org/download/nginx-1.10.1.tar.gz
+</span><span class='line'>
+</span><span class='line'>tar -zxvf nginx-1.10.1.tar.gz <span class="o">&amp;&amp;</span> <span class="nb">cd </span>nginx-1.10.1
+</span><span class='line'>
+</span><span class='line'>./configure --with-http_v2_module --with-http_ssl_module --prefix<span class="o">=</span>/usr/local/nginx --with-http_image_filter_module --with-http_gzip_static_module --with-http_secure_link_module --with-http_stub_status_module --add-module<span class="o">=</span><span class="s2">&quot;/usr/local/ruby23/lib/ruby/gems/2.3.0/gems/passenger-5.1.1/src/nginx_module&quot;</span>
+</span><span class='line'>
+</span><span class='line'>make <span class="o">&amp;&amp;</span> make install <span class="c">#這裡會將 Nginx 安裝到 /usr/local/nginx 下</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>至此為止 Nginx 已設定完成</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[RubyKaigi 2016]]></title>
@@ -2062,28 +2257,6 @@ Photo by Igarashi Kuniaki</p>
 <li>次之是場地的準備, 因為不在中研院的關係這部份的工作變得比以前繁重許多, 由於前面所説的改建的關係, 像是電源以及擴音/錄音設備之類的都是在10月以後才完整ready; 前面也提到了為此多花了不少時間</li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby Tuesday#22]]></title>
-    <link href="http://ryudo.tw/blog/2013/04/17/rubytuesday-22/"/>
-    <updated>2013-04-17T16:12:00+08:00</updated>
-    <id>http://ryudo.tw/blog/2013/04/17/rubytuesday-22</id>
-    <content type="html"><![CDATA[<p>由於之前已經比較久沒辦的關係, 相信大家都悶了, 剛好這次找到了相當不錯的場地<a href="https://www.facebook.com/hdxcafe">HDX Cafe</a>, 加上兩位新人講者<a href="http://blog.taian.su/">泰安</a>和<a href="http://tonytonyjan.net/">大兜</a>, 所以就決定要開辦Tuesday啦; 這個場地好的點在於：</p>
-
-<ul>
-<li>地點好, 在程式人的聖地天瓏書局的隔壁, 也就是以前儒林書局的位置; 會前會後都可以下去<del>敗家</del></li>
-<li>場地大, 2F的場地兩邊加起來可以擠上100人都沒問題</li>
-<li>投影設備, 投影幕是移動式的所以到處都可以用</li>
-<li>餐點便宜, 包場的低消是120元, 飲料餐點的水準也比以前去過的不少場地要優, 除了正餐還有麵包/蛋糕, 整體來說很超值.</li>
-<li>可以待到10點, 其實他們是9:30收, 但包場可以到10點沒問題</li>
-</ul>
-
-
-<p><img src="http://i.imgur.com/CLY6rOWl.jpg"/></p>
-
-<p>講者的部份, 兩位新人的演出也非常精彩(和我第一次比真的是強很多), 會場氣氛也非常熱絡; 大家也都呆到快收攤才離開; 報到率近乎100%, 整個都很讓人感動, 希望能繼續辦下去, 謝謝大家！</p>
 ]]></content>
   </entry>
   

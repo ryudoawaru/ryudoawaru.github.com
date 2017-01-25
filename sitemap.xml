@@ -93,16 +93,22 @@
         <lastmod>2017-01-11T18:49:00+08:00</lastmod>
     </url>
     <url>
+        <loc>
+            http://ryudo.tw/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017/
+        </loc>
+        <lastmod>2017-01-25T11:52:35+08:00</lastmod>
+    </url>
+    <url>
         <loc>http://ryudo.tw/about/</loc>
         <lastmod>2015-08-06T10:32:56+08:00</lastmod>
     </url>
     <url>
         <loc>http://ryudo.tw/blog/archives/</loc>
-        <lastmod>2017-01-11T18:49:00+08:00</lastmod>
+        <lastmod>2017-01-25T11:52:35+08:00</lastmod>
     </url>
     <url>
         <loc>http://ryudo.tw/</loc>
-        <lastmod>2017-01-11T18:49:00+08:00</lastmod>
+        <lastmod>2017-01-25T11:52:35+08:00</lastmod>
     </url>
     <url>
         <loc>http://ryudo.tw/my-presentations/</loc>

@@ -9,7 +9,8 @@
   <meta name="author" content="Mu-Fan Teng">
 
   
-  <meta name="description" content="緣起 由於有了去年第一次和高見龍等人一同參加 RubyKaigi 2013 的經驗，因此當確定今年的 RubyKaigi時程後，就非常的期待有機會能夠再次參加這場 Ruby世界最重要的研討會。 今年的 RubyConf.tw 2014 ，做為總召，有幸召集到了許多 Rails Girls &hellip;">
+  <meta name="description" content="前言 PostgreSQL 和 MySQL 不同，資料檔格式會隨著小數點二位數以上的版號（9.3 - 9.4）變動，換句話說每當升級版本時，資料檔就必需要升級才可以繼續使用。 升級的方式有兩種： 將原本的資料執行 pg_dumpall 後再 restore 回去
+用 pg_upgrade &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +67,127 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/15/upgrade-pgsql-from-93-to-94/">在 Mac / Homebrew 下升級 PostgreSQL 從 9.3 到 9.4</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-15T22:10:00+08:00" pubdate data-updated="true">Feb 15<span>th</span>, 2015</time>
+        
+         | <a href="/blog/2015/02/15/upgrade-pgsql-from-93-to-94/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>前言</h3>
+
+<p>PostgreSQL 和 MySQL 不同，資料檔格式會隨著小數點二位數以上的版號（9.3 - 9.4）變動，換句話說每當升級版本時，資料檔就必需要升級才可以繼續使用。</p>
+
+<p>升級的方式有兩種：</p>
+
+<ul>
+<li>將原本的資料執行 <a href="http://www.postgresql.org/docs/9.4/static/app-pg-dumpall.html">pg_dumpall</a> 後再 restore 回去</li>
+<li>用 <a href="http://www.postgresql.org/docs/9.4/static/pgupgrade.html">pg_upgrade</a> 命令從舊的資料檔產生出新版本的資料檔。</li>
+</ul>
+
+
+<p>這邊要講的是第二種情形。</p>
+
+<h3>環境限定：</h3>
+
+<ul>
+<li>可執行 <a href="http://brew.sh/">Homebrew</a> 的 MacOS 環境</li>
+<li>原 PostgreSQL 為 Homebrew 安裝，9.3.x 版</li>
+</ul>
+
+
+<h3>步驟</h3>
+
+<ol>
+<li>安裝新的 PostgreSQL
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>brew update
+</span><span class='line'>brew install postgresql
+</span></code></pre></td></tr></table></div></figure>
+
+</li>
+<li>停止現在的 PostgreSQL Daemon
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
+</span></code></pre></td></tr></table></div></figure>
+</li>
+<li>建立 9.4 的資料庫檔案
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>initdb /usr/local/var/postgres9.4 -E utf8
+</span></code></pre></td></tr></table></div></figure>
+</li>
+<li>使用 pg_upgrade 指令升級 舊PG的資料檔案到 9.4，注意這邊的 9.3.5_1 和 9.4.0 是會依照你的舊版本和實際安裝的新板本的版號而有差異的
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>pg_upgrade -v <span class="se">\</span>
+</span><span class='line'>    -d /usr/local/var/postgres <span class="se">\</span>
+</span><span class='line'>    -D /usr/local/var/postgres9.4 <span class="se">\</span>
+</span><span class='line'>    -b /usr/local/Cellar/postgresql/9.3.5_1/bin/ <span class="se">\</span>
+</span><span class='line'>    -B /usr/local/Cellar/postgresql/9.4.0/bin/
+</span></code></pre></td></tr></table></div></figure>
+</li>
+<li>將舊資料檔備份，並且讓新資料檔的目錄更名使之變成預設的資料檔
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> /usr/local/var
+</span><span class='line'>mv postgres postgres9.3
+</span><span class='line'>mv postgres9.4 postgres
+</span></code></pre></td></tr></table></div></figure>
+</li>
+<li>
+重啟 PostgreSQL
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
+</span></code></pre></td></tr></table></div></figure>
+</li>
+
+<li>檢查 /usr/local/var/postgres/server.log 檔是否有正常啟動 server</li>
+<li>如果原本有安裝
+<a href="https://rubygems.org/gems/pg">pg GEM</a>
+的話要重新安裝</li>
+</ol>
+
+
+<p>以上！</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1327,57 +1449,6 @@ Photo by Igarashi Kuniaki</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/04/17/rubytuesday-22/">Ruby Tuesday#22</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-04-17T16:12:00+08:00" pubdate data-updated="true">Apr 17<span>th</span>, 2013</time>
-        
-         | <a href="/blog/2013/04/17/rubytuesday-22/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>由於之前已經比較久沒辦的關係, 相信大家都悶了, 剛好這次找到了相當不錯的場地<a href="https://www.facebook.com/hdxcafe">HDX Cafe</a>, 加上兩位新人講者<a href="http://blog.taian.su/">泰安</a>和<a href="http://tonytonyjan.net/">大兜</a>, 所以就決定要開辦Tuesday啦; 這個場地好的點在於：</p>
-
-<ul>
-<li>地點好, 在程式人的聖地天瓏書局的隔壁, 也就是以前儒林書局的位置; 會前會後都可以下去<del>敗家</del></li>
-<li>場地大, 2F的場地兩邊加起來可以擠上100人都沒問題</li>
-<li>投影設備, 投影幕是移動式的所以到處都可以用</li>
-<li>餐點便宜, 包場的低消是120元, 飲料餐點的水準也比以前去過的不少場地要優, 除了正餐還有麵包/蛋糕, 整體來說很超值.</li>
-<li>可以待到10點, 其實他們是9:30收, 但包場可以到10點沒問題</li>
-</ul>
-
-
-<p><img src="http://i.imgur.com/CLY6rOWl.jpg"/></p>
-
-<p>講者的部份, 兩位新人的演出也非常精彩(和我第一次比真的是強很多), 會場氣氛也非常熱絡; 大家也都呆到快收攤才離開; 報到率近乎100%, 整個都很讓人感動, 希望能繼續辦下去, 謝謝大家！</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -1407,6 +1478,10 @@ Photo by Igarashi Kuniaki</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017/">Install Ruby / Rails / Passenger / PostgreSQL Stack in RHEL and variant OS (前篇)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/09/26/my-rubykaigi-2016-tour/">RubyKaigi 2016</a>
       </li>
     
@@ -1420,10 +1495,6 @@ Photo by Igarashi Kuniaki</p>
     
       <li class="post">
         <a href="/blog/2016/02/02/upgrade-postgresql-on-osx/">在 OSX 下升級 Homebrew 安裝的 PostgreSQL(dump 版)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/12/31/pgsql-inheritance/">Table Inheritance in PostgreSQL</a>
       </li>
     
   </ul>
