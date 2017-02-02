@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: devops | 慕凡(@ryudoawaru)'s blog]]></title>
+  <title><![CDATA[Category: DevOps | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/devops/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2017-01-25T11:56:10+08:00</updated>
+  <updated>2017-02-02T17:24:36+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -18,7 +18,7 @@
     <link href="http://ryudo.tw/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017/"/>
     <updated>2017-01-24T15:10:00+08:00</updated>
     <id>http://ryudo.tw/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017</id>
-    <content type="html"><![CDATA[<p>本篇文章簡介在目前最新版的 RHEL 系 OS 上安裝 Rails Stack 的方式</p>
+    <content type="html"><![CDATA[<p>在敝公司<a href="https://5xruby.tw/">五倍紅寶石</a>每期的<a href="https://5xruby.tw/talks/ruby-on-rails2016-4">RUBY ON RAILS 從零開始</a>課程中，常常會遇到學員詢問如何在 <a href="https://www.linode.com/">Linode</a> 或 <a href="https://www.digitalocean.com">Digital Ocean</a> 這類 VPS 平台中安裝 Ruby / Rails Stack 的相關問題，以下的文章將簡介在目前最新版的 RHEL 系 OS 上安裝 Rails Stack 的步驟。</p>
 
 <p>本篇文章的 Rails Stack 包含：</p>
 
@@ -52,6 +52,8 @@
 <li>Logrotate &amp;&amp; iptables 設定</li>
 </ul>
 
+
+<p>注意：以下所有步驟皆需以 root 身份或 sudo 執行</p>
 
 <h3>安裝必要套件</h3>
 
