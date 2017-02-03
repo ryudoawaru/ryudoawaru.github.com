@@ -4,7 +4,7 @@
   <title><![CDATA[慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2017-02-03T16:16:26+08:00</updated>
+  <updated>2017-02-03T16:33:14+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -180,7 +180,7 @@
 </ul>
 
 
-<h1>Logrotate 設定</h1>
+<h3>Logrotate 設定</h3>
 
 <p>如果在前面的 Virtual  Host 設定中有設定 access_log 或 error_log 的話，就必需要設定 <a href="http://linux.vbird.org/linux_basic/0570syslog.php#rotate">Logrotate</a> 來定期輪替 Nginx log，輪替的設定如下。</p>
 
