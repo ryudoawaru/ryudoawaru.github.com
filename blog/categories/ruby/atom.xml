@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: ruby, | 慕凡(@ryudoawaru)'s blog]]></title>
+  <title><![CDATA[Category: Ruby | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2017-02-02T17:24:36+08:00</updated>
+  <updated>2017-02-03T16:15:41+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -14,357 +14,381 @@
 
   
   <entry>
-    <title type="html"><![CDATA[How to migrate a PostgreSQL DB with many schemas in a multenancy Rails application]]></title>
-    <link href="http://ryudo.tw/blog/2013/08/11/migrate-multi-schemas-into-a-rails-application/"/>
-    <updated>2013-08-11T21:38:00+08:00</updated>
-    <id>http://ryudo.tw/blog/2013/08/11/migrate-multi-schemas-into-a-rails-application</id>
-    <content type="html"><![CDATA[<p>PostgreSQL的schema是一個非常方便的功能, 適合拿來做所謂的<a href="http://www.arthurtoday.com/2010/02/multi-tenant-application-multitenancy.html#.UgeXg2T08Rw">Multi-Tenancy</a>類服務; 例如無名或Pixnet這類的BSP(Blog Service Provider)或是像我的FREEBBS的免費論壇服務(Forum Service Provider), 通常稱為SAAS(Software As A Service)系統, 可以把N個相同結構的schema放在同一個資料庫裡面; 比起MySQL只能分別放在不同的資料庫裡會有很多好處。</p>
-
-<p>假設今天我用PostgreSQL的schema功能來做一個BSP服務的話, DB內的schema會分成兩大類：</p>
+    <title type="html"><![CDATA[Install Ruby / Rails / Passenger / PostgreSQL Stack in RHEL and variant OS (後篇)]]></title>
+    <link href="http://ryudo.tw/blog/2017/02/02/install-ruby-rails-passenger-postgresql-into-rhel-2017-02/"/>
+    <updated>2017-02-02T17:32:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2017/02/02/install-ruby-rails-passenger-postgresql-into-rhel-2017-02</id>
+    <content type="html"><![CDATA[<p>接續<a href="/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017/">前篇</a>，本篇內容包含：</p>
 
 <ul>
-<li>管理用schema(只有一個)</li>
-<li>Blog Schema(有無數個, 每個的結構相同)</li>
+<li>Nginx 設定檔</li>
+<li>設定 systemd 啟動檔</li>
+<li>Logrotate &amp; Iptables 設定</li>
 </ul>
 
 
-<p>一般狀況下, 我們在使用ActiveRecord連接PosttgreSQL時可以在連接選項設定使用Schema, 像這樣：</p>
+<h3>Nginx 設定檔</h3>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>database.yml  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">development</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">adapter</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">postgresql</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">encoding</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">unicode</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">database</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">SHOPON_development</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">pool</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">5</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">schema_search_path</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">base, blog1</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>由於編譯 Nginx 時把 prefix 設定在 <code>/usr/local/nginx</code> 下，所以設定檔就在 <code>/usr/local/nginx/conf</code>  下，先編輯 <code>/usr/local/nginx/conf/nginx.conf</code></p>
 
-<p>schema_search_path的預設值是public, 如果照以上設定, 當你執行任何migration時會先從base這個schema執行起, 也就是所有的migration都只會跑在base這個schema上面,</p>
+<p>```nginx</p>
 
-<p>但場景回到Rails/ActiveRecord上, 假如你要做一個BSP, 一般而言你有以下幾種方式：</p>
+<p>user  nobody; #這邊的 user 和 Rails App 的 user 是不一樣的設定，但是要考慮到 Asset File 的存取，也就是這個 user 必需要可以唯讀 Rails App 的 public 目錄
+worker_processes  4;
+error_log  logs/error.log  info;
+pid       /var/run/nginx.pid; #設定 pid file 的位置，必需和後面 systemd 設定檔一致
+worker_rlimit_nofile 40960;
+events {</p>
 
-<ol>
-<li>管理端(管理BSP的)和服務端(Blog服務本身)分別各自一個Rails Application目錄, 然後各有各的migrate</li>
-<li>將兩端放在同一個Rails App裡</li>
-</ol>
+<pre><code>worker_connections  10240;
+</code></pre>
+
+<p>}#worker_rlimit_nofile 和 worker_connections：為了突破系統開啟檔案上限的設定，必需一起設定，一般來說 worker_rlimit_nofile 為 worker_connections x worker_processes</p>
+
+<p>http {
+  include       mime.types;
+  default_type  application/octet-stream;<br/>
+  access_log logs/access.log;
+  sendfile        on;
+  keepalive_timeout  65;
+  gzip  on;
+  send_timeout 600;
+  gzip_min_length  1000;
+  gzip_buffers     4 8k;
+  gzip_types       text/plain application/x-javascript text/css application/xml text/javascript;
+  client_max_body_size 100M; #關係到上傳檔案的上限
+  passenger_root /usr/local/ruby23/lib/ruby/gems/2.3.0/gems/passenger-5.1.1; #Passenger Gem 的根目錄，會因為使用的 Ruby 版本與 Passenger 版本變化
+  passenger_max_pool_size 16; # 最大同時可以存在的 Rails App 行程數，請依照系統的記憶體大小計算，一般應該是 "(總記憶體 x 0.75) / 單一 Rails App 使用記憶體"，例如 4GB 的機器，單一 Rails App 記憶體約 150 就是 <code>4096 * 0.75 / 150  = 20</code>
+  server{</p>
+
+<pre><code>server_name _;
+location /{
+  return 404;
+}
+</code></pre>
+
+<p>  }# 對應不屬於任何 Virtual Host 的請求，在這裡返回 404 Not Found 的頁面。
+  include valid-vhosts/*.conf; #在其它檔案中設定 Virtual Host
+}</p>
+
+<p>```</p>
+
+<p>以下是 Virtual Host 的設定</p>
+
+<p>```nginx</p>
+
+<p>server{
+  server_name 5xruby.tw; #Virtual Host 的主機名稱
+  root /home/5xruby/5xruby.tw/current/public; #務必設定為 App 的 Public 目錄
+  passenger_enabled on; #開啟 Passenger
+  rails_env production; # 設定 Rails App Stage
+  passenger_ruby /usr/local/ruby23/bin/ruby; #如果這個 App 和 Passenger 使用的 Ruby 版本不同的話就需要指定
+  access_log logs/5xruby-access.log;
+  error_log logs/5xruby-err.log;
+  location ~ ^/assets/ {</p>
+
+<pre><code># 讓瀏覽器快取靜態 Asset Pipeline 檔案的設定
+expires 1y;
+add_header Cache-Control public;
+add_header ETag "";
+break;
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>```</p>
+
+<h3>設定 systemd 啟動檔</h3>
+
+<ul>
+<li>編輯  /lib/systemd/system/nginx.service</li>
+</ul>
 
 
-<p>如果用一般的方式migrate, Rails會依照你database.yml裡設定的schema_search_path的順序找第一順位來執行migrate; 這樣你要如何migrate你的資料到不同schema呢？</p>
+<p>```</p>
 
-<p>今天要講的就是將兩端放在同app裡的方式, 也就是</p>
+<p>[Unit]
+Description=The NGINX HTTP and reverse proxy server
+After=syslog.target network.target remote-fs.target nss-lookup.target</p>
 
-<ol>
-<li>在migrate檔內設定只能在服務端schema或是管理端schema執行</li>
-<li>有<strong>單獨migrate管理端</strong>和<strong>單獨migrate服務端</strong>的功能</li>
-</ol>
+<p>[Service]
+Type=forking
+PIDFile=/var/run/nginx.pid
+ExecStartPre=  /usr/local/nginx/sbin/nginx -t
+ExecStart=  /usr/local/nginx/sbin/nginx
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true</p>
+
+<p>[Install]
+WantedBy=multi-user.target</p>
+
+<p>```</p>
+
+<ul>
+<li>以 root 身份輸入 <code>systemctl enable nginx</code> 設定開機自動啟動</li>
+<li>輸入 <code>/usr/local/nginx/sbin/nginx -t</code> 測試設定檔正確與否</li>
+<li><code>systemctl start nginx</code> 啟動，可以再透過 <code>systemctl status nginx</code> 觀察啟動情形</li>
+</ul>
 
 
-<p><strong><em>實現1.的方式如下</em></strong>：</p>
+<h1>Logrotate 設定</h1>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>migrate_control_side.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">CreateSites</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">change</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;if ActiveRecord::Base.connection.schema_search_path == &#39;base&#39; #base為管理端schema</span>
-</span><span class='line'><span class="sr">  create_table :sites do |t|</span>
-</span><span class='line'><span class="sr">    t.string :subdn</span>
-</span><span class='line'><span class="sr">    t.string :name</span>
-</span><span class='line'><span class="sr">    t.timestamps</span>
-</span><span class='line'><span class="sr">  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>如果在前面的 Virtual  Host 設定中有設定 access_log 或 error_log 的話，就必需要設定 <a href="http://linux.vbird.org/linux_basic/0570syslog.php#rotate">Logrotate</a> 來定期輪替 Nginx log，輪替的設定如下。</p>
 
-<p>簡單來說就是當現在的 schema_search_path 不等於base則不執行create_table的動作; 如果是服務端, 則反過來設定schema_search_path不為base或public即可, 更進一步的可以將這兩種檢查寫成ActiveRecord::Migration的module, 像這樣：</p>
+<p>```</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>multitenancy_migration.rb </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">module</span> <span class="nn">ActiveRecord::MultitenancyMigration</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">must_migrate_in_base</span> <span class="c1">#管理端&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">if</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">schema_search_path</span> <span class="o">==</span> <span class="s1">&#39;base&#39;</span>
-</span><span class='line'>  <span class="k">yield</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def must_migrate_in_site #服務端&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">schema_search_path</span> <span class="o">=</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">schema_search_path</span>
-</span><span class='line'><span class="k">if</span> <span class="o">!</span><span class="n">schema_search_path</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;base&#39;</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="o">!</span><span class="n">schema_search_path</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;public&#39;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">yield</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;ActiveRecord::Migration.class_eval do</span>
-</span><span class='line'><span class="sr">  include ActiveRecord::MultitenancyMigration</span>
-</span><span class='line'><span class="sr">  extend ActiveRecord::MultitenancyMigration</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>/usr/local/nginx/logs/*.log {</p>
 
-<p>由於migration檔的內部可能是以self.up(class method)或是up(instance method)的方式編寫, 因此需要同時include和extend這個模組。</p>
+<pre><code>missingok
+size=20M #單檔超過 20M 為條件
+compress #壓縮舊檔案
+rotate 10
+notifempty
+sharedscripts
+postrotate
+test ! -f /var/run/nginx.pid || kill -s USR1 `cat /var/run/nginx.pid` #讓 Nginx 重新開啟 Log 檔
+endscript
+</code></pre>
 
-<p><strong><em>實現2.的方式如下</em></strong>：</p>
+<p>}</p>
 
-<p>需要建立for 管理端以及 for 服務端的task 來migrate 各自的schema
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>base.rake</span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">namespace</span> <span class="ss">:base</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">task</span> <span class="n">migrate_db</span><span class="p">:</span> <span class="ss">:environment</span> <span class="k">do</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;ActiveRecord::Base.connection.schema_search_path = &#39;base&#39;</span>
-</span><span class='line'><span class="sr">Rake::Task[&#39;db:migrate&#39;].invoke</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="n">task</span> <span class="n">rollback_db</span><span class="p">:</span> <span class="ss">:environment</span> <span class="k">do</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;ActiveRecord::Base.connection.schema_search_path = &#39;base&#39;</span>
-</span><span class='line'><span class="sr">Rake::Task[&#39;db:rollback&#39;].invoke</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>site.rake </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">namespace</span> <span class="ss">:site</span> <span class="k">do</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def check_subdn_exists&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">if</span> <span class="no">ENV</span><span class="o">.</span><span class="n">has_key?</span><span class="p">(</span><span class="s1">&#39;SUBDN&#39;</span><span class="p">)</span>
-</span><span class='line'>  <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">schema_search_path</span> <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;SUBDN&#39;</span><span class="o">]</span>
-</span><span class='line'>  <span class="k">yield</span>
-</span><span class='line'><span class="k">else</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;Please assign SUBDN first!&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  desc &#39;Migrate Database of Individual site, have to assign SUBDN paramater!&#39;</span>
-</span><span class='line'><span class="sr">  task migrate_db: :environment do&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">check_subdn_exists</span> <span class="k">do</span>
-</span><span class='line'>  <span class="ss">Rake</span><span class="p">:</span><span class="ss">:Task</span><span class="o">[</span><span class="s1">&#39;db:migrate&#39;</span><span class="o">].</span><span class="n">invoke</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  desc &#39;Rollback migration of single site&#39;</span>
-</span><span class='line'><span class="sr">  task rollback_db: :environment do&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">check_subdn_exists</span> <span class="k">do</span>
-</span><span class='line'>  <span class="ss">Rake</span><span class="p">:</span><span class="ss">:Task</span><span class="o">[</span><span class="s1">&#39;db:rollback&#39;</span><span class="o">].</span><span class="n">invoke</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>```</p>
 
-<p>簡單來說就是在migrate前先切換schema, 然後用Rake的指令呼叫原本的db:migrate/rollback出來, 當然你也可以寫一個task是去掃現存的服務端列表然後再各自migrate, 如果要寫在controller或model的話, 則必需先require rake然後再load Rakefile才行。</p>
+<p>對 Rails 產生的 Log 也可以比照辦理</p>
 
-<p>以上</p>
+<h3>Iptables 設定</h3>
+
+<p>現在的 RHEL 系 OS 通常都預設使用 Firewalld 做為系統防火牆，在此先改回筆者比較熟悉的 Iptables</p>
+
+<ul>
+<li>yum remove firewalld</li>
+<li>yum install iptables-services</li>
+<li>編輯 /etc/sysconfig/iptables</li>
+</ul>
+
+
+<p>```</p>
+
+<p>*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -s 127.0.0.1 -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport ssh -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport http -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport https -j ACCEPT
+COMMIT</p>
+
+<p>```</p>
+
+<ul>
+<li>systemctl start iptables</li>
+</ul>
+
+
+<p>到此為止就完成了基本 Rails Stack 的設定。</p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Introduce Ruby Taiwan Community@RubyKaigi 2013[EN,CH]]]></title>
-    <link href="http://ryudo.tw/blog/2013/06/07/rubykaigi2013-lt/"/>
-    <updated>2013-06-07T20:57:00+08:00</updated>
-    <id>http://ryudo.tw/blog/2013/06/07/rubykaigi2013-lt</id>
-    <content type="html"><![CDATA[<p>非常榮幸本次有機會可以和台灣Ruby社群的朋友一起參加世界級的Ruby研討會<a href="http://rubykaigi.org/2013">RubyKaigi2013</a>, 做為台灣Ruby社群的主持人之一, 既然參加了就想要讓世界的Ruby朋友們知道Ruby Taiwan社群的存在, 因此在LT徵稿前就打算要投稿這個主題了.</p>
+    <title type="html"><![CDATA[Install Ruby / Rails / Passenger / PostgreSQL Stack in RHEL and variant OS (前篇)]]></title>
+    <link href="http://ryudo.tw/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017/"/>
+    <updated>2017-01-24T15:10:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017</id>
+    <content type="html"><![CDATA[<p>在敝公司<a href="https://5xruby.tw/">五倍紅寶石</a>每期的<a href="https://5xruby.tw/talks/ruby-on-rails2016-4">RUBY ON RAILS 從零開始</a>課程中，常常會遇到學員詢問如何在 <a href="https://www.linode.com/">Linode</a> 或 <a href="https://www.digitalocean.com">Digital Ocean</a> 這類 VPS 平台中安裝 Ruby / Rails Stack 的相關問題，以下的文章將簡介在目前最新版的 RHEL 系 OS 上安裝 Rails Stack 的步驟。</p>
 
-<hr />
+<p>本篇文章的 Rails Stack 包含：</p>
 
-<p>It's my pleasure to join the world-class Ruby seminar <a href="http://rubykaigi.org/2013">RubyKaigi2013</a>, as one of the organizers of Ruby Taiwan community, I wish to let the world know the exist of our community, so I plan to submit this LT.</p>
-
-<p>由於是第一次在海外以英文發表, 又是只有五分鐘的LT, 如果用一般的形式會很難控制時間, 因此就想到了高橋流的方式, 在準備的過程中不斷反覆觀看高橋征義在台灣的LT影片以及簡報來練習; 對於鋪梗也是費盡心思, 感謝<a href="https://twitter.com/ihower">@ihower</a>在去年RubyConf Taiwan 2012的<a href="http://www.slideshare.net/ihower/rubyconf-taiwan-2012-opening-closing">十六字箴言</a>, 以及在<a href="http://magazine.rubyist.net/?0041-RubyTaiwan2012">Rubyist Magazine</a>將其日語漢字化的柴田先生<a href="https://twitter.com/hsbt">@hsbt</a>; 另外由於會眾日本人佔多數, 在講稿上採取英日文並行的方式, 這點要特別再特別的感謝旅居日本的台灣人Rubyist侯大偉<a href="https://twitter.com/davidhou_tw">@davidhou_tw</a>的全力支持, 大偉不但幫我翻譯, 甚至還請了日本朋友幫忙review, 我跟他致謝時他說：「還是慎重點好 畢竟你代表台灣宣傳阿」這句話時, 真的整個超感動又熱血的.</p>
-
-<hr />
-
-<p>Since this is my first time to speak outside of Taiwan and it's a 5 mins LT session, I decided to use the Takahashi-method on my talk. I watch Takahashi-san's slide and screencasts again and again to meditate and practice my speech. Special thanks to @ihower's <a href="http://www.slideshare.net/ihower/rubyconf-taiwan-2012-opening-closing">opening slide at RubyConf Taiwan 2012</a> and <a href="(https://twitter.com/hsbt">@hsbt</a>'s <a href="http://magazine.rubyist.net/?0041-RubyTaiwan2012">Japanese translation on Rubyist Magazine</a> gave me some content on the slide. I write both Japanese and English on my slide because the biggtest part of audience are Japanese. I have to appreciate <a href="https://twitter.com/davidhou_tw">David Hou</a> who is a Taiwanese Rubyist working and living in Japan for translating my slide to Japanese. He even asked help from a Japanese friend. He said to me: "We should be more careful, you represent the Ruby Taiwan community after all" when I expressed my thank to him. He really moved me!</p>
-
-<p>另外一個最後引起日本朋友們關注的就是桐島梗了, 其實會有這個梗是因為自從去年Rubyconf Taiwan 2012後就有在關注日本Ruby大神們的推特, 適逢今年3月時日本舉辦的<a href="http://magazine.rubyist.net/?0042-OoedoRubyKaigi03Report">大江戶RubyKaigi03</a>其中一場由CRuby GC的作者中村成洋<a href="https://twitter.com/nari3">@nari3</a>的演講<a href="http://www.slideshare.net/authorNari/ruby-17269278">桐島、Rubyやめるってよ</a>持續引起大神們的討論, 看了簡報之後雖然不是很懂但是對其中引用的電影<a href="http://www.ghfff.org.tw/program/content.aspx?id=521">聽說桐島退社了</a>感到興趣, 看過之後再回頭看中村的簡報就能夠理解那些梗了, 個人以為那句「<a href="http://imgur.com/Z8m9zkn">戰鬥吧！這裡是我們的世界</a>」是整個電影, 同時也是我自己參與社群經營活動的精神之體現, 作為結尾是非常適合的.</p>
-
-<hr />
-
-<p>I found the most eye-catching point of my presentation for Japanese is the 「Kirishima」's ネタ. In fact I started to follow many Japanese Rubyist's twitter after the RubyConf Taiwan 2012 last year. I noticed <a href="https://twitter.com/nari3">Narihiro Nakamura</a>'s presentation named 「<a href="http://www.slideshare.net/authorNari/ruby-17269278">Kirishima, stop using Ruby</a>」 which is retwteed many times after the 「Oedo RubyKaigi 03」 on March this year. I am extremely interested by the slide's subject which is a movie named 「The Kirishima Thing」, so I can  understanded what Nakamura expressed in his slide after watched the movie and deeply impressed by it. I decided to use the most important line of the movie "Fighting, this is our world!" as the last page of my slide because I think it is the spirit of both the movie and the reason of why I join the operation of our community.</p>
-
-<p>上台前一直很擔心這些梗會沒有用, 前一天晚上由於和龍哥隔天都要上台的關係緊張到幾乎沒睡; 不過現場的反應真是超乎想像意外的好, 結束後也陸續接到幾位日本朋友們的鼓勵, 真的非常窩心, 感謝你們!</p>
-
-<hr />
-
-<p>I almost can't sleep on the eve of LT and worried about if my slide can't attract the audience. Fortunately I finished the speech and it seemed the audience's reaction was good. I must show my gratitude for beging metioned by many Japanese Ruby friends on Twitter as below:</p>
-
-<blockquote class="twitter-tweet" data-conversation="none" lang="zh-tw"><p>@<a href="https://twitter.com/ryudoawaru">ryudoawaru</a> ありがとうございました！lightning talk最高でした！</p>&mdash; Akira Matsuda (@a_matsuda) <a href="https://twitter.com/a_matsuda/status/340776485826740225">2013年6月1日</a></blockquote>
+<ol>
+<li>系統上可以跑多重版本的 Ruby</li>
+<li>Rails 5</li>
+<li>PostgreSQL 9.6</li>
+<li>使用 Passenger 為 Application Server，Nginx 為 Web Frontend Server</li>
+</ol>
 
 
-<blockquote class="twitter-tweet" lang="zh-tw"><p>練度たかい <a href="https://twitter.com/search/%23rubykaigi">#rubykaigi</a> <a href="https://twitter.com/search/%23rubykaigia">#rubykaigia</a></p>&mdash; Kakutani Shintaro (@kakutani) <a href="https://twitter.com/kakutani/status/340393348638601216">2013年5月31日</a></blockquote>
+<p>本篇文章適用的 Linux Distribution：</p>
+
+<ol>
+<li>RedHat Enterprise 7</li>
+<li>CentOS 7</li>
+<li>Fedora 24+</li>
+<li>其它 RHEL 衍生的，以 systemd 為啟動系統的 Linux Distribution 們 (理論上)</li>
+</ol>
 
 
-<blockquote class="twitter-tweet" lang="zh-tw"><p>I would like to go to RubyConf Taiwan 2014〜</p>&mdash; SHIBATA Hiroshi (@hsbt) <a href="https://twitter.com/hsbt/status/341113796158439424">2013年6月2日</a></blockquote>
+<p>從乾淨的 OS 開始，步驟大致如下：</p>
+
+<ul>
+<li>安裝必要套件</li>
+<li>安裝 PGDG Repo &amp; PostgreSQL</li>
+<li>編譯 Ruby</li>
+<li>安裝與編譯 Passenger / Nginx Extension</li>
+<li>編譯 Nginx</li>
+<li>啟動設定</li>
+<li>Logrotate 設定</li>
+</ul>
 
 
-<blockquote class="twitter-tweet" lang="zh-tw"><p>Awesome taiwan ruby community! @<a href="https://twitter.com/ryudoawaru">ryudoawaru</a></p>&mdash; Tatsuya Sato (@sato_ryu) <a href="https://twitter.com/sato_ryu/status/340393351146778624">2013年5月31日</a></blockquote>
+<p>注意：以下所有步驟皆需以 root 身份或 sudo 執行</p>
+
+<h3>安裝必要套件</h3>
+
+<p>```bash</p>
+
+<p>yum groupinstall "Development Tools"，</p>
+
+<p>```</p>
+
+<p>如果是 Fedora 的話，通常還會有 "C Development Tools and Libraries" 和 "D Development Tools and Libraries" 兩種</p>
+
+<p>```bash</p>
+
+<p>yum install v8-devel v8 screen libmcrypt-devel wget libxslt-devel libxml2-devel gdbm-devel libffi-devel zlib-devel openssl-devel libyaml-devel readline-devel curl-devel  pcre-devel git memcached-devel valgrind-devel ImageMagick-devel ImageMagick npm geoip-devel pcre-devel gd-devel openssl-devel</p>
+
+<p>```</p>
+
+<h4>套件說明：</h4>
+
+<p>主要是針對編譯 Ruby 所需，以及其它常見的 RubyGem 如 RMagick 或是 Asset Pipeline 編譯 JS 所需要的套件等。</p>
+
+<h3>安裝 PGDG Repo / PostgreSQL</h3>
+
+<h4>什麼是 <a href="https://yum.postgresql.org/repopackages.php">PGDG</a></h4>
+
+<p>PGDG (PostgreSQL Global Development Group) 是 PostgreSQL (以下簡稱 PgSQL) 的開發單位的簡稱，PGDG Repo 是 PgSQL 的官方為各大 Linux Distribution 提供的套件庫。</p>
+
+<h4>安裝步驟：</h4>
+
+<p>在<a href="https://yum.postgresql.org/repopackages.php">這邊</a>找到對應的 PgSQL 版本與 Distribution 的對應 RPM Url 後，在 Console 下：</p>
+
+<p>以 Fedora 25 + PgSQL 9.6 為例：</p>
+
+<p>```bash</p>
+
+<p>rpm -Uvh https://download.postgresql.org/pub/repos/yum/9.6/fedora/fedora-25-x86_64/pgdg-fedora96-9.6-3.noarch.rpm</p>
+
+<p>```</p>
+
+<p>然後安裝 PgSQL Server 與開發套件</p>
+
+<p>```bash</p>
+
+<p>yum install postgresql96 postgresql96-devel postgresql96-server postgresql96-libs postgresql96-contrib</p>
+
+<p>```</p>
+
+<p>請注意如果你安裝的不是 9.6 的話，請將上面的 96 改成對應的版號即可</p>
+
+<h3>編譯 Ruby</h3>
+
+<p>這邊不使用 rvm 或 rbenv 等 Ruby 版本管理套件，而是採用將不同的 Ruby 版本安裝到不同路徑的方式來解決可能在 Server 上同時運行多版本 Ruby 的需求。</p>
+
+<p>路徑設定原則：</p>
+
+<p>例如 2.3 就安裝到 <code>/usr/local/ruby23</code>，2.4就在 <code>/usr/local/ruby24</code> 以此類推</p>
+
+<p>流程：</p>
+
+<ul>
+<li>下載 CRuby source code</li>
+</ul>
 
 
-<blockquote class="twitter-tweet" data-conversation="none" lang="zh-tw"><p>@<a href="https://twitter.com/ryudoawaru">ryudoawaru</a> わたしも小学生の時からのファンです！ 素敵なLTでした、TwのRubyカンファレンスに行ってみたくなりました :)</p>&mdash; やきとりい (@yotii23) <a href="https://twitter.com/yotii23/status/340406791693279233">2013年5月31日</a></blockquote>
+<p>```bash
+cd /usr/src &amp;&amp; wget https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.3.tar.bz2</p>
+
+<p>```</p>
+
+<ul>
+<li>解壓縮</li>
+</ul>
 
 
-<blockquote class="twitter-tweet" lang="zh-tw"><p>@<a href="https://twitter.com/ryudoawaru">ryudoawaru</a> 良いLTでした(бвб)！</p>&mdash; すずきみほ SUZUKI Miho (@adzuki34) <a href="https://twitter.com/adzuki34/status/340393460668432384">2013年5月31日</a></blockquote>
+<p>```bash</p>
+
+<p>tar -jxvf ruby-2.3.3.tar.bz2</p>
+
+<p>```</p>
+
+<ul>
+<li>configure</li>
+</ul>
 
 
-<blockquote class="twitter-tweet" lang="zh-tw"><p>@<a href="https://twitter.com/ryudoawaru">ryudoawaru</a> LT素晴らしかったです！ありがとうございました！</p>&mdash; Yuki Nishijima (@yuki24) <a href="https://twitter.com/yuki24/status/340784167895838720">2013年6月1日</a></blockquote>
+<p>```bash</p>
+
+<p>cd ruby-2.3.3 &amp;&amp; ./configure --prefix=/usr/local/ruby23</p>
+
+<p>```</p>
+
+<ul>
+<li>make</li>
+</ul>
 
 
-<blockquote class="twitter-tweet" lang="zh-tw"><p>.@<a href="https://twitter.com/ryudoawaru">ryudoawaru</a> さんが <a href="https://twitter.com/search/%23rubykaigi">#rubykaigi</a> 2日目のLTでスライドに桐島を使っていたのは、@<a href="https://twitter.com/nari3">nari3</a> の大江戸03のスライドを見て興味を持ち、映画を探して観て大好きになったからだとか(台湾語字幕あるそうです)。台湾rubyistに桐島届いてた！</p>&mdash; O-Show (@oshow) <a href="https://twitter.com/oshow/status/341110877375840256">2013年6月2日</a></blockquote>
+<p>```bash</p>
+
+<p>make &amp;&amp; make install</p>
+
+<p>```</p>
+
+<p>其它版本可以比照辦理。</p>
+
+<h3>安裝 Passenger 與 Nginx Module</h3>
+
+<ul>
+<li>在執行任何 Ruby 指令前請記得設定系統路徑到要使用 Ruby 版本的 bin 目錄，例如：</li>
+</ul>
 
 
-<script async src="http://ryudo.tw//platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p><code>bash
+export PATH=$PATH:/usr/local/ruby23/bin:
+</code></p>
+
+<p>或是把以上內容加到 <code>~/.bash_profile</code> 的尾端，讓每次登入時自動執行。</p>
+
+<ul>
+<li>安裝 bundler &amp; passenger Gem</li>
+</ul>
 
 
-<p>神奇的是, 在LT投影片上傳slideshare後的隔天竟然登上了slideshare的「Hot on Facebook」首頁排行榜, 真的是又驚又喜</p>
+<p><code>bash
+gem install passenger bundler
+</code></p>
 
-<hr />
+<p>此時要注意安裝的 Passenger 版號，進入 Passenger 目錄編譯 Passenger Nginx Module，以 Ruby 2.3 和 Passenger 5.1.1 為例：</p>
 
-<p>It was a miracle that on the third day of RubyKaigi2013, my slide was in the 「Hot in Facebook」 area of Slideshare's homepage.</p>
+<p>```bash</p>
 
-<center><img src="http://i.imgur.com/rN7xNwl.png" style="max-width:720px;" /></center>
+<p>cd /usr/local/ruby23/lib/ruby/gems/2.3.0/gems/passenger-5.1.1/
+rake nginx</p>
 
+<p>```</p>
 
-<p>感謝<a href="https://twitter.com/takai">高井先生</a>的照片, 拍的非常好.</p>
-
-<hr />
-
-<p>Thanks to the high quality photo taken by <a href="https://twitter.com/takai">Naoto Takai</a>.</p>
-
-<center><img src="http://farm6.staticflickr.com/5469/8905326085_5f217d6665_c.jpg"/></center>
+<ul>
+<li>下載 Nginx 源碼並使用編譯好的 Passenger Module 編譯 (以 1.10.1 版為例)</li>
+</ul>
 
 
-<p>這趟日本行真的是收獲多多, 接下來還會有幾篇文章介紹; 整個從準備到上台的過程中, 心裡一直想就大偉的話, 要讓世界知道Ruby Taiwan社群的存在, 今後一樣會持續努力</p>
+<p>```bash</p>
 
-<hr />
+<p>cd /usr/src &amp;&amp; wget http://nginx.org/download/nginx-1.10.1.tar.gz</p>
 
-<p>I learn so much on Japan this time, and I will write many blog posts to represent my journey. On the process of preparing the presentation, I always remember what David said and try my best to let the attendee know what we(Ruby Taiwan community) do and I will continue my work in the future.</p>
+<p>tar -zxvf nginx-1.10.1.tar.gz &amp;&amp; cd nginx-1.10.1</p>
 
-<h3>Thanks to all awesome staffs of Rubykaigi and community friends in Japan, また台湾で会お！</h3>
+<p>./configure --with-http_v2_module --with-http_ssl_module --prefix=/usr/local/nginx --with-http_image_filter_module --with-http_gzip_static_module --with-http_secure_link_module --with-http_stub_status_module --add-module="/usr/local/ruby23/lib/ruby/gems/2.3.0/gems/passenger-5.1.1/src/nginx_module"</p>
 
-<p>附上簡報檔以及當天Live如下：</p>
+<p>make &amp;&amp; make install #這裡會將 Nginx 安裝到 /usr/local/nginx 下</p>
 
-<center>
-<iframe src="http://www.slideshare.net/slideshow/embed_code/22236968?rel=0" width="597" height="486" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC;border-width:1px 1px 0;margin-bottom:5px" allowfullscreen webkitallowfullscreen mozallowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="http://www.slideshare.net/ryudoawaru/introduce-ruby-taiwanrubykaigi2013" title="Introduce Ruby Taiwan@Rubykaigi2013" target="_blank">Introduce Ruby Taiwan@Rubykaigi2013</a> </strong> from <strong><a href="http://www.slideshare.net/ryudoawaru" target="_blank">Mu-Fan Teng</a></strong> </div>
-<iframe width="480" height="302" src="http://www.ustream.tv/embed/recorded/33573701/highlight/367455?v=3&amp;wmode=direct" scrolling="no" frameborder="0" style="border: 0px none transparent;">    </iframe>
-<br /><a href="http://www.ustream.tv/" style="padding: 2px 0px 4px; width: 400px; background: #ffffff; display: block; color: #000000; font-weight: normal; font-size: 10px; text-decoration: underline; text-align: center;" target="_blank">Video streaming by Ustream</a>
-</center>
+<p>```</p>
 
+<p>至此為止 Nginx 已設定完成，後續操作請看<a href="/blog/2017/02/02/install-ruby-rails-passenger-postgresql-into-rhel-2017-02/">下篇</a></p>
 ]]></content>
   </entry>
   

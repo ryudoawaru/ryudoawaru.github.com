@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: rails | 慕凡(@ryudoawaru)'s blog]]></title>
+  <title><![CDATA[Category: Rails | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2017-02-02T17:24:36+08:00</updated>
+  <updated>2017-02-03T16:15:41+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -14,352 +14,381 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Table Inheritance in PostgreSQL]]></title>
-    <link href="http://ryudo.tw/blog/2015/12/31/pgsql-inheritance/"/>
-    <updated>2015-12-31T12:17:00+08:00</updated>
-    <id>http://ryudo.tw/blog/2015/12/31/pgsql-inheritance</id>
-    <content type="html"><![CDATA[<h3>前言</h3>
-
-<p><a href="http://api.rubyonrails.org/classes/ActiveRecord/Inheritance.html">Single Table Inheritance</a>（以下簡稱 STI） 是我們在 Rails 常用的一個功能，一般來說 STI 在 Rails 的實現方式如下：</p>
-
-<ol>
-<li>一張資料表</li>
-<li>多個 ActiveRecord Class 使用這張表</li>
-<li>預設用 type 這個欄位來界定這筆紀錄所屬的 class</li>
-</ol>
-
-
-<p>這樣做的好處是子類別可以用父類別的欄位，主要的缺點是在可能會浪費到不需要的欄位；Rails 之所以這樣設計，主要是因為大部份的 RDBMS 系統除了 PostgreSQL 和 Oracle 以外幾乎都沒有實作 Table Inheritance。</p>
-
-<h3>PostgreSQL 的 Table Inheritance</h3>
-
-<p>PostgreSQL 的 Table Inheritance 和 STI 最大的差別在於多表繼承，在官網上就有相當詳細的<a href="http://www.postgresql.org/docs/9.1/static/ddl-inherit.html">介紹</a>，基本上就是在資料表之間實作出繼承的關係，B 表繼承 A 表的話，則：</p>
+    <title type="html"><![CDATA[Install Ruby / Rails / Passenger / PostgreSQL Stack in RHEL and variant OS (後篇)]]></title>
+    <link href="http://ryudo.tw/blog/2017/02/02/install-ruby-rails-passenger-postgresql-into-rhel-2017-02/"/>
+    <updated>2017-02-02T17:32:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2017/02/02/install-ruby-rails-passenger-postgresql-into-rhel-2017-02</id>
+    <content type="html"><![CDATA[<p>接續<a href="/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017/">前篇</a>，本篇內容包含：</p>
 
 <ul>
-<li>B 表會有所有 A 表的欄位資訊</li>
-<li>即使日後 A 表欄位有所變動，也會即時反應到 B 表上</li>
-<li>B 表所建立的資料，在查尋 A 表時會全部出現，反之則無</li>
+<li>Nginx 設定檔</li>
+<li>設定 systemd 啟動檔</li>
+<li>Logrotate &amp; Iptables 設定</li>
 </ul>
 
 
-<p>接下來我們就來介紹如何在 Rails 中用 PostgreSQL 的 Table Inheritance 來實作 ActiveRecord 的物件繼承。</p>
+<h3>Nginx 設定檔</h3>
 
-<h4>期望的 Schema</h4>
+<p>由於編譯 Nginx 時把 prefix 設定在 <code>/usr/local/nginx</code> 下，所以設定檔就在 <code>/usr/local/nginx/conf</code>  下，先編輯 <code>/usr/local/nginx/conf/nginx.conf</code></p>
 
-<p><img src="/images/pgsql-inheritance/schema.png" alt="" /></p>
+<p>```nginx</p>
 
-<h4>實作</h4>
+<p>user  nobody; #這邊的 user 和 Rails App 的 user 是不一樣的設定，但是要考慮到 Asset File 的存取，也就是這個 user 必需要可以唯讀 Rails App 的 public 目錄
+worker_processes  4;
+error_log  logs/error.log  info;
+pid       /var/run/nginx.pid; #設定 pid file 的位置，必需和後面 systemd 設定檔一致
+worker_rlimit_nofile 40960;
+events {</p>
 
-<p>建立父類別 User</p>
-
-<p><code>bash
-rails g model User
-</code></p>
-
-<p>```ruby
-class CreateUsers &lt; ActiveRecord::Migration[5.0]
-  def change</p>
-
-<pre><code>create_table :users do |t|
-  t.string :username
-  t.string :password
-  t.string :type
-  t.timestamps
-end
+<pre><code>worker_connections  10240;
 </code></pre>
 
-<p>  end
-end</p>
+<p>}#worker_rlimit_nofile 和 worker_connections：為了突破系統開啟檔案上限的設定，必需一起設定，一般來說 worker_rlimit_nofile 為 worker_connections x worker_processes</p>
 
-<p>class User &lt; ApplicationRecord
-end
-```</p>
+<p>http {
+  include       mime.types;
+  default_type  application/octet-stream;<br/>
+  access_log logs/access.log;
+  sendfile        on;
+  keepalive_timeout  65;
+  gzip  on;
+  send_timeout 600;
+  gzip_min_length  1000;
+  gzip_buffers     4 8k;
+  gzip_types       text/plain application/x-javascript text/css application/xml text/javascript;
+  client_max_body_size 100M; #關係到上傳檔案的上限
+  passenger_root /usr/local/ruby23/lib/ruby/gems/2.3.0/gems/passenger-5.1.1; #Passenger Gem 的根目錄，會因為使用的 Ruby 版本與 Passenger 版本變化
+  passenger_max_pool_size 16; # 最大同時可以存在的 Rails App 行程數，請依照系統的記憶體大小計算，一般應該是 "(總記憶體 x 0.75) / 單一 Rails App 使用記憶體"，例如 4GB 的機器，單一 Rails App 記憶體約 150 就是 <code>4096 * 0.75 / 150  = 20</code>
+  server{</p>
 
-<p>建立 sub-class Staff</p>
-
-<p><code>bash
-rails g model Staff
-</code></p>
-
-<p>```ruby
-class CreateStaffs &lt; ActiveRecord::Migration[5.0]
-  def up</p>
-
-<pre><code>execute &lt;&lt;-SQL
-CREATE TABLE staffs(level integer,CONSTRAINT "PK" PRIMARY KEY (id))
-INHERITS(users)
-SQL
+<pre><code>server_name _;
+location /{
+  return 404;
+}
 </code></pre>
 
-<p>  end</p>
+<p>  }# 對應不屬於任何 Virtual Host 的請求，在這裡返回 404 Not Found 的頁面。
+  include valid-vhosts/*.conf; #在其它檔案中設定 Virtual Host
+}</p>
 
-<p>  def down</p>
+<p>```</p>
 
-<pre><code>drop_table :staffs
+<p>以下是 Virtual Host 的設定</p>
+
+<p>```nginx</p>
+
+<p>server{
+  server_name 5xruby.tw; #Virtual Host 的主機名稱
+  root /home/5xruby/5xruby.tw/current/public; #務必設定為 App 的 Public 目錄
+  passenger_enabled on; #開啟 Passenger
+  rails_env production; # 設定 Rails App Stage
+  passenger_ruby /usr/local/ruby23/bin/ruby; #如果這個 App 和 Passenger 使用的 Ruby 版本不同的話就需要指定
+  access_log logs/5xruby-access.log;
+  error_log logs/5xruby-err.log;
+  location ~ ^/assets/ {</p>
+
+<pre><code># 讓瀏覽器快取靜態 Asset Pipeline 檔案的設定
+expires 1y;
+add_header Cache-Control public;
+add_header ETag "";
+break;
 </code></pre>
 
-<p>  end
-end
-class Staff &lt; User
-  self.table_name = 'staffs'
-end
-```</p>
+<p>  }
+}</p>
 
-<p>和原本 STI 的行為不同，由於 ActiveRecord Migration 並沒有內建相關功能，所以需要自行撰寫 SQL 式來建立 Staffs 表，在建立時需實際指定繼承自 users 表，並且將額外附加的欄位等屬性設定進去即可。</p>
+<p>```</p>
 
-<p>在 Model 的程式方面，必需指定子類別的資料表，否則 Rails 會按照 STI 預設行為去使用父類別的資料表（users）。</p>
-
-<p>在這個範例中，在 staffs 表建立的資料都會出現在 users 表上，反之則不會。</p>
-
-<p><code>ruby
-User.create(username: 'ryudo', password:'12345')
-Staff.create(username:'Jodeci',password:'12345')
-User.pluck(:username)
-   (0.4ms)  SELECT "users"."username" FROM "users"
- =&gt; ["ryudo", "Jodeci"]
-Staff.pluck(:username)
-   (0.4ms)  SELECT "staffs"."username" FROM "staffs" WHERE "staffs"."type" IN ('Staff')
- =&gt; ["Jodeci"]
-User.count #=&gt; 2
-Staff.count #=&gt; 1
-User.last
-  User Load (0.6ms)  SELECT  "users".* FROM "users" ORDER BY "users"."id" DESC LIMIT $1  [["LIMIT", 1]]
- =&gt; #&lt;Staff id: 2, username: "Jodeci", password: "12345", type: "Staff", created_at: "2015-12-31 07:12:16", updated_at: "2015-12-31 07:12:16"&gt;
-</code></p>
-
-<h4>Table Inheritance 會繼承的東西：</h4>
+<h3>設定 systemd 啟動檔</h3>
 
 <ul>
-<li>欄位資訊：包括預設值或是 NOT NULL，也就是在 SQL 建構式中看到欄位敘述的內容。</li>
-<li>父表上的欄位變動：也就是之後在父表上新增刪除修改欄位的變動，會確實的反應到子表上。</li>
+<li>編輯  /lib/systemd/system/nginx.service</li>
 </ul>
 
 
-<h4>Table Inheritance 不會繼承的東西：</h4>
+<p>```</p>
+
+<p>[Unit]
+Description=The NGINX HTTP and reverse proxy server
+After=syslog.target network.target remote-fs.target nss-lookup.target</p>
+
+<p>[Service]
+Type=forking
+PIDFile=/var/run/nginx.pid
+ExecStartPre=  /usr/local/nginx/sbin/nginx -t
+ExecStart=  /usr/local/nginx/sbin/nginx
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true</p>
+
+<p>[Install]
+WantedBy=multi-user.target</p>
+
+<p>```</p>
 
 <ul>
-<li>欄位資訊以外的全部：包括 Primary Key、Constraint 或是 Index 等。</li>
+<li>以 root 身份輸入 <code>systemctl enable nginx</code> 設定開機自動啟動</li>
+<li>輸入 <code>/usr/local/nginx/sbin/nginx -t</code> 測試設定檔正確與否</li>
+<li><code>systemctl start nginx</code> 啟動，可以再透過 <code>systemctl status nginx</code> 觀察啟動情形</li>
 </ul>
 
 
-<h4>主鍵重複值問題</h4>
+<h1>Logrotate 設定</h1>
 
-<p>這應該是最大的困擾之一，就是繼承的子表的主鍵是可以和父表的值重複的，例如以下的程式碼是可以正確執行的：</p>
+<p>如果在前面的 Virtual  Host 設定中有設定 access_log 或 error_log 的話，就必需要設定 <a href="http://linux.vbird.org/linux_basic/0570syslog.php#rotate">Logrotate</a> 來定期輪替 Nginx log，輪替的設定如下。</p>
 
-<p><code>ruby 測試title
-User.create(id:1, username: 'ryudo', password:'12345') #=&gt; 建立 id 為 1 的 User
-Staff.create(id:1,username:'Jodeci',password:'12345') #=&gt; 建立 id 為 1 的 Staff
-</code></p>
+<p>```</p>
 
-<p>這樣在 users 表會真的有兩筆 id 為 1 的紀錄，而且目前無法用資料庫的方式去迴避這個問題，不過由於兩個 id 之間是共用同一個 Sequence，在不指定 id 建立資料的狀況下，id 的值是不會重複的。</p>
+<p>/usr/local/nginx/logs/*.log {</p>
 
-<h4>inheritance_column 存廢問題：</h4>
+<pre><code>missingok
+size=20M #單檔超過 20M 為條件
+compress #壓縮舊檔案
+rotate 10
+notifempty
+sharedscripts
+postrotate
+test ! -f /var/run/nginx.pid || kill -s USR1 `cat /var/run/nginx.pid` #讓 Nginx 重新開啟 Log 檔
+endscript
+</code></pre>
 
-<p>在上面的範例中，我們可以看到原本 STI 的 inheritance_column，也就是 type 這個欄位的存在，原本 STI 的設計是：子類別的資料將會自動在 type 上加上類別名稱，查詢 Staff 時也會預設查詢 type 為 Staff 的資料。</p>
+<p>}</p>
 
-<p>這個設計是因為在資料同屬一張表的前提下，必需用一個欄位去區分類別的關係，而在 Table Inheritance 下，由於每個類別有獨立的資料表，在查詢子類別時已經不需要用 type 這個條件了；但是如果在父類別的資料表查詢時，還是需要用 inheritance_column 去區分出這筆資料所屬的類別，否則所有父類別資料表的資料在 ActiveRecord 中會被視為父類別的資料。</p>
+<p>```</p>
 
-<h4>多表繼承</h4>
+<p>對 Rails 產生的 Log 也可以比照辦理</p>
 
-<p>其實是有這項功能的，但是目前還沒想到需要使用的場合所以這次就不討論了。</p>
+<h3>Iptables 設定</h3>
 
-<h3>是否要使用這個功能？</h3>
-
-<h4>好處</h4>
+<p>現在的 RHEL 系 OS 通常都預設使用 Firewalld 做為系統防火牆，在此先改回筆者比較熟悉的 Iptables</p>
 
 <ul>
-<li>比起 ActiveRecord 提供的 STI 更趨近於物件化</li>
-<li>由於資料表是物理上的切分，等於是一種 Partitioning，在資料量大的時候可以提升子表的效能</li>
-<li>同上，減少欄位或 Index 等資源不必要的浪費</li>
+<li>yum remove firewalld</li>
+<li>yum install iptables-services</li>
+<li>編輯 /etc/sysconfig/iptables</li>
 </ul>
 
 
-<h4>壞處</h4>
+<p>```</p>
+
+<p>*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -s 127.0.0.1 -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport ssh -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport http -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport https -j ACCEPT
+COMMIT</p>
+
+<p>```</p>
 
 <ul>
-<li>Rails 預設不支援相關的 Migration 操作，需手動撰寫 SQL</li>
-<li>同上，在 Model 的設定上必需客製一些設定</li>
+<li>systemctl start iptables</li>
 </ul>
 
 
-<p>以上！</p>
+<p>到此為止就完成了基本 Rails Stack 的設定。</p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[自動化測試 Rails 中的 URL HELPER]]></title>
-    <link href="http://ryudo.tw/blog/2015/02/18/automatic-urlhelper-test-in-rails/"/>
-    <updated>2015-02-18T12:51:00+08:00</updated>
-    <id>http://ryudo.tw/blog/2015/02/18/automatic-urlhelper-test-in-rails</id>
-    <content type="html"><![CDATA[<h3>前言：</h3>
+    <title type="html"><![CDATA[Install Ruby / Rails / Passenger / PostgreSQL Stack in RHEL and variant OS (前篇)]]></title>
+    <link href="http://ryudo.tw/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017/"/>
+    <updated>2017-01-24T15:10:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017</id>
+    <content type="html"><![CDATA[<p>在敝公司<a href="https://5xruby.tw/">五倍紅寶石</a>每期的<a href="https://5xruby.tw/talks/ruby-on-rails2016-4">RUBY ON RAILS 從零開始</a>課程中，常常會遇到學員詢問如何在 <a href="https://www.linode.com/">Linode</a> 或 <a href="https://www.digitalocean.com">Digital Ocean</a> 這類 VPS 平台中安裝 Ruby / Rails Stack 的相關問題，以下的文章將簡介在目前最新版的 RHEL 系 OS 上安裝 Rails Stack 的步驟。</p>
 
-<p>最近在某個和客戶共同開發的專案中，遇到了以下的情形：</p>
+<p>本篇文章的 Rails Stack 包含：</p>
 
 <ol>
-<li>專案的 layout / view 經過大幅的改版</li>
-<li>改版是把舊 layout（以下簡稱 ver1）的大部份功能改出一份新版 layout / view / controller（以下稱 ver2）</li>
-<li>改版後幾乎沒有移除 ver1 重複的部份，因此系統中存著很多其實用不到的 view / controller / route</li>
-<li>又因為改版後不想改變在 production env 的 url，所以在路由設定中用了大概是類似的架構：
+<li>系統上可以跑多重版本的 Ruby</li>
+<li>Rails 5</li>
+<li>PostgreSQL 9.6</li>
+<li>使用 Passenger 為 Application Server，Nginx 為 Web Frontend Server</li>
+</ol>
+
+
+<p>本篇文章適用的 Linux Distribution：</p>
+
+<ol>
+<li>RedHat Enterprise 7</li>
+<li>CentOS 7</li>
+<li>Fedora 24+</li>
+<li>其它 RHEL 衍生的，以 systemd 為啟動系統的 Linux Distribution 們 (理論上)</li>
+</ol>
+
+
+<p>從乾淨的 OS 開始，步驟大致如下：</p>
 
 <ul>
-<li>Development 中有 /ver1 和 /ver2 兩個 route namespace，而且有 base uri，意即可能會有 /ver1/products 和 /ver2/products</li>
-<li>Production 中，這兩個 namespace 的 base uri 會被消除，舉例來說，如果遇到 /products 的 request，系統會先找 /ver2 有沒有 /products，有的話會先使用，沒有再去找 /ver1</li>
+<li>安裝必要套件</li>
+<li>安裝 PGDG Repo &amp; PostgreSQL</li>
+<li>編譯 Ruby</li>
+<li>安裝與編譯 Passenger / Nginx Extension</li>
+<li>編譯 Nginx</li>
+<li>啟動設定</li>
+<li>Logrotate 設定</li>
 </ul>
-</li>
-</ol>
 
 
-<p>所以系統最後就存在一堆功能重疊的 controller / view / layout 了，現在的工作是要移除 /ver1 和 /ver2 中重複的部份。</p>
+<p>注意：以下所有步驟皆需以 root 身份或 sudo 執行</p>
 
-<h3>執行：</h3>
+<h3>安裝必要套件</h3>
 
-<p>基本上就是高科技手工業，程序如下：</p>
+<p>```bash</p>
 
-<ol>
-<li>找 /ver2 的 route，假設現在的目標是 resources :users</li>
-<li>在 /ver1 上找尋類似的 resource</li>
-<li>如果有，就把 /ver1 的刪掉</li>
-<li>如果不是單純的 Restful CRUD（意指有其它非 index. show, create 等標準 action 的 action）就得要一一檢查在 /ver2 上是否都有相對應的 action</li>
-<li>找到所有的 view / helper / asset / controller 中是否有用到 /ver1 上的 url helper method，然後統一取代</li>
-</ol>
+<p>yum groupinstall "Development Tools"，</p>
+
+<p>```</p>
+
+<p>如果是 Fedora 的話，通常還會有 "C Development Tools and Libraries" 和 "D Development Tools and Libraries" 兩種</p>
+
+<p>```bash</p>
+
+<p>yum install v8-devel v8 screen libmcrypt-devel wget libxslt-devel libxml2-devel gdbm-devel libffi-devel zlib-devel openssl-devel libyaml-devel readline-devel curl-devel  pcre-devel git memcached-devel valgrind-devel ImageMagick-devel ImageMagick npm geoip-devel pcre-devel gd-devel openssl-devel</p>
+
+<p>```</p>
+
+<h4>套件說明：</h4>
+
+<p>主要是針對編譯 Ruby 所需，以及其它常見的 RubyGem 如 RMagick 或是 Asset Pipeline 編譯 JS 所需要的套件等。</p>
+
+<h3>安裝 PGDG Repo / PostgreSQL</h3>
+
+<h4>什麼是 <a href="https://yum.postgresql.org/repopackages.php">PGDG</a></h4>
+
+<p>PGDG (PostgreSQL Global Development Group) 是 PostgreSQL (以下簡稱 PgSQL) 的開發單位的簡稱，PGDG Repo 是 PgSQL 的官方為各大 Linux Distribution 提供的套件庫。</p>
+
+<h4>安裝步驟：</h4>
+
+<p>在<a href="https://yum.postgresql.org/repopackages.php">這邊</a>找到對應的 PgSQL 版本與 Distribution 的對應 RPM Url 後，在 Console 下：</p>
+
+<p>以 Fedora 25 + PgSQL 9.6 為例：</p>
+
+<p>```bash</p>
+
+<p>rpm -Uvh https://download.postgresql.org/pub/repos/yum/9.6/fedora/fedora-25-x86_64/pgdg-fedora96-9.6-3.noarch.rpm</p>
+
+<p>```</p>
+
+<p>然後安裝 PgSQL Server 與開發套件</p>
+
+<p>```bash</p>
+
+<p>yum install postgresql96 postgresql96-devel postgresql96-server postgresql96-libs postgresql96-contrib</p>
+
+<p>```</p>
+
+<p>請注意如果你安裝的不是 9.6 的話，請將上面的 96 改成對應的版號即可</p>
+
+<h3>編譯 Ruby</h3>
+
+<p>這邊不使用 rvm 或 rbenv 等 Ruby 版本管理套件，而是採用將不同的 Ruby 版本安裝到不同路徑的方式來解決可能在 Server 上同時運行多版本 Ruby 的需求。</p>
+
+<p>路徑設定原則：</p>
+
+<p>例如 2.3 就安裝到 <code>/usr/local/ruby23</code>，2.4就在 <code>/usr/local/ruby24</code> 以此類推</p>
+
+<p>流程：</p>
+
+<ul>
+<li>下載 CRuby source code</li>
+</ul>
 
 
-<p>以上程序有效的前提是，所有的 URL 都用 helper method 而不用純字串或 url_for 等。</p>
+<p>```bash
+cd /usr/src &amp;&amp; wget https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.3.tar.bz2</p>
 
-<p>事情聽起來好像不是很難，不過這個專案可怕的地方就在於數百行的 route 中幾乎沒有單純 CRUD 的 resource，所以和同事花上了很多時間在手工上，完成後的問題就是，要怎樣確保沒有遺漏的地方。</p>
+<p>```</p>
 
-<p>於是想到，是否可以將程式中所有用到的 url helper method 集合起來一一做檢查呢？最後想到的解法大意如下：</p>
-
-<ol>
-<li>用文字搜尋的程式，以正規表示式去找出程式碼中使用的 url helper method</li>
-<li>將找到的 method 集合產生列表</li>
-<li>用列表產生 it 區塊</li>
-<li>it 區塊中使用 <a href="https://www.relishapp.com/rspec/rspec-rails/v/2-4/docs/helper-specs/helper-spec">helper spec</a> 去測試 view context 中是否有這些 method</li>
-</ol>
+<ul>
+<li>解壓縮</li>
+</ul>
 
 
-<p>文字搜尋採用目前比較流行的 <a href="http://beyondgrep.com/">ack</a>，好處是除了速度快之外又是 Perl 版的 Regexp，比 egrep 內建的更貼近 Ruby 使用的版本</p>
+<p>```bash</p>
+
+<p>tar -jxvf ruby-2.3.3.tar.bz2</p>
+
+<p>```</p>
+
+<ul>
+<li>configure</li>
+</ul>
+
+
+<p>```bash</p>
+
+<p>cd ruby-2.3.3 &amp;&amp; ./configure --prefix=/usr/local/ruby23</p>
+
+<p>```</p>
+
+<ul>
+<li>make</li>
+</ul>
+
+
+<p>```bash</p>
+
+<p>make &amp;&amp; make install</p>
+
+<p>```</p>
+
+<p>其它版本可以比照辦理。</p>
+
+<h3>安裝 Passenger 與 Nginx Module</h3>
+
+<ul>
+<li>在執行任何 Ruby 指令前請記得設定系統路徑到要使用 Ruby 版本的 bin 目錄，例如：</li>
+</ul>
+
 
 <p><code>bash
-ack --noheading -h '[^A-Za-z0-9_.].((ver1|ver2)[\\w_]+?\_(url|path))' app/ --output '$1' | sort | uniq
+export PATH=$PATH:/usr/local/ruby23/bin:
 </code></p>
 
-<p>使用的 ack 參數如下：</p>
+<p>或是把以上內容加到 <code>~/.bash_profile</code> 的尾端，讓每次登入時自動執行。</p>
 
 <ul>
-<li>正規表示式為：<code>[^A-Za-z0-9_.].((ver1|ver2)[\\w_]+?\_(url|path))</code></li>
-<li>--noheading 不顯示檔案名在頭</li>
-<li>-h 不顯示檔名在左邊</li>
-<li>--output '$1' 只顯示批配的第 1 項</li>
+<li>安裝 bundler &amp; passenger Gem</li>
 </ul>
 
 
-<p>測試的程式大概長的像這樣：</p>
+<p><code>bash
+gem install passenger bundler
+</code></p>
 
-<p>```ruby
-RSpec.describe ApplicationHelper, :type => :helper do
-  fn = "tmp/url_helpers.txt"
-  cmd = "ack --noheading -h '[<sup>A-Za-z0-9<em>.].((ver1|ver2)[\w</em>]+?_(url|path))'</sup> app/ --output '$1' | sort | uniq > #{fn}"
-  system cmd
-  File.read(fn).split.each do |url_helper_name|</p>
+<p>此時要注意安裝的 Passenger 版號，進入 Passenger 目錄編譯 Passenger Nginx Module，以 Ruby 2.3 和 Passenger 5.1.1 為例：</p>
 
-<pre><code>it "Url helper #{url_helper_name} should be available" do
-  helper.respond_to?(url_helper_name.to_sym).should be(true)
-end
-</code></pre>
+<p>```bash</p>
 
-<p>  end
-end
-```</p>
+<p>cd /usr/local/ruby23/lib/ruby/gems/2.3.0/gems/passenger-5.1.1/
+rake nginx</p>
 
-<p>這樣一跑完就可以放心了。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Rails Girls Taipei-01 活動主辦心得]]></title>
-    <link href="http://ryudo.tw/blog/2013/09/14/railsgirls-taipei-01/"/>
-    <updated>2013-09-14T14:39:00+08:00</updated>
-    <id>http://ryudo.tw/blog/2013/09/14/railsgirls-taipei-01</id>
-    <content type="html"><![CDATA[<p><img src="http://farm6.staticflickr.com/5471/9698784100_dfb2afc625_b.jpg" alt="Group photo of Rails Girls Taipei-01" /></p>
+<p>```</p>
 
-<p>以下是我和<a href="http://blog.eddie.com.tw/">高見龍</a> 以及<a href="http://blog.taian.su/">泰安</a> 共同主辦第一屆<a href="http://railsgirls.tw/">Rails Girls Taipei</a>活動的心得</p>
-
-<h3>Rails Girls社群</h3>
-
-<p>有關於Rails Girls社群的介紹可以參考<a href="http://www.openfoundry.org/index.php?option=com_content&amp;task=view&amp;id=9044&amp;Itemid=4">Open Foundry</a>或 <a href="http://www.inside.com.tw/2013/08/12/rails-girls-taipei-workshop">Inside</a>的介紹, 在此就不再儹述。</p>
-
-<h3>緣起</h3>
-
-<p>女性, 在台灣的程式社群屬於稀有動物的範疇, 一般來說在各大程式研討會中女會眾的比例通常在百分之三或以下, 所以一開始知道有<a href="http://railsgirls.com">Rails Girls</a>這種活動(或著可以說是社群)時並不是特別感興趣; 轉捩點是四月和高見龍一起開<a href="http://blog.eddie.com.tw/2013/04/22/1st-ruby-and-rails-training-course/">有心人課程</a>時, 發現竟然有意外多的女性學員(約佔全部學員的四分之一), 讓我們重新考慮舉辦這個活動的可能性; 研究了一下之後, 發現他是可以自由申請主辦的, 因此在五月初準備Rubykaigi 2013的行程與演講時, 就試著填寫了主站上的申請表單, Rails Girls的創辦人Linda Liukas也很快的就回應我, 讓我加入了世界各地Rails Girls活動的主辦群中。</p>
-
-<p>加入「世界各地的Rails Girls主辦群」之後, 就是可以加入Railsgilrs.com網站的Github Repository, 以及修改或新增網站的內容, 使用Repository內的資源(圖片/素材)之外 還有加入Rails Girls的maillist;  除此之外都要由當地的主辦人自行張羅。</p>
-
-<h3>在日本的見聞</h3>
-
-<p>我在五月底至六月初和高見龍一同前往日本參加<a href="http://ryudo.tw/blog/2013/06/07/rubykaigi2013-lt">Rubykaigi 2013</a>時, 有幸和日本Rails Girls的主辦人<a href="http://www.hsbt.org">柴田博志</a>先生討論了如何教不會程式的女生上手Rails的方式, 他講到了一個重點「藉由copy &amp; paste, 讓學員有成就感」。</p>
-
-<p>在Rubykaigi三天的議程中, 我們觀察到女性會眾的比例是遠超過5%的, 也藉機在現場認識了許多女性會眾, 發現之中甚至有原本不具程式經驗, 卻因為參加過Rails Girls活動後主動來參加RubyKaigi的女會眾; 而在Rubykaigi後一天舉辦的<a href="http://rubyhiroba.org">Ruby Hiroba</a>的主題活動<a href="https://www.facebook.com/Rails%20GirlsMoreExtended">Rails Girls, more extended</a>中, 同行的高見龍也現場觀察了日本這邊的活動情形, 如名稱上的「more extended」所示, 這是普通Rails Girls活動的進階版, 是採取由學員選擇有興趣的主題, 例如前端或後端技術等, 和熟練這些主題的教練一對二或三的教學形式, 在現場就近直接觀查教學的情形, 對於我們日後的主辦也很有幫助; 整個3+1天的活動之中的所見所聞, 都增加了我們的信心和決心。</p>
-
-<p><img src="http://farm8.staticflickr.com/7424/8901595193_1939a4de96_b_d.jpg" alt="Photo with Nakawaza and Yamaneko @Rubykaigi2013" />
-(在RubyKaigi會場和Rails Girls的學員中澤(中)以及知名的mrubyist Yamane(右)合照)</p>
-
-<h3>開始籌辦</h3>
-
-<p>從日本回來之後一直忙於各種事件, 直到七月才有空開始, 除了本來就決定要一起主辦的高見龍之外, 剛好社群的朋友泰安對於這個活動都很有興趣, 因此我們就決定一起主辦這個活動。</p>
-
-<p>泰安的夫人本身是一位業餘的畫家, 就請他畫了現在各位看到的這個Logo</p>
-
-<p><img src="/images/rg-taipei.jpg" alt="Rails Girls Taiwan Logo" /></p>
-
-<h4>贊助商</h4>
-
-<p>由於這個活動規定不能向學員收取門票, 所以最重要的是找尋贊助商; 想到之前上課的學生阿姿是國內非常知名且歷史悠久的和女性有關的網站<a href="http://verywed.com">非常婚禮verywed</a>的員工, 於是請她幫忙介紹引薦該公司的老闆與技術主管, 在簡短的會談闡明本活動的宗旨後, 該公司也欣然同意贊助本次活動, 順帶一提的是該公司是台灣極少數以女性員工為主的網路公司, 連程式都是以女性員工佔多數, 感謝非常婚禮的幫忙。</p>
-
-<h4>場地</h4>
-
-<p>一開始由於並不知道會有多少人報名, 決定以小而精的場地為主要的考量, 就選擇了在各大程式語言社群中頗負盛名的<a href="http://clbc.tw">CLBC慶隆商務俱樂部</a>為第一順位的場地選擇; 在談完贊助後立刻前往預約, 也很幸運的預約到了想要的時間; 並且獲得老闆Tyler的同意讓我們用公益團體的優惠價格計費, 在此必需要再次的感謝CLBC。</p>
-
-<p><img src="http://farm3.staticflickr.com/2888/9695456801_7ee681348d_b_d.jpg" alt="Rails Girls Taipei-01 Venue" /></p>
-
-<h4>報名</h4>
-
-<p>事先大家最擔心的就是會沒有學員, 畢竟現狀就如前面所提, 程式社群的女性成員是非常稀少的, 不過事後證明這些擔心都是多餘的; 中午開放報名後, 不到2小時就超過了150人, 更在第二天下午時已經超過了320人, 只好提前關閉註冊, 接下來篩選學員的工作反而是最花時間的, 大概花了將近十天在review報名資料上, 由於場地限制的因素, 最後只能選出31位的學員。</p>
-
-<p>學員的資歷方面真的是臥虎藏龍的等級, 有位學員甚至曾經在大陸的百度這種超巨型網路公司工作過, 也有學員特地從台中兩天都當日搭高鐵往返參加的, 最值得一提的是一位來自花蓮數位機會中心的老師, 為了知識傳承, 特地從東部海邊北上來參加活動。</p>
-
-<h4>選取標準</h4>
-
-<p>如同國外創立這個活動的原意, 加上參考日本方面的選取標準後, 我們希望選擇的是比較沒有其它程式經驗的人, 然後重要的是, 在自介中說明以下兩件事：</p>
-
-<ol>
-<li>為什麼妳想參加這個活動？</li>
-<li>讓我們了解妳是一個怎樣的人？</li>
-</ol>
+<ul>
+<li>下載 Nginx 源碼並使用編譯好的 Passenger Module 編譯 (以 1.10.1 版為例)</li>
+</ul>
 
 
-<h4>事前準備</h4>
+<p>```bash</p>
 
-<p>雖然之前已經有一點教Ruby的經驗, 不過教完全新手的事, 從學生時代以後就沒體驗過, 這次我們決定由一位教練負責2位學員, 因此從社群徵求了15位朋友來擔任教練的工作, 在Ruby Tuesday#25的會後進行了第一次的討論; 決定了教學方向後, 教材的部份就由泰安負責主編, 其他教練協助編輯, 成果可以在<a href="https://github.com/railsgirls-taiwan">Github</a>上看到; 加上一位公費留學過歐洲, 英文非常流利的教練<a href="https://twitter.com/JuanitoFatas">@JuanitoFatas</a>幫忙翻譯了<a href="http://guides.railsgirls.tw">Rails Girls Guides</a>為主的很多文件, 讓我們雖然是首次主辦, 但各方面規模與完整性並不輸給國外。</p>
+<p>cd /usr/src &amp;&amp; wget http://nginx.org/download/nginx-1.10.1.tar.gz</p>
 
-<h4>現場狀況</h4>
+<p>tar -zxvf nginx-1.10.1.tar.gz &amp;&amp; cd nginx-1.10.1</p>
 
-<p>雖然已經主辦過如<a href="http://ryudo.tw/blog/2013/04/23/rubyconftw-2012-memories-1">RubyConf Taiwan</a> 這樣的年度國際研討會, 第一次主辦完全以女性為主的活動, 不免還是會擔心出席率等等的問題; 不過活動一切順利, 教練和學員的互動也出乎意外的良好, 可能是因為女生之間一起學習的關係, 一般程式社群中新人女會眾的集體沉默現象在這邊完全不復見, 學員都全程參與, 也沒有遲到早退的問題, 真是可喜可賀。</p>
+<p>./configure --with-http_v2_module --with-http_ssl_module --prefix=/usr/local/nginx --with-http_image_filter_module --with-http_gzip_static_module --with-http_secure_link_module --with-http_stub_status_module --add-module="/usr/local/ruby23/lib/ruby/gems/2.3.0/gems/passenger-5.1.1/src/nginx_module"</p>
 
-<p><img src="http://farm4.staticflickr.com/3702/9698686706_29d4fa9f51_b_d.jpg" alt="現場1" />
-<img src="http://farm4.staticflickr.com/3671/9698677328_4ba4ab1959_b_d.jpg" alt="現場2" /></p>
+<p>make &amp;&amp; make install #這裡會將 Nginx 安裝到 /usr/local/nginx 下</p>
 
-<h4>After Party</h4>
+<p>```</p>
 
-<p>教學之外, 這個活動的目的之一是促進學員和教練之間的互動, After Party也列在官方的Guides內, 因此事先就宣布並徵詢學員的參與意願; 場地方面, 想要維持品質以及營造互動的氛圍, 決定要以Lounge Bar為主, 經友人推薦之下, 選擇了費用上不算便宜的<a href="https://www.facebook.com/Tribeca.TPE">TRIBECA</a>, 由於學員需要自費, 原本以為會變成教練與Staff們為主的聚會, 最後還是有超過一半的學員參加, 大家也聊到了十點才散會。</p>
-
-<p><img src="http://farm4.staticflickr.com/3794/9850705143_0b013f3e26_b_d.jpg" alt="Rails Girls Taipei After Party 2" />
-<img src="http://farm4.staticflickr.com/3793/9850684473_9c65e3c4d6_b_d.jpg" alt="Rails Girls Taipei After Party 3" />
-<img src="http://farm6.staticflickr.com/5445/9851366586_f2b7fd1ed7_b_d.jpg" alt="Rails Girls Taipei After Party" /></p>
-
-<h3>感想</h3>
-
-<p>Ruby真的是一門神奇的語言啊, 原本只是基於想要改變社群性別分布不均這個現狀的心情, 從國外引進並舉辦了這個活動, 卻得到了遠遠出乎意料的反應與成果, 看來21世紀的程式學習趨勢真的不是說說而已, 今後也會繼續這個活動下去, 感謝活動過程中一路相挺的朋友們, 謝謝大家。</p>
+<p>至此為止 Nginx 已設定完成，後續操作請看<a href="/blog/2017/02/02/install-ruby-rails-passenger-postgresql-into-rhel-2017-02/">下篇</a></p>
 ]]></content>
   </entry>
   

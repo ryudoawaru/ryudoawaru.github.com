@@ -4,7 +4,7 @@
   <title><![CDATA[Category: DevOps | 慕凡(@ryudoawaru)'s blog]]></title>
   <link href="http://ryudo.tw/blog/categories/devops/atom.xml" rel="self"/>
   <link href="http://ryudo.tw/"/>
-  <updated>2017-02-02T17:24:36+08:00</updated>
+  <updated>2017-02-03T16:15:41+08:00</updated>
   <id>http://ryudo.tw/</id>
   <author>
     <name><![CDATA[Mu-Fan Teng]]></name>
@@ -12,6 +12,188 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Install Ruby / Rails / Passenger / PostgreSQL Stack in RHEL and variant OS (後篇)]]></title>
+    <link href="http://ryudo.tw/blog/2017/02/02/install-ruby-rails-passenger-postgresql-into-rhel-2017-02/"/>
+    <updated>2017-02-02T17:32:00+08:00</updated>
+    <id>http://ryudo.tw/blog/2017/02/02/install-ruby-rails-passenger-postgresql-into-rhel-2017-02</id>
+    <content type="html"><![CDATA[<p>接續<a href="/blog/2017/01/24/install-ruby-rails-passenger-postgresql-into-rhel-2017/">前篇</a>，本篇內容包含：</p>
+
+<ul>
+<li>Nginx 設定檔</li>
+<li>設定 systemd 啟動檔</li>
+<li>Logrotate &amp; Iptables 設定</li>
+</ul>
+
+
+<h3>Nginx 設定檔</h3>
+
+<p>由於編譯 Nginx 時把 prefix 設定在 <code>/usr/local/nginx</code> 下，所以設定檔就在 <code>/usr/local/nginx/conf</code>  下，先編輯 <code>/usr/local/nginx/conf/nginx.conf</code></p>
+
+<p>```nginx</p>
+
+<p>user  nobody; #這邊的 user 和 Rails App 的 user 是不一樣的設定，但是要考慮到 Asset File 的存取，也就是這個 user 必需要可以唯讀 Rails App 的 public 目錄
+worker_processes  4;
+error_log  logs/error.log  info;
+pid       /var/run/nginx.pid; #設定 pid file 的位置，必需和後面 systemd 設定檔一致
+worker_rlimit_nofile 40960;
+events {</p>
+
+<pre><code>worker_connections  10240;
+</code></pre>
+
+<p>}#worker_rlimit_nofile 和 worker_connections：為了突破系統開啟檔案上限的設定，必需一起設定，一般來說 worker_rlimit_nofile 為 worker_connections x worker_processes</p>
+
+<p>http {
+  include       mime.types;
+  default_type  application/octet-stream;<br/>
+  access_log logs/access.log;
+  sendfile        on;
+  keepalive_timeout  65;
+  gzip  on;
+  send_timeout 600;
+  gzip_min_length  1000;
+  gzip_buffers     4 8k;
+  gzip_types       text/plain application/x-javascript text/css application/xml text/javascript;
+  client_max_body_size 100M; #關係到上傳檔案的上限
+  passenger_root /usr/local/ruby23/lib/ruby/gems/2.3.0/gems/passenger-5.1.1; #Passenger Gem 的根目錄，會因為使用的 Ruby 版本與 Passenger 版本變化
+  passenger_max_pool_size 16; # 最大同時可以存在的 Rails App 行程數，請依照系統的記憶體大小計算，一般應該是 "(總記憶體 x 0.75) / 單一 Rails App 使用記憶體"，例如 4GB 的機器，單一 Rails App 記憶體約 150 就是 <code>4096 * 0.75 / 150  = 20</code>
+  server{</p>
+
+<pre><code>server_name _;
+location /{
+  return 404;
+}
+</code></pre>
+
+<p>  }# 對應不屬於任何 Virtual Host 的請求，在這裡返回 404 Not Found 的頁面。
+  include valid-vhosts/*.conf; #在其它檔案中設定 Virtual Host
+}</p>
+
+<p>```</p>
+
+<p>以下是 Virtual Host 的設定</p>
+
+<p>```nginx</p>
+
+<p>server{
+  server_name 5xruby.tw; #Virtual Host 的主機名稱
+  root /home/5xruby/5xruby.tw/current/public; #務必設定為 App 的 Public 目錄
+  passenger_enabled on; #開啟 Passenger
+  rails_env production; # 設定 Rails App Stage
+  passenger_ruby /usr/local/ruby23/bin/ruby; #如果這個 App 和 Passenger 使用的 Ruby 版本不同的話就需要指定
+  access_log logs/5xruby-access.log;
+  error_log logs/5xruby-err.log;
+  location ~ ^/assets/ {</p>
+
+<pre><code># 讓瀏覽器快取靜態 Asset Pipeline 檔案的設定
+expires 1y;
+add_header Cache-Control public;
+add_header ETag "";
+break;
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>```</p>
+
+<h3>設定 systemd 啟動檔</h3>
+
+<ul>
+<li>編輯  /lib/systemd/system/nginx.service</li>
+</ul>
+
+
+<p>```</p>
+
+<p>[Unit]
+Description=The NGINX HTTP and reverse proxy server
+After=syslog.target network.target remote-fs.target nss-lookup.target</p>
+
+<p>[Service]
+Type=forking
+PIDFile=/var/run/nginx.pid
+ExecStartPre=  /usr/local/nginx/sbin/nginx -t
+ExecStart=  /usr/local/nginx/sbin/nginx
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true</p>
+
+<p>[Install]
+WantedBy=multi-user.target</p>
+
+<p>```</p>
+
+<ul>
+<li>以 root 身份輸入 <code>systemctl enable nginx</code> 設定開機自動啟動</li>
+<li>輸入 <code>/usr/local/nginx/sbin/nginx -t</code> 測試設定檔正確與否</li>
+<li><code>systemctl start nginx</code> 啟動，可以再透過 <code>systemctl status nginx</code> 觀察啟動情形</li>
+</ul>
+
+
+<h1>Logrotate 設定</h1>
+
+<p>如果在前面的 Virtual  Host 設定中有設定 access_log 或 error_log 的話，就必需要設定 <a href="http://linux.vbird.org/linux_basic/0570syslog.php#rotate">Logrotate</a> 來定期輪替 Nginx log，輪替的設定如下。</p>
+
+<p>```</p>
+
+<p>/usr/local/nginx/logs/*.log {</p>
+
+<pre><code>missingok
+size=20M #單檔超過 20M 為條件
+compress #壓縮舊檔案
+rotate 10
+notifempty
+sharedscripts
+postrotate
+test ! -f /var/run/nginx.pid || kill -s USR1 `cat /var/run/nginx.pid` #讓 Nginx 重新開啟 Log 檔
+endscript
+</code></pre>
+
+<p>}</p>
+
+<p>```</p>
+
+<p>對 Rails 產生的 Log 也可以比照辦理</p>
+
+<h3>Iptables 設定</h3>
+
+<p>現在的 RHEL 系 OS 通常都預設使用 Firewalld 做為系統防火牆，在此先改回筆者比較熟悉的 Iptables</p>
+
+<ul>
+<li>yum remove firewalld</li>
+<li>yum install iptables-services</li>
+<li>編輯 /etc/sysconfig/iptables</li>
+</ul>
+
+
+<p>```</p>
+
+<p>*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -s 127.0.0.1 -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport ssh -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport http -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport https -j ACCEPT
+COMMIT</p>
+
+<p>```</p>
+
+<ul>
+<li>systemctl start iptables</li>
+</ul>
+
+
+<p>到此為止就完成了基本 Rails Stack 的設定。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Install Ruby / Rails / Passenger / PostgreSQL Stack in RHEL and variant OS (前篇)]]></title>
@@ -49,7 +231,7 @@
 <li>安裝與編譯 Passenger / Nginx Extension</li>
 <li>編譯 Nginx</li>
 <li>啟動設定</li>
-<li>Logrotate &amp;&amp; iptables 設定</li>
+<li>Logrotate 設定</li>
 </ul>
 
 
@@ -130,7 +312,7 @@ cd /usr/src &amp;&amp; wget https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.3.
 
 <p>```bash</p>
 
-<p>tar -jxvpf ruby-2.3.3.tar.bz2</p>
+<p>tar -jxvf ruby-2.3.3.tar.bz2</p>
 
 <p>```</p>
 
@@ -206,7 +388,7 @@ rake nginx</p>
 
 <p>```</p>
 
-<p>至此為止 Nginx 已設定完成</p>
+<p>至此為止 Nginx 已設定完成，後續操作請看<a href="/blog/2017/02/02/install-ruby-rails-passenger-postgresql-into-rhel-2017-02/">下篇</a></p>
 ]]></content>
   </entry>
   
